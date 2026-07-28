@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo:6.0
+    container_name: mfg-mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    volumes:
+      - mongo-data:/data/db
+    ports:
+      - "27017:27017"
+
+  backend:
+    build:
+      context: ./BE
+    container_name: mfg-backend
+    restart: unless-stopped
+    env_file:
+      - ./BE/.env
+    environment:
+      # If using the default docker-compose mongo credentials, override MONGODB_URI
+      MONGODB_URI: mongodb://root:example@mongo:27017
+      MONGODB_DB: multi_family_db
+    depends_on:
+      - mongo
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build:
+      context: ./FE
+    container_name: mfg-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80" # serve nginx on container:80, expose on host 3000 to match dev origin
+    depends_on:
+      - backend
+
+volumes:
+  mongo-data:
