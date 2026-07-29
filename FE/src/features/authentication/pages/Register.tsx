@@ -1,5 +1,7 @@
 import React from 'react';
 import RegisterForm from '../components/RegisterForm';
+import AuthLanding from '../components/AuthLanding';
+import registerBackground from '../../../assets/nenan.png';
 
 interface RegisterPageProps {
   onSwitchToLogin: () => void;
@@ -8,9 +10,13 @@ interface RegisterPageProps {
 
 const RegisterPage: React.FC<RegisterPageProps> = ({ onSwitchToLogin, onSuccess }) => {
   return (
-    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #0f172a 0%, #1d4ed8 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+    <AuthLanding
+      title="Kết nối các dòng họ, lưu giữ nguồn cội"
+      subtitle="Tạo tài khoản để quản lý gia phả, khám phá quan hệ họ hàng và kết nối các dòng họ nội – ngoại – dâu – rể."
+      backgroundImage={registerBackground}
+    >
       <RegisterForm onSwitchToLogin={onSwitchToLogin} onSuccess={onSuccess} />
-    </div>
+    </AuthLanding>
   );
 };
 
