@@ -1,7 +1,7 @@
 import React from 'react';
-import LoginPage from '../features/authentication/pages/Login';
-import RegisterPage from '../features/authentication/pages/Register';
-import { Dashboard } from '../features/dashboard/pages/Dashboard';
+import LoginPage from '../pages/auth/Login';
+import RegisterPage from '../pages/auth/Register';
+import Dashboard from '../pages/dashboard/Dashboard';
 
 export type AuthView = 'login' | 'register' | 'dashboard';
 
@@ -26,4 +26,3 @@ const AppRoutes: React.FC<AppRoutesProps> = ({ view, onNavigate, onAuthSuccess, 
 };
 
 export default AppRoutes;
-

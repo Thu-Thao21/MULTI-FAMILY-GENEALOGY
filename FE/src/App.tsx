@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import AppRoutes, { type AuthView } from './routes/AppRoutes';
-import { useAuth } from './features/authentication/hooks/useAuth';
+import { useAuth } from './hooks/useAuth';
 
 export default function App() {
   const { user, isAuthenticated, login, register, logout } = useAuth();

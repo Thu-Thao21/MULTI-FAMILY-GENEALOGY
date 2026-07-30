@@ -1,0 +1,15 @@
+# Cách import dữ liệu mẫu vào MongoDB
+
+## 1. Nếu dùng Docker Compose
+
+docker compose up -d mongo
+
+## 2. Chạy script seed
+cd BE
+python scripts/seed_family_data.py
+
+## 3. Nếu muốn kiểm tra dữ liệu
+mongo
+use multi_family_db
+show collections
+ db.users.find().pretty()
