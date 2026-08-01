@@ -1,13 +1,18 @@
-from pydantic_settings import BaseSettings
+import os
+
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    MONGODB_URI: str = "mongodb://localhost:27017"
-    MONGODB_DB: str = "multi_family_db"
+    DATABASE_URL: str = "postgresql+psycopg://postgres:postgres@localhost:5432/multi_family_db"
 
-    model_config = {
-        "env_file": ".env",
-    }
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 
 settings = Settings()
+
+if not settings.DATABASE_URL:
+    settings.DATABASE_URL = "postgresql+psycopg://postgres:postgres@localhost:5432/multi_family_db"
+
+if os.getenv("DATABASE_URL"):
+    settings.DATABASE_URL = os.getenv("DATABASE_URL")

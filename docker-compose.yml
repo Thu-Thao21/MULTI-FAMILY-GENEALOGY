@@ -1,17 +1,18 @@
 version: '3.8'
 
 services:
-  mongo:
-    image: mongo:6.0
-    container_name: mfg-mongo
+  postgres:
+    image: postgres:16
+    container_name: mfg-postgres
     restart: unless-stopped
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: example
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: multi_family_db
     volumes:
-      - mongo-data:/data/db
+      - postgres-data:/var/lib/postgresql/data
     ports:
-      - "27017:27017"
+      - "5432:5432"
 
   backend:
     build:
@@ -21,13 +22,23 @@ services:
     env_file:
       - ./BE/.env
     environment:
-      # If using the default docker-compose mongo credentials, override MONGODB_URI
-      MONGODB_URI: mongodb://root:example@mongo:27017
-      MONGODB_DB: multi_family_db
+      DATABASE_URL: postgresql+psycopg://postgres:postgres@postgres:5432/multi_family_db
     depends_on:
-      - mongo
+      - postgres
     ports:
       - "8000:8000"
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: mfg-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@pgadmin.local
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "8080:80"
+    depends_on:
+      - postgres
 
   frontend:
     build:
@@ -40,4 +51,4 @@ services:
       - backend
 
 volumes:
-  mongo-data:
+  postgres-data:
