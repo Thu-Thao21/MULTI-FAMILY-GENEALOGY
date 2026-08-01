@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.db.mongodb import connect_mongo, close_mongo, get_database
-from app.routers import health, users
+from app.routers import health, users, auth
 
 app = FastAPI(title="Multi-family Genealogy API")
 
@@ -27,6 +27,6 @@ async def shutdown_event():
 
 app.include_router(health.router, prefix="/api")
 app.include_router(users.router, prefix="/api")
+app.include_router(auth.router, prefix="/api")
 
-# To run: uvicorn app.main:app --reload --port 8000
-
+# To run: uvicorn app.main:app --reload --port 8001

@@ -1,3 +1,4 @@
+import apiClient from '../api/axios';
 import type { AuthResponse, AuthUser, LoginPayload, RegisterPayload } from '../types/auth';
 
 const USER_STORAGE_KEY = 'mfg-auth-users';
@@ -83,7 +84,6 @@ function loadStoredUsers(): AuthUser[] {
     }
   }
 
-  // Merge DEFAULT_DEMO_USERS if not present in stored users
   const userMap = new Map<string, AuthUser>();
   for (const demoUser of DEFAULT_DEMO_USERS) {
     userMap.set(demoUser.id, demoUser);
@@ -137,6 +137,44 @@ export function logoutUser(): void {
 }
 
 export async function registerUser(payload: RegisterPayload): Promise<AuthResponse> {
+  // 1. Try sending request to Backend FastAPI / MongoDB first
+  try {
+    const response = await apiClient.post('/auth/register', {
+      username: payload.username,
+      email_or_phone: payload.emailOrPhone,
+      display_name: payload.displayName,
+      password: payload.password,
+    });
+
+    if (response.data && response.data.user) {
+      const user: AuthUser = {
+        id: response.data.user.id,
+        username: response.data.user.username,
+        email: response.data.user.email,
+        phone: response.data.user.phone,
+        displayName: response.data.user.displayName || payload.displayName || payload.username,
+        password: payload.password,
+      };
+      saveCurrentUser(user);
+
+      // also save to local cache
+      const users = loadStoredUsers();
+      users.push(user);
+      saveStoredUsers(users);
+
+      return {
+        user,
+        message: response.data.message || 'Đăng ký tài khoản thành công vào MongoDB.',
+      };
+    }
+  } catch (apiError: any) {
+    if (apiError.response?.data?.detail) {
+      throw new Error(apiError.response.data.detail);
+    }
+    // Fallback to local execution if backend isn't reachable
+  }
+
+  // 2. Local fallback registration
   const users = loadStoredUsers();
   const identifier = parseIdentifier(payload.emailOrPhone);
 
@@ -175,10 +213,41 @@ export async function registerUser(payload: RegisterPayload): Promise<AuthRespon
 }
 
 export async function loginUser(payload: LoginPayload): Promise<AuthResponse> {
+  // 1. Try Backend FastAPI / MongoDB login first
+  try {
+    const response = await apiClient.post('/auth/login', {
+      email_or_phone: payload.emailOrPhone,
+      password: payload.password,
+    });
+
+    if (response.data && response.data.user) {
+      const user: AuthUser = {
+        id: response.data.user.id,
+        username: response.data.user.username,
+        email: response.data.user.email,
+        phone: response.data.user.phone,
+        displayName: response.data.user.displayName || payload.emailOrPhone,
+        password: payload.password,
+      };
+
+      saveCurrentUser(user);
+
+      return {
+        user,
+        message: response.data.message || 'Đăng nhập thành công từ MongoDB.',
+      };
+    }
+  } catch (apiError: any) {
+    if (apiError.response?.data?.detail) {
+      throw new Error(apiError.response.data.detail);
+    }
+    // Fallback to local authentication if backend endpoint unreachable
+  }
+
+  // 2. Local fallback login logic
   const users = loadStoredUsers();
   const rawInput = payload.emailOrPhone.trim().toLowerCase();
 
-  // Find user by email, phone, or username
   const matchedUser = users.find((user) => {
     const matchUser = user.username?.toLowerCase() === rawInput;
     const matchEmail = user.email?.toLowerCase() === rawInput;
@@ -203,6 +272,25 @@ export async function loginUser(payload: LoginPayload): Promise<AuthResponse> {
 }
 
 export async function requestPasswordResetOTP(emailOrPhone: string): Promise<{ otpCode: string; message: string }> {
+  // 1. Try Backend FastAPI / MongoDB request OTP first
+  try {
+    const response = await apiClient.post('/auth/forgot-password/request-otp', {
+      email_or_phone: emailOrPhone,
+    });
+
+    if (response.data) {
+      return {
+        otpCode: response.data.otpCode || '888999',
+        message: response.data.message || `Mã OTP xác thực đã được gửi tới ${emailOrPhone}.`,
+      };
+    }
+  } catch (apiError: any) {
+    if (apiError.response?.data?.detail) {
+      throw new Error(apiError.response.data.detail);
+    }
+  }
+
+  // 2. Local fallback request OTP
   const users = loadStoredUsers();
   const rawInput = emailOrPhone.trim().toLowerCase();
 
@@ -214,7 +302,6 @@ export async function requestPasswordResetOTP(emailOrPhone: string): Promise<{ o
     throw new Error('Không tìm thấy tài khoản với email/số điện thoại này.');
   }
 
-  // Generate 6-digit OTP code (default demo OTP: 888999 or random)
   const otpCode = '888999';
 
   if (typeof window !== 'undefined') {
@@ -222,7 +309,7 @@ export async function requestPasswordResetOTP(emailOrPhone: string): Promise<{ o
     otpSessions[rawInput] = {
       otpCode,
       userId: user.id,
-      expiresAt: Date.now() + 15 * 60 * 1000, // 15 mins
+      expiresAt: Date.now() + 15 * 60 * 1000,
     };
     window.localStorage.setItem(OTP_STORAGE_KEY, JSON.stringify(otpSessions));
   }
@@ -239,9 +326,6 @@ export async function resetPasswordWithOTP(
   newPassword: string,
   confirmPassword: string
 ): Promise<{ message: string }> {
-  const users = loadStoredUsers();
-  const rawInput = emailOrPhone.trim().toLowerCase();
-
   if (newPassword !== confirmPassword) {
     throw new Error('Mật khẩu mới và mật khẩu xác nhận không khớp.');
   }
@@ -250,7 +334,29 @@ export async function resetPasswordWithOTP(
     throw new Error('Mật khẩu mới phải chứa ít nhất 6 ký tự.');
   }
 
-  // Verify OTP session
+  // 1. Try Backend FastAPI / MongoDB password reset
+  try {
+    const response = await apiClient.post('/auth/forgot-password/reset', {
+      email_or_phone: emailOrPhone,
+      otp_code: otpCode,
+      new_password: newPassword,
+    });
+
+    if (response.data) {
+      return {
+        message: response.data.message || 'Đặt lại mật khẩu thành công trong MongoDB!',
+      };
+    }
+  } catch (apiError: any) {
+    if (apiError.response?.data?.detail) {
+      throw new Error(apiError.response.data.detail);
+    }
+  }
+
+  // 2. Local fallback password reset
+  const users = loadStoredUsers();
+  const rawInput = emailOrPhone.trim().toLowerCase();
+
   let isValidOTP = false;
   let userIdToUpdate = '';
 
@@ -263,7 +369,6 @@ export async function resetPasswordWithOTP(
     }
   }
 
-  // Fallback demo OTP verification if code is 888999
   if (!isValidOTP && otpCode.trim() === '888999') {
     isValidOTP = true;
   }
@@ -272,7 +377,6 @@ export async function resetPasswordWithOTP(
     throw new Error('Mã OTP không chính xác hoặc đã hết hạn.');
   }
 
-  // Update password in stored users list
   let userUpdated = false;
   const updatedUsers = users.map((user) => {
     const matchId = user.id === userIdToUpdate;
@@ -293,7 +397,6 @@ export async function resetPasswordWithOTP(
 
   saveStoredUsers(updatedUsers);
 
-  // Clear OTP session
   if (typeof window !== 'undefined') {
     const otpSessions = JSON.parse(window.localStorage.getItem(OTP_STORAGE_KEY) || '{}');
     delete otpSessions[rawInput];
