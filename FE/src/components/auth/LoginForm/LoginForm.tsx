@@ -4,10 +4,15 @@ import './LoginForm.css';
 
 export interface LoginFormProps {
   onSwitchToRegister: () => void;
+  onSwitchToForgotPassword?: () => void;
   onSuccess: () => void;
 }
 
-export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister, onSuccess }) => {
+export const LoginForm: React.FC<LoginFormProps> = ({
+  onSwitchToRegister,
+  onSwitchToForgotPassword,
+  onSuccess,
+}) => {
   const { login } = useAuth();
   const [formData, setFormData] = useState({ emailOrPhone: '', password: '' });
   const [error, setError] = useState('');
@@ -61,7 +66,19 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister, onSucc
         </div>
 
         <div className="login-form-group">
-          <label className="login-form-label">Mật khẩu</label>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <label className="login-form-label">Mật khẩu</label>
+            {onSwitchToForgotPassword && (
+              <button
+                type="button"
+                onClick={onSwitchToForgotPassword}
+                className="btn-switch-link"
+                style={{ fontSize: '13px', fontWeight: 600 }}
+              >
+                Quên mật khẩu?
+              </button>
+            )}
+          </div>
           <input
             type="password"
             name="password"

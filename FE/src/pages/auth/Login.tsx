@@ -5,17 +5,22 @@ import loginBackground from '../../assets/nenan.png';
 
 export interface LoginPageProps {
   onSwitchToRegister: () => void;
+  onSwitchToForgotPassword?: () => void;
   onSuccess: () => void;
 }
 
-const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToRegister, onSuccess }) => {
+const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToRegister, onSwitchToForgotPassword, onSuccess }) => {
   return (
     <AuthLanding
       title="Kết nối các dòng họ, lưu giữ nguồn cội"
       subtitle="Quản lý gia phả, khám phá quan hệ họ hàng và kết nối các dòng họ nội – ngoại – dâu – rể."
       backgroundImage={loginBackground}
     >
-      <LoginForm onSwitchToRegister={onSwitchToRegister} onSuccess={onSuccess} />
+      <LoginForm
+        onSwitchToRegister={onSwitchToRegister}
+        onSwitchToForgotPassword={onSwitchToForgotPassword}
+        onSuccess={onSuccess}
+      />
     </AuthLanding>
   );
 };
