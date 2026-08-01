@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
-from app.db.mongodb import connect_mongo, close_mongo, get_database
-from app.routers import health, users, auth
+from app.db.postgres import init_db, close_db
+from app.routers import health, users, auth, members, networks
 
 app = FastAPI(title="Multi-family Genealogy API")
 
@@ -16,17 +16,20 @@ app.add_middleware(
 
 @app.on_event("startup")
 async def startup_event():
-    # connect to MongoDB
-    connect_mongo(settings.MONGODB_URI)
-    # ensure database access possible (lazy)
-    db = get_database(settings.MONGODB_DB)
+    # Initialize PostgreSQL DB and create tables / seed data if needed
+    try:
+        await init_db()
+    except Exception as e:
+        print(f"[WARN] Postgres init_db error: {e}")
 
 @app.on_event("shutdown")
 async def shutdown_event():
-    close_mongo()
+    await close_db()
 
 app.include_router(health.router, prefix="/api")
 app.include_router(users.router, prefix="/api")
 app.include_router(auth.router, prefix="/api")
+app.include_router(members.router, prefix="/api")
+app.include_router(networks.router, prefix="/api")
 
 # To run: uvicorn app.main:app --reload --port 8001

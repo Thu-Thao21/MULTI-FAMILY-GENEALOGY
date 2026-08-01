@@ -3,7 +3,7 @@ FROM node:18-alpine AS build
 WORKDIR /app
 
 COPY package.json package-lock.json* ./
-COPY tsconfig.json vite.config.ts ./
+COPY tsconfig.json vite.config.ts index.html ./
 COPY public ./public
 COPY src ./src
 

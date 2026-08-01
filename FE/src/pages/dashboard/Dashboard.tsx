@@ -4,6 +4,15 @@ import { Sidebar } from '../../components/dashboard/Sidebar';
 import { PersonalizedOverview } from '../../components/dashboard/PersonalizedOverview';
 import { UpcomingEventsWidget } from '../../components/dashboard/UpcomingEventsWidget';
 import { RecentActivitiesWidget } from '../../components/dashboard/RecentActivitiesWidget';
+import { MemberList } from '../../components/profile/MemberList';
+import { ProfileLayout } from '../../components/profile/ProfileLayout';
+import { NotificationModal } from '../../components/common/NotificationModal';
+import { FamilyPaternalTab } from '../../components/network/FamilyPaternalTab';
+import { FamilyMaternalTab } from '../../components/network/FamilyMaternalTab';
+import { InLawMarriagesTab } from '../../components/network/InLawMarriagesTab';
+import { AffiliatedFamiliesTab } from '../../components/network/AffiliatedFamiliesTab';
+import { TreeLayout } from '../../components/tree/TreeLayout';
+import type { TreeViewMode } from '../../types/tree';
 
 export interface DashboardProps {
   userName: string;
@@ -14,20 +23,123 @@ export const Dashboard: React.FC<DashboardProps> = ({ userName, onLogout }) => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [userRole] = useState<'Admin' | 'Trưởng họ' | 'Thành viên'>('Trưởng họ');
+  const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
+  const [isProcessingToastOpen, setIsProcessingToastOpen] = useState(false);
+  const [toastIcon, setToastIcon] = useState('🌳');
 
   const handleSelectTab = (tabId: string) => {
     setActiveTab(tabId);
-    if (tabId.startsWith('tree')) {
-      alert(`Đang chuyển tới trang Cây Gia Phả: ${tabId}`);
-    } else if (tabId.startsWith('net')) {
-      alert(`Đang chuyển tới trang Mạng lưới Liên họ: ${tabId}`);
-    } else if (tabId.startsWith('member')) {
-      alert(`Đang chuyển tới trang Hồ sơ & Thành viên: ${tabId}`);
+    if (tabId === 'member-list') {
+      setSelectedMemberId(null);
+    } else if (tabId === 'member-profile') {
+      setSelectedMemberId('member_006');
+    } else if (
+      tabId === 'net-noi' ||
+      tabId === 'net-ngoai' ||
+      tabId === 'net-dau-re' ||
+      tabId === 'net-thong-gia' ||
+      tabId.startsWith('tree')
+    ) {
+      // Direct component rendering tabs
     } else if (tabId.startsWith('finder')) {
-      alert(`Đang chuyển tới trang Tra cứu quan hệ: ${tabId}`);
-    } else if (tabId.startsWith('admin')) {
-      alert(`Đang chuyển tới Quản trị hệ thống: ${tabId}`);
+      setToastIcon('🔍');
+      setIsProcessingToastOpen(true);
+    } else if (tabId.startsWith('admin') || tabId.startsWith('export') || tabId.startsWith('import')) {
+      setToastIcon('⚙️');
+      setIsProcessingToastOpen(true);
     }
+  };
+
+  const handleSelectMember = (memberId: string) => {
+    setSelectedMemberId(memberId);
+    setActiveTab('member-profile');
+  };
+
+  const renderMainContent = () => {
+    // Module 1: Cây gia phả trực hệ (ERGO-Centric Tree)
+    if (activeTab.startsWith('tree')) {
+      const mode: TreeViewMode =
+        activeTab === 'tree-horizontal'
+          ? 'horizontal'
+          : activeTab === 'tree-focus'
+          ? 'focus'
+          : 'vertical';
+      return (
+        <TreeLayout
+          initialMode={mode}
+          onSelectMemberProfile={(memberId) => {
+            setSelectedMemberId(memberId);
+            setActiveTab('member-profile');
+          }}
+        />
+      );
+    }
+
+    // Module 2: Hồ sơ & Thành viên
+    if (activeTab === 'member-list' && !selectedMemberId) {
+      return <MemberList onSelectMember={handleSelectMember} />;
+    }
+    if (activeTab === 'member-profile' || selectedMemberId) {
+      return (
+        <ProfileLayout
+          memberId={selectedMemberId || 'member_006'}
+          onBack={() => {
+            setSelectedMemberId(null);
+            setActiveTab('member-list');
+          }}
+        />
+      );
+    }
+
+    // Module 3: Mạng lưới Liên họ
+    if (activeTab === 'net-noi') return <FamilyPaternalTab />;
+    if (activeTab === 'net-ngoai') return <FamilyMaternalTab />;
+    if (activeTab === 'net-dau-re') return <InLawMarriagesTab />;
+    if (activeTab === 'net-thong-gia') return <AffiliatedFamiliesTab />;
+
+    // Dashboard (default)
+    return (
+      <>
+        <PersonalizedOverview
+          userName={userName}
+          familyBranch="Họ Nguyễn (Chi Trưởng)"
+          generationLevel="Đời thứ 7"
+          totalMembers={128}
+          linkedFamiliesCount={4}
+        />
+
+        <div>
+          <div style={{ marginBottom: '16px' }}>
+            <h2
+              style={{
+                fontSize: '20px',
+                fontWeight: 800,
+                color: '#0f172a',
+                margin: '0 0 4px',
+                fontFamily: "'Plus Jakarta Sans', sans-serif",
+              }}
+            >
+              Đời Sống & Sự Kiện Gia Tộc
+            </h2>
+            <p style={{ margin: 0, fontSize: '13.5px', color: '#64748b' }}>
+              Theo dõi lịch giỗ tổ, mừng thọ và các cập nhật mới nhất trong gia phả.
+            </p>
+          </div>
+
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
+              gap: '24px',
+              alignItems: 'start',
+            }}
+          >
+            <UpcomingEventsWidget />
+            <RecentActivitiesWidget />
+          </div>
+        </div>
+      </>
+    );
   };
 
   return (
@@ -65,36 +177,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ userName, onLogout }) => {
             overflowX: 'hidden',
           }}
         >
-          <PersonalizedOverview
-            userName={userName}
-            familyBranch="Họ Nguyễn (Chi Trưởng)"
-            generationLevel="Đời thứ 7"
-            totalMembers={128}
-            linkedFamiliesCount={4}
-          />
-
-          <div>
-            <div style={{ marginBottom: '16px' }}>
-              <h2 style={{ fontSize: '20px', fontWeight: 800, color: '#0f172a', margin: '0 0 4px', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-                Đời Sống & Sự Kiện Gia Tộc
-              </h2>
-              <p style={{ margin: 0, fontSize: '13.5px', color: '#64748b' }}>
-                Theo dõi lịch giỗ tổ, mừng thọ và các cập nhật mới nhất trong gia phả.
-              </p>
-            </div>
-
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
-                gap: '24px',
-                alignItems: 'start',
-              }}
-            >
-              <UpcomingEventsWidget />
-              <RecentActivitiesWidget />
-            </div>
-          </div>
+          {renderMainContent()}
         </main>
       </div>
 
@@ -116,6 +199,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ userName, onLogout }) => {
           © 2026 • Số hóa & Gắn kết các dòng họ Việt Nam.
         </div>
       </footer>
+
+      <NotificationModal
+        isOpen={isProcessingToastOpen}
+        onClose={() => setIsProcessingToastOpen(false)}
+        icon={toastIcon}
+      />
     </div>
   );
 };
