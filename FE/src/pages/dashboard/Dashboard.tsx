@@ -12,6 +12,7 @@ import { FamilyMaternalTab } from '../../components/network/FamilyMaternalTab';
 import { InLawMarriagesTab } from '../../components/network/InLawMarriagesTab';
 import { AffiliatedFamiliesTab } from '../../components/network/AffiliatedFamiliesTab';
 import { TreeLayout } from '../../components/tree/TreeLayout';
+import { useAuth } from '../../hooks/useAuth';
 import type { TreeViewMode } from '../../types/tree';
 
 export interface DashboardProps {
@@ -20,12 +21,21 @@ export interface DashboardProps {
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({ userName, onLogout }) => {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [userRole] = useState<'Admin' | 'Trưởng họ' | 'Thành viên'>('Trưởng họ');
   const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
   const [isProcessingToastOpen, setIsProcessingToastOpen] = useState(false);
   const [toastIcon, setToastIcon] = useState('🌳');
+
+  const displayUserName = user?.displayName || user?.username || userName || 'Người dùng';
+  const userRole =
+    user?.role === 'admin'
+      ? 'Admin'
+      : user?.role === 'family_head'
+      ? 'Trưởng họ'
+      : 'Thành viên';
+
 
   const handleSelectTab = (tabId: string) => {
     setActiveTab(tabId);
@@ -101,12 +111,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ userName, onLogout }) => {
     return (
       <>
         <PersonalizedOverview
-          userName={userName}
+          userName={displayUserName}
           familyBranch="Họ Nguyễn (Chi Trưởng)"
           generationLevel="Đời thứ 7"
           totalMembers={128}
           linkedFamiliesCount={4}
         />
+
 
         <div>
           <div style={{ marginBottom: '16px' }}>
@@ -154,12 +165,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ userName, onLogout }) => {
       }}
     >
       <TopBar
-        userName={userName}
+        userName={displayUserName}
         userRole={userRole}
         onLogout={onLogout}
         isSidebarCollapsed={isSidebarCollapsed}
         onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
       />
+
 
       <div style={{ display: 'flex', flex: 1 }}>
         <Sidebar

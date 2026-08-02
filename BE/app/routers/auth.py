@@ -2,16 +2,16 @@ from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from passlib.context import CryptContext
 from pydantic import BaseModel
 from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.security import hash_password, verify_password
 from app.db.postgres import get_db
 from app.models.postgres import PasswordReset, User
 
 router = APIRouter(prefix="/auth", tags=["auth"])
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
 
 
 class RegisterSchema(BaseModel):
@@ -68,7 +68,7 @@ async def register(payload: RegisterSchema, db: AsyncSession = Depends(get_db)):
         email=input_str if is_email else None,
         phone=input_str if not is_email else None,
         full_name=payload.display_name.strip() if payload.display_name else payload.username.strip(),
-        password_hash=pwd_context.hash(payload.password),
+        password_hash=hash_password(payload.password),
         role="member",
         status="active",
         created_at=now,
@@ -114,7 +114,7 @@ async def login(payload: LoginSchema, db: AsyncSession = Depends(get_db)):
     is_valid = False
     if user.password_hash:
         try:
-            is_valid = pwd_context.verify(payload.password, user.password_hash)
+            is_valid = verify_password(payload.password, user.password_hash)
         except Exception:
             is_valid = False
 
@@ -204,7 +204,7 @@ async def reset_password(payload: ResetPasswordSchema, db: AsyncSession = Depend
             detail="Không tìm thấy tài khoản để đặt lại mật khẩu."
         )
 
-    user.password_hash = pwd_context.hash(payload.new_password)
+    user.password_hash = hash_password(payload.new_password)
     user.updated_at = datetime.now(timezone.utc)
     await db.commit()
 

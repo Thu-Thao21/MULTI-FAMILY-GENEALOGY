@@ -94,8 +94,73 @@ async def init_db() -> None:
             )
         ]
 
-        session.add_all(demo_users + demo_resets)
+        demo_families = [
+            Family(
+                id="family_001",
+                name="Dòng họ Nguyễn Văn",
+                code="NGUYENVAN",
+                branch_count=3,
+                member_count=15,
+                address="Đồng Bằng Sông Hồng, Hà Nội",
+                description="Dòng họ lâu đời mang truyền thống hiếu học và đoàn kết.",
+                head_name="Nguyễn Văn An",
+                created_at=now,
+                updated_at=now,
+            ),
+            Family(
+                id="family_002",
+                name="Dòng họ Trần Thị",
+                code="TRANTHI",
+                branch_count=2,
+                member_count=10,
+                address="Thừa Thiên Huế",
+                description="Dòng họ Trần tại khu vực miền Trung.",
+                head_name="Trần Thị Thảo",
+                created_at=now,
+                updated_at=now,
+            ),
+        ]
+
+        demo_members = [
+            Member(
+                id="member_001",
+                family_id="family_001",
+                full_name="Nguyễn Văn An",
+                other_name="Tụ Đức",
+                gender="male",
+                birth_date=date(1975, 5, 12),
+                is_alive=True,
+                branch="Chi 1 - Nhánh Trưởng",
+                occupation="Kỹ sư phần mềm",
+                education="Đại học Bách Khoa",
+                bio="Trưởng ban liên lạc dòng họ Nguyễn Văn.",
+                generation=3,
+                status="alive",
+                created_at=now,
+                updated_at=now,
+            ),
+            Member(
+                id="member_005",
+                family_id="family_002",
+                full_name="Trần Thị Thảo",
+                other_name="Thảo Thanh",
+                gender="female",
+                birth_date=date(1982, 8, 20),
+                is_alive=True,
+                branch="Chi 2",
+                occupation="Giáo viên",
+                education="Đại học Sư Phạm",
+                bio="Trưởng họ Trần Thị.",
+                generation=4,
+                status="alive",
+                created_at=now,
+                updated_at=now,
+            ),
+        ]
+
+        session.add_all(demo_users + demo_resets + demo_families + demo_members)
         await session.commit()
+
 
 
 async def close_db() -> None:
