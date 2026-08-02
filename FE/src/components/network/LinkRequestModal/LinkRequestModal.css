@@ -1,0 +1,127 @@
+/* LinkRequestModal styles */
+.link-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: lmFadeIn 0.2s ease-out;
+}
+
+@keyframes lmFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.link-modal-card {
+  background: #ffffff;
+  border-radius: 20px;
+  width: 480px;
+  max-width: 90vw;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  animation: lmSlideUp 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  overflow: hidden;
+}
+
+@keyframes lmSlideUp {
+  from { opacity: 0; transform: translateY(20px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.link-modal-header {
+  padding: 24px 24px 16px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.link-modal-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.link-modal-body {
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.link-modal-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #334155;
+  margin-bottom: 6px;
+  display: block;
+}
+
+.link-modal-select,
+.link-modal-textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.link-modal-select:focus,
+.link-modal-textarea:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.link-modal-textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.link-modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid #f1f5f9;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.link-modal-btn {
+  padding: 10px 20px;
+  border-radius: 10px;
+  border: none;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.link-modal-btn.cancel {
+  background: #f1f5f9;
+  color: #334155;
+}
+
+.link-modal-btn.cancel:hover {
+  background: #e2e8f0;
+}
+
+.link-modal-btn.submit {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.link-modal-btn.submit:hover {
+  background: #1d4ed8;
+}
+
+.link-modal-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

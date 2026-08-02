@@ -1,36 +1,41 @@
-from fastapi import APIRouter, HTTPException, status
-from pydantic import BaseModel
 from typing import List
+from fastapi import APIRouter, Depends, HTTPException, status
+from pydantic import BaseModel
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.db.postgres import get_db
+from app.models.postgres import User
 
 router = APIRouter(prefix="/users", tags=["users"])
 
-# Example Pydantic model — extend as needed
-class UserIn(BaseModel):
-    first_name: str
-    last_name: str
-    email: str
 
-class UserOut(UserIn):
+class UserOut(BaseModel):
     id: str
+    username: str
+    full_name: str
+    email: str | None = None
+    phone: str | None = None
+    role: str
+    status: str
 
-# Placeholder in-memory store for quick testing — replace with MongoDB calls
-_fake_users = []
+    class Config:
+        from_attributes = True
 
-@router.post("/", response_model=UserOut, status_code=status.HTTP_201_CREATED)
-async def create_user(user: UserIn):
-    new = user.dict()
-    new_id = str(len(_fake_users) + 1)
-    new_doc = {"id": new_id, **new}
-    _fake_users.append(new_doc)
-    return new_doc
 
 @router.get("/", response_model=List[UserOut])
-async def list_users():
-    return _fake_users
+async def list_users(db: AsyncSession = Depends(get_db)):
+    """Lấy danh sách tất cả tài khoản từ PostgreSQL."""
+    result = await db.execute(select(User))
+    users = result.scalars().all()
+    return users
+
 
 @router.get("/{user_id}", response_model=UserOut)
-async def get_user(user_id: str):
-    for u in _fake_users:
-        if u["id"] == user_id:
-            return u
-    raise HTTPException(status_code=404, detail="User not found")
+async def get_user(user_id: str, db: AsyncSession = Depends(get_db)):
+    """Lấy thông tin 1 tài khoản theo ID từ PostgreSQL."""
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=404, detail="Không tìm thấy tài khoản trong PostgreSQL.")
+    return user

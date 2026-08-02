@@ -1,0 +1,13 @@
+/* ContributionsTab Styles */
+.contribution-badge-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: #eff6ff;
+  color: #2563eb;
+  font-size: 13px;
+  font-weight: 700;
+  border: 1px solid #bfdbfe;
+}
