@@ -74,6 +74,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const reloadUserStatus = async (): Promise<void> => {
     if (auth.currentUser) {
       await auth.currentUser.reload();
+      await auth.currentUser.getIdToken(true);
       await fetchAccount();
     }
   };

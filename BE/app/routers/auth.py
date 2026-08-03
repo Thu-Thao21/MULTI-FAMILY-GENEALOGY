@@ -7,6 +7,7 @@ from sqlalchemy import or_, select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
 from app.core.security import hash_password, verify_password
 from app.db.postgres import get_db
 from app.models.postgres import Account, Admin, FamilyHead, Member, PasswordReset
@@ -43,13 +44,13 @@ class RegisterSchema(BaseModel):
     email_or_phone: str
     display_name: Optional[str] = None
     password: str
-    role: Optional[str] = "member"  # "family_head" hoặc "member"
+    role: Optional[str] = "member"
 
 
 class LoginSchema(BaseModel):
     email_or_phone: str
     password: str
-    role: Optional[str] = "member"  # "admin", "family_head", "member"
+    role: Optional[str] = "member"
 
 
 class RequestOTPSchema(BaseModel):
@@ -88,10 +89,16 @@ async def login(payload: LoginSchema, db: AsyncSession = Depends(get_db)):
 
 @router.post("/request-otp")
 async def request_otp(payload: RequestOTPSchema, db: AsyncSession = Depends(get_db)):
+    if not settings.ENABLE_LEGACY_PASSWORD_RESET:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Tính năng đặt lại mật khẩu legacy bằng OTP đã bị tắt. Vui lòng sử dụng liên kết khôi phục mật khẩu Firebase gửi qua Email.",
+        )
+
     import random
     input_str = payload.email_or_phone.strip().lower()
 
-    # Find account across Account (Google/Firebase users), Admin, FamilyHead, Member
+    # Find account across Account, Admin, FamilyHead, Member
     account = None
 
     stmt = select(Account).where(
@@ -144,8 +151,6 @@ async def request_otp(payload: RequestOTPSchema, db: AsyncSession = Depends(get_
     db.add(reset_record)
     await db.commit()
 
-    print(f"\n[OTP SERVICE] Ma OTP khoi phuc mat khau cho {input_str}: {otp_code} (Het han luc: {expires_at.strftime('%H:%M:%S')})\n")
-
     if "@" in input_str:
         import asyncio
         from app.services.email_service import send_otp_email
@@ -159,6 +164,12 @@ async def request_otp(payload: RequestOTPSchema, db: AsyncSession = Depends(get_
 
 @router.post("/reset-password")
 async def reset_password(payload: ResetPasswordSchema, db: AsyncSession = Depends(get_db)):
+    if not settings.ENABLE_LEGACY_PASSWORD_RESET:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Tính năng đặt lại mật khẩu legacy bằng OTP đã bị tắt. Vui lòng sử dụng liên kết khôi phục mật khẩu Firebase gửi qua Email.",
+        )
+
     input_str = payload.email_or_phone.strip().lower()
     otp_code_str = payload.otp_code.strip()
     new_password_str = payload.new_password.strip()

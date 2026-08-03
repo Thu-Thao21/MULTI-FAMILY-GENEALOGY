@@ -11,6 +11,8 @@ class Settings(BaseSettings):
     GOOGLE_APPLICATION_CREDENTIALS: str = ""
     FIREBASE_AUTH_EMULATOR_HOST: str = ""
 
+    ENABLE_LEGACY_PASSWORD_RESET: bool = False
+
     CORS_ORIGINS: str = "http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173"
 
     SMTP_HOST: str = "smtp.gmail.com"
@@ -23,7 +25,7 @@ class Settings(BaseSettings):
     @property
     def cors_origins_list(self) -> List[str]:
         if not self.CORS_ORIGINS:
-            return ["http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:3000"]
+            return ["http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:3000", "http://localhost:8000"]
         return [origin.strip() for origin in self.CORS_ORIGINS.split(",") if origin.strip()]
 
 

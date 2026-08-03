@@ -421,74 +421,12 @@ CREATE TABLE IF NOT EXISTS family_memberships (
     joined_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
--- 3. KHỞI TẠO TÀI KHOẢN MẶC ĐỊNH (ADMIN & TRƯỞNG TỘC)
+-- 3. GHI CHÚ VỀ TÀI KHOẢN MẶC ĐỊNH (DEV ROLE ACCOUNTS)
+-- Tài khoản Admin và Trưởng Tộc DEV được đồng bộ tự động với Firebase DEV UIDs thật 
+-- qua script: python scripts/sync_dev_role_accounts.py --apply
+-- hoặc bật SEED_DEV_ACCOUNTS=true khi chạy trong môi trường 'development'.
+-- Không seed trực tiếp Firebase UID giả hoặc mật khẩu cố định vào file SQL này.
 
--- 3.1 Nạp tài khoản Admin vào bảng accounts & account_roles
-INSERT INTO accounts (id, firebase_uid, username, email, display_name, password_hash, email_verified, status)
-VALUES (
-    'admin_default_001',
-    'admin_default_001',
-    'admin',
-    'thuthaor120608@gmail.com',
-    'Quản Trị Viên Hệ Thống',
-    '$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeg6Lruj3vjPGga31lW',
-    TRUE,
-    'active'
-) ON CONFLICT (id) DO NOTHING;
-
-INSERT INTO account_roles (id, account_id, role, status)
-VALUES (
-    'role_admin_default_001',
-    'admin_default_001',
-    'admin',
-    'active'
-) ON CONFLICT (id) DO NOTHING;
-
-INSERT INTO admins (id, username, email, full_name, password_hash, admin_code, permissions_level, managed_scope, role, status)
-VALUES (
-    'admin_default_001',
-    'admin',
-    'thuthaor120608@gmail.com',
-    'Quản Trị Viên Hệ Thống',
-    '$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeg6Lruj3vjPGga31lW',
-    'ADM-001',
-    'super_admin',
-    'all_families',
-    'admin',
-    'active'
-) ON CONFLICT (id) DO NOTHING;
-
-
--- 3.2 Nạp tài khoản Trưởng Tộc vào bảng accounts & account_roles & family_heads
-INSERT INTO accounts (id, firebase_uid, username, email, display_name, password_hash, email_verified, status)
-VALUES (
-    'family_head_default_001',
-    'family_head_default_001',
-    'truongtoc',
-    'truongtoc@gmail.com',
-    'Trưởng Tộc Nguyễn Văn',
-    '$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeg6Lruj3vjPGga31lW',
-    TRUE,
-    'active'
-) ON CONFLICT (id) DO NOTHING;
-
-INSERT INTO account_roles (id, account_id, role, status)
-VALUES (
-    'role_fh_default_001',
-    'family_head_default_001',
-    'family_head',
-    'active'
-) ON CONFLICT (id) DO NOTHING;
-
-INSERT INTO family_heads (id, username, email, full_name, password_hash, status)
-VALUES (
-    'family_head_default_001',
-    'truongtoc',
-    'truongtoc@gmail.com',
-    'Trưởng Tộc Nguyễn Văn',
-    '$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeg6Lruj3vjPGga31lW',
-    'active'
-) ON CONFLICT (id) DO NOTHING;
 
 -- 4. TẠO 3 VIEWS TRUY VẤN TRỰC QUAN TRONG PGADMIN 4
 CREATE OR REPLACE VIEW vw_admins AS

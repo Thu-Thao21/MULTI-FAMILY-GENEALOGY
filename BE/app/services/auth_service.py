@@ -152,6 +152,7 @@ def format_account_me(account: Account) -> AccountOut:
             status=r.status,
             created_at=r.created_at,
         )
+        for r in (account.roles or [])
     ]
 
     return AccountOut(

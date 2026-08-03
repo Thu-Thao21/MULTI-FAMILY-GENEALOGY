@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import os
 import asyncio
+import logging
 import sys
 from typing import AsyncGenerator
 
@@ -12,6 +14,8 @@ from sqlalchemy.orm import DeclarativeBase
 
 from app.core.config import settings
 
+logger = logging.getLogger("mfg.postgres")
+
 
 class Base(DeclarativeBase):
     pass
@@ -19,6 +23,7 @@ class Base(DeclarativeBase):
 
 engine = create_async_engine(settings.DATABASE_URL, echo=False)
 async_session_maker = async_sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
+AsyncSessionLocal = async_session_maker  # Alias for backward compatibility with scripts
 
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
@@ -27,11 +32,14 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
 
 
 async def init_db() -> None:
-    """Tạo tất cả bảng trong database và tự động thêm các cột mới nếu thiếu."""
+    """Khởi tạo schema database và thực hiện dev seed nếu được bật bằng SEED_DEV_ACCOUNTS=true."""
     import app.models.postgres  # noqa: F401
-    from sqlalchemy import text, select
-    from app.models.postgres import Admin, Account, AccountRole
-    from app.core.security import hash_password
+    from sqlalchemy import text
+
+    seed_dev = os.getenv("SEED_DEV_ACCOUNTS", "false").lower() in ("true", "1")
+
+    if seed_dev and settings.APP_ENV == "production":
+        raise RuntimeError("CẢNH BÁO BẢO MẬT: SEED_DEV_ACCOUNTS=true không được phép hoạt động trên môi trường production!")
 
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
@@ -40,68 +48,10 @@ async def init_db() -> None:
         except Exception:
             pass  # Cột đã tồn tại
 
-    # Auto-seed default Admin if not exists
-    async with async_session_maker() as session:
-        res = await session.execute(select(Admin).where(Admin.username == 'admin'))
-        if not res.scalar_one_or_none():
-            pwd_hash = hash_password('12060805')
-            session.add(Admin(
-                id='admin_default_001',
-                username='admin',
-                email='thuthaor120608@gmail.com',
-                phone='0912345678',
-                full_name='Quản Trị Viên Hệ Thống',
-                password_hash=pwd_hash,
-                admin_code='ADM-001',
-                permissions_level='super_admin',
-                managed_scope='all_families',
-                role='admin',
-                status='active'
-            ))
-            res_acc = await session.execute(select(Account).where(Account.email == 'thuthaor120608@gmail.com'))
-            if not res_acc.scalar_one_or_none():
-                session.add(Account(
-                    id='admin_default_001',
-                    firebase_uid='admin_default_001',
-                    username='admin',
-                    email='thuthaor120608@gmail.com',
-                    display_name='Quản Trị Viên Hệ Thống',
-                    password_hash=pwd_hash,
-                    email_verified=True,
-                    status='active'
-                ))
-                await session.flush()
-                session.add(AccountRole(
-                    account_id='admin_default_001',
-                    role='admin',
-                    status='active'
-                ))
-
-        # Auto-seed default Family Head if not exists
-        res_fh = await session.execute(select(Account).where(Account.email == 'truongtoc@gmail.com'))
-        if not res_fh.scalar_one_or_none():
-            pwd_hash = hash_password('12060805')
-            fh_acc = Account(
-                id='family_head_default_001',
-                firebase_uid='family_head_default_001',
-                username='truongtoc',
-                email='truongtoc@gmail.com',
-                display_name='Trưởng Tộc Nguyễn Văn',
-                password_hash=pwd_hash,
-                email_verified=True,
-                status='active'
-            )
-            session.add(fh_acc)
-            await session.flush()
-            session.add(AccountRole(
-                account_id='family_head_default_001',
-                role='family_head',
-                status='active'
-            ))
-
-        await session.commit()
-
-
+    if seed_dev and settings.APP_ENV == "development":
+        logger.info("SEED_DEV_ACCOUNTS=true: Khởi chạy đồng bộ 2 Firebase DEV UIDs...")
+        from scripts.sync_dev_role_accounts import sync_dev_accounts
+        await sync_dev_accounts(apply=True)
 
 
 async def close_db() -> None:
