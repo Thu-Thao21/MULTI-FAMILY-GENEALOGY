@@ -1,0 +1,10 @@
+# MULTI-FAMILY-GENEALOGY
+MULTI-FAMILY-GENEALOGY là một hệ thống quản lý gia phả đa dòng họ, được xây dựng nhằm số hóa và quản lý thông tin về các thành viên, quan hệ huyết thống và quan hệ hôn nhân giữa nhiều dòng họ. Khác với cách quản lý gia phả truyền thống thường chỉ tập trung vào một dòng họ riêng lẻ, hệ thống cho phép xây dựng các cây gia phả độc lập và liên kết chúng với nhau thông qua các mối quan hệ nội – ngoại – dâu – rể – thông gia.
+
+Hệ thống cung cấp cho người dùng khả năng đăng ký, đăng nhập và quản lý hồ sơ thành viên, bao gồm các thông tin như họ tên, ngày sinh, giới tính, quê quán, nghề nghiệp, học vấn, tiểu sử, hình ảnh và các thông tin liên quan. Các thành viên có thể được kết nối với nhau thông qua các quan hệ cha mẹ – con cái, vợ chồng, anh chị em, con nuôi hoặc con riêng, từ đó hình thành cây gia phả trực quan và có cấu trúc.
+
+Điểm nổi bật của hệ thống là khả năng chuyển đổi từ mô hình cây gia phả truyền thống sang mô hình cây – mạng lưới. Mỗi dòng họ có thể được xây dựng thành một cây gia phả riêng, sau đó các cây được liên kết với nhau thông qua quan hệ hôn nhân. Ví dụ, khi một thành viên của họ Nguyễn kết hôn với một thành viên của họ Trần, hệ thống có thể tạo liên kết giữa cây gia phả họ Nguyễn và cây gia phả họ Trần. Người dùng có thể xem cây trực hệ của một cá nhân và chuyển sang các cây gia phả liên quan như họ ngoại, họ của vợ/chồng hoặc họ thông gia.
+
+Ngoài việc quản lý cây gia phả, hệ thống còn hỗ trợ tìm kiếm và tra cứu quan hệ họ hàng. Người dùng có thể tìm kiếm thành viên theo tên, năm sinh hoặc các thông tin liên quan; xem cha mẹ, ông bà, anh chị em, vợ/chồng và con cháu; xác định mối quan hệ giữa hai người; tìm đường kết nối giữa các thành viên và hỗ trợ xác định cách xưng hô trong gia đình.
+
+Hệ thống cũng hướng đến việc bảo tồn và lưu trữ lịch sử dòng họ thông qua hồ sơ cá nhân, hình ảnh, tiểu sử và các tư liệu liên quan. Dữ liệu được tổ chức tập trung giúp các thế hệ con cháu dễ dàng tra cứu nguồn gốc, tìm hiểu lịch sử gia đình và duy trì sự kết nối giữa các thành viên dù đang sinh sống ở những địa phương khác nhau.

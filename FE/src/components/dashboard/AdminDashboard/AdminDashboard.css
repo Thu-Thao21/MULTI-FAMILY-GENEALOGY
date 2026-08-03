@@ -1,0 +1,131 @@
+.admin-dash-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.admin-header-banner {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #334155 100%);
+  color: #ffffff;
+  border-radius: 20px;
+  padding: 28px 32px;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.2);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.admin-badge-tag {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  background-color: #dc2626;
+  color: #ffffff;
+  padding: 4px 12px;
+  border-radius: 999px;
+  margin-bottom: 8px;
+}
+
+.admin-title {
+  margin: 0 0 6px;
+  font-size: 1.8rem;
+  font-weight: 800;
+}
+
+.admin-subtitle {
+  margin: 0;
+  opacity: 0.9;
+  font-size: 0.95rem;
+}
+
+.admin-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 18px;
+}
+
+.admin-stat-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px 22px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.admin-stat-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #64748b;
+  margin-bottom: 6px;
+}
+
+.admin-stat-value {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.admin-stat-icon {
+  font-size: 2rem;
+  opacity: 0.8;
+}
+
+.admin-sections-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+  gap: 24px;
+}
+
+.admin-card-box {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+}
+
+.admin-box-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.admin-box-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.service-status-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 14px;
+  background: #f8fafc;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #e2e8f0;
+}
+
+.service-name {
+  font-weight: 700;
+  color: #0f172a;
+  font-size: 0.9rem;
+}
+
+.status-online {
+  background: #dcfce7;
+  color: #15803d;
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 999px;
+}

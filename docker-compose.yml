@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: mfg-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: multi_family_db
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./BE/scripts/init_database.sql:/docker-entrypoint-initdb.d/init_database.sql:ro
+    ports:
+      - "5433:5432"
+
+  backend:
+    build:
+      context: ./BE
+    container_name: mfg-backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+psycopg://postgres:postgres@postgres:5432/multi_family_db
+      SECRET_KEY: supersecretkey123
+    depends_on:
+      - postgres
+    ports:
+      - "8000:8000"
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: mfg-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: thuthaor120608@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+
+  frontend:
+    build:
+      context: ./FE
+    container_name: mfg-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80" # serve nginx on container:80, expose on host 3000 to match dev origin
+    depends_on:
+      - backend
+
+volumes:
+  postgres-data:

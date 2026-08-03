@@ -1,0 +1,1362 @@
+KẾ HOẠCH PROMPT TRIỂN KHAI
+ĐĂNG KÝ • ĐĂNG NHẬP
+QUÊN MẬT KHẨU
+Google • Facebook • Email thật • SĐT OTP • Phân quyền Admin / Trưởng họ / Member
+Repository: Thu-Thao21/MULTI-FAMILY-GENEALOGY
+Nhánh làm việc: dev
+Kiến trúc khuyến nghị: Firebase Authentication + FastAPI + PostgreSQL
+GHI CHÚ: Tài liệu này không chỉ liệt kê công việc. Mỗi mục là một prompt có thể sao chép trực tiếp vào ChatGPT/Codex/Cursor để thực hiện tuần tự trên code.
+1. Cách sử dụng tài liệu
+Thực hiện prompt theo đúng thứ tự. Không chạy nhiều prompt lớn cùng lúc.
+Sau mỗi prompt, yêu cầu AI liệt kê file đã sửa, lệnh chạy, kết quả test và vấn đề còn lại.
+Chỉ chuyển sang prompt kế tiếp khi toàn bộ tiêu chí nghiệm thu của prompt hiện tại đã đạt.
+Mọi thay đổi phải thực hiện trên nhánh dev hoặc một feature branch tách từ dev; không chỉnh trực tiếp main.
+Không cho AI tự commit, push hoặc merge nếu bạn chưa yêu cầu rõ ràng.
+2. Nguyên tắc kiến trúc bắt buộc
+Hạng mục
+Quy tắc
+Danh tính
+Firebase Authentication quản lý email/password, Google, Facebook, SĐT OTP và ID token.
+Quyền
+PostgreSQL là nguồn sự thật duy nhất của role: admin, family_head, member.
+Backend
+FastAPI phải xác minh Firebase ID token trước khi tin người dùng hoặc role.
+Đăng ký
+Người dùng công khai chỉ được tạo role member. Family head phải qua yêu cầu/phê duyệt. Admin không đăng ký công khai.
+Bảo mật
+Không lưu mật khẩu trong localStorage; không dùng token tự ghép; không dùng mật khẩu tổng.
+Điều hướng
+Frontend lấy role thật từ /api/auth/me rồi mới chuyển đến /admin, /family-head hoặc /member.
+LƯU Ý: Gmail API không phải API đăng nhập Google. Trong kế hoạch này, Google Sign-In dùng Firebase Google Provider; email xác minh/reset dùng Firebase Authentication. Gmail API chỉ cần khi ứng dụng thực sự phải đọc hoặc gửi thư từ một hộp Gmail.
+3. Bản đồ giai đoạn
+Giai đoạn
+Mục tiêu
+Prompt
+A — Chuẩn hóa nền tảng
+Dọn lỗ hổng, tạo cấu hình và mô hình tài khoản chuẩn
+P0–P4
+Giai đoạn
+Mục tiêu
+Prompt
+B — Các phương thức xác thực
+Email, Google, Facebook, SĐT OTP, quên mật khẩu
+P5–P10
+Giai đoạn
+Mục tiêu
+Prompt
+C — Role và điều hướng
+Admin / Trưởng họ / Member, route guard, phê duyệt role
+P11–P13
+Giai đoạn
+Mục tiêu
+Prompt
+D — Hoàn thiện production
+Liên kết tài khoản, bảo mật, test, Docker và tài liệu
+P14–P18
+4. Prompt bối cảnh dùng lại cho mọi bước
+PROMPT BỐI CẢNH CHUNG — dán ở đầu mỗi phiên làm việc
+Bạn đang làm việc trong repository GitHub Thu-Thao21/MULTI-FAMILY-GENEALOGY, nhánh dev.
+Stack hiện tại:
+- Frontend: React 18 + TypeScript + Vite + Axios.
+- Backend: FastAPI + SQLAlchemy AsyncSession + PostgreSQL.
+- Các file auth hiện tại nằm trong FE/src/components/auth, FE/src/context/AuthContext.tsx, FE/src/services/auth.service.ts và BE/app/routers/auth.py.
+Mục tiêu tổng thể:
+Hoàn thiện đăng ký, đăng nhập và quên mật khẩu bằng email thật, số điện thoại OTP, Google và Facebook; sau đăng nhập chuyển đúng sang trang Admin, Trưởng họ hoặc Member.
+Quy tắc không được vi phạm:
+1. Không lưu mật khẩu ở localStorage/sessionStorage.
+2. Không dùng mật khẩu tổng hoặc bypass xác thực.
+3. Không tạo token bằng chuỗi tự ghép.
+4. Role phải lấy từ PostgreSQL, không tin role do frontend gửi.
+5. Đăng ký công khai mặc định là member; family_head cần phê duyệt; admin không đăng ký công khai.
+6. Backend phải verify Firebase ID token trước khi xử lý dữ liệu bảo vệ.
+7. Không sửa các module cây gia phả/mạng lưới/hồ sơ nếu không cần cho auth.
+8. Không commit, push hoặc merge.
+Khi hoàn thành nhiệm vụ, hãy trả về:
+- Danh sách file đã sửa/tạo.
+- Tóm tắt quyết định kỹ thuật.
+- Lệnh cài dependency và lệnh chạy.
+- Test đã thực hiện và kết quả.
+- Rủi ro hoặc việc còn lại.
+- Không tuyên bố hoàn tất nếu chưa chạy test phù hợp.
+5. Bộ prompt triển khai tuần tự
+P0 — Audit riêng module Auth và lập baseline
+Mục tiêu: 
+Xác định chính xác code đang chạy trước khi sửa.
+Phạm vi file ưu tiên
+FE/src/components/auth/**
+FE/src/context/AuthContext.tsx
+FE/src/services/auth.service.ts
+FE/src/api/axios.ts
+FE/src/routes/AppRoutes.tsx
+BE/app/routers/auth.py
+BE/app/core/security.py
+BE/app/models/postgres.py
+BE/app/core/config.py
+PROMPT COPY-PASTE P0
+Bạn đang làm việc trong repository GitHub Thu-Thao21/MULTI-FAMILY-GENEALOGY, nhánh dev.
+Stack hiện tại:
+- Frontend: React 18 + TypeScript + Vite + Axios.
+- Backend: FastAPI + SQLAlchemy AsyncSession + PostgreSQL.
+- Các file auth hiện tại nằm trong FE/src/components/auth, FE/src/context/AuthContext.tsx, FE/src/services/auth.service.ts và BE/app/routers/auth.py.
+Mục tiêu tổng thể:
+Hoàn thiện đăng ký, đăng nhập và quên mật khẩu bằng email thật, số điện thoại OTP, Google và Facebook; sau đăng nhập chuyển đúng sang trang Admin, Trưởng họ hoặc Member.
+Quy tắc không được vi phạm:
+1. Không lưu mật khẩu ở localStorage/sessionStorage.
+2. Không dùng mật khẩu tổng hoặc bypass xác thực.
+3. Không tạo token bằng chuỗi tự ghép.
+4. Role phải lấy từ PostgreSQL, không tin role do frontend gửi.
+5. Đăng ký công khai mặc định là member; family_head cần phê duyệt; admin không đăng ký công khai.
+6. Backend phải verify Firebase ID token trước khi xử lý dữ liệu bảo vệ.
+7. Không sửa các module cây gia phả/mạng lưới/hồ sơ nếu không cần cho auth.
+8. Không commit, push hoặc merge.
+Khi hoàn thành nhiệm vụ, hãy trả về:
+- Danh sách file đã sửa/tạo.
+- Tóm tắt quyết định kỹ thuật.
+- Lệnh cài dependency và lệnh chạy.
+- Test đã thực hiện và kết quả.
+- Rủi ro hoặc việc còn lại.
+- Không tuyên bố hoàn tất nếu chưa chạy test phù hợp.
+NHIỆM VỤ HIỆN TẠI:
+Hãy audit riêng module đăng ký/đăng nhập/quên mật khẩu trên nhánh dev.
+Nhiệm vụ:
+1. Đọc toàn bộ file auth frontend và backend liên quan.
+2. Vẽ luồng hiện tại: RegisterForm/LoginForm/ForgotPasswordForm → service → API → database → điều hướng.
+3. Liệt kê lỗi theo 4 nhóm: security, runtime, data model, UX/routing.
+4. Xác nhận cụ thể các lỗi đã nghi ngờ: password lưu localStorage, token tự ghép, mật khẩu bypass, role do frontend chọn, endpoint quên mật khẩu thiếu, nút Google/Facebook chưa có logic.
+5. Chưa sửa code ở bước này.
+6. Đề xuất danh sách thay đổi tối thiểu theo thứ tự dependency.
+Đầu ra phải có:
+- Bảng file → trách nhiệm → vấn đề.
+- Sơ đồ luồng hiện tại.
+- Danh sách blockers cần xử lý trước.
+- Kế hoạch migration tránh phá các module khác.
+Tiêu chí nghiệm thu
+☐ 
+Không thay đổi file nào.
+☐ 
+Có danh sách file auth đầy đủ.
+☐ 
+Có chỉ ra dependency giữa FE, BE và DB.
+☐ 
+Có kế hoạch migration an toàn.
+P1 — Dọn lỗ hổng nghiêm trọng trong auth hiện tại
+Mục tiêu: 
+Loại bỏ ngay các cơ chế không an toàn trước khi tích hợp Firebase.
+Phạm vi file ưu tiên
+BE/app/routers/auth.py
+FE/src/services/auth.service.ts
+FE/src/types/auth.ts
+FE/src/components/auth/LoginForm/LoginForm.tsx
+PROMPT COPY-PASTE P1
+Bạn đang làm việc trong repository GitHub Thu-Thao21/MULTI-FAMILY-GENEALOGY, nhánh dev.
+Stack hiện tại:
+- Frontend: React 18 + TypeScript + Vite + Axios.
+- Backend: FastAPI + SQLAlchemy AsyncSession + PostgreSQL.
+- Các file auth hiện tại nằm trong FE/src/components/auth, FE/src/context/AuthContext.tsx, FE/src/services/auth.service.ts và BE/app/routers/auth.py.
+Mục tiêu tổng thể:
+Hoàn thiện đăng ký, đăng nhập và quên mật khẩu bằng email thật, số điện thoại OTP, Google và Facebook; sau đăng nhập chuyển đúng sang trang Admin, Trưởng họ hoặc Member.
+Quy tắc không được vi phạm:
+1. Không lưu mật khẩu ở localStorage/sessionStorage.
+2. Không dùng mật khẩu tổng hoặc bypass xác thực.
+3. Không tạo token bằng chuỗi tự ghép.
+4. Role phải lấy từ PostgreSQL, không tin role do frontend gửi.
+5. Đăng ký công khai mặc định là member; family_head cần phê duyệt; admin không đăng ký công khai.
+6. Backend phải verify Firebase ID token trước khi xử lý dữ liệu bảo vệ.
+7. Không sửa các module cây gia phả/mạng lưới/hồ sơ nếu không cần cho auth.
+8. Không commit, push hoặc merge.
+Khi hoàn thành nhiệm vụ, hãy trả về:
+- Danh sách file đã sửa/tạo.
+- Tóm tắt quyết định kỹ thuật.
+- Lệnh cài dependency và lệnh chạy.
+- Test đã thực hiện và kết quả.
+- Rủi ro hoặc việc còn lại.
+- Không tuyên bố hoàn tất nếu chưa chạy test phù hợp.
+NHIỆM VỤ HIỆN TẠI:
+Hãy sửa các lỗ hổng nghiêm trọng trong auth hiện tại nhưng chưa tích hợp Firebase ở bước này.
+Yêu cầu bắt buộc:
+1. Xóa hoàn toàn mọi mật khẩu bypass như 12060805, 123456, admin.
+2. Không trả token dạng token_<role>_<id>. Nếu chưa có token chuẩn, tạm thời trả lỗi rõ hoặc đánh dấu endpoint legacy; tuyệt đối không giả lập token bảo mật.
+3. Xóa trường password khỏi AuthUser và không lưu password vào localStorage.
+4. Xóa email cá nhân thật khỏi placeholder/giao diện.
+5. Không cho frontend tự coi localStorage user là phiên đăng nhập hợp lệ nếu không có token xác thực.
+6. Giữ giao diện không bị vỡ trong quá trình chuyển đổi.
+7. Thêm test đơn vị tối thiểu hoặc kiểm tra tĩnh chứng minh các chuỗi bypass/password lưu trữ không còn trong code auth.
+Không xây Firebase ở prompt này. Mục tiêu chỉ là tạo baseline an toàn để tiếp tục.
+Tiêu chí nghiệm thu
+☐ 
+Không còn chuỗi mật khẩu bypass trong module auth.
+☐ 
+Không còn password trong AuthUser/localStorage.
+☐ 
+Không còn token tự ghép được coi là token thật.
+☐ 
+UI vẫn build được hoặc có báo cáo lỗi build chính xác.
+P2 — Tạo cấu hình Firebase cho Frontend và Backend
+Mục tiêu: 
+Chuẩn bị dependency, biến môi trường và SDK mà chưa triển khai luồng người dùng.
+Phạm vi file ưu tiên
+FE/package.json
+FE/src/config/firebase.ts
+FE/.env.example
+BE/requirements.txt
+BE/app/core/config.py
+BE/app/core/firebase.py
+BE/.env.example
+PROMPT COPY-PASTE P2
+Bạn đang làm việc trong repository GitHub Thu-Thao21/MULTI-FAMILY-GENEALOGY, nhánh dev.
+Stack hiện tại:
+- Frontend: React 18 + TypeScript + Vite + Axios.
+- Backend: FastAPI + SQLAlchemy AsyncSession + PostgreSQL.
+- Các file auth hiện tại nằm trong FE/src/components/auth, FE/src/context/AuthContext.tsx, FE/src/services/auth.service.ts và BE/app/routers/auth.py.
+Mục tiêu tổng thể:
+Hoàn thiện đăng ký, đăng nhập và quên mật khẩu bằng email thật, số điện thoại OTP, Google và Facebook; sau đăng nhập chuyển đúng sang trang Admin, Trưởng họ hoặc Member.
+Quy tắc không được vi phạm:
+1. Không lưu mật khẩu ở localStorage/sessionStorage.
+2. Không dùng mật khẩu tổng hoặc bypass xác thực.
+3. Không tạo token bằng chuỗi tự ghép.
+4. Role phải lấy từ PostgreSQL, không tin role do frontend gửi.
+5. Đăng ký công khai mặc định là member; family_head cần phê duyệt; admin không đăng ký công khai.
+6. Backend phải verify Firebase ID token trước khi xử lý dữ liệu bảo vệ.
+7. Không sửa các module cây gia phả/mạng lưới/hồ sơ nếu không cần cho auth.
+8. Không commit, push hoặc merge.
+Khi hoàn thành nhiệm vụ, hãy trả về:
+- Danh sách file đã sửa/tạo.
+- Tóm tắt quyết định kỹ thuật.
+- Lệnh cài dependency và lệnh chạy.
+- Test đã thực hiện và kết quả.
+- Rủi ro hoặc việc còn lại.
+- Không tuyên bố hoàn tất nếu chưa chạy test phù hợp.
+NHIỆM VỤ HIỆN TẠI:
+Hãy tích hợp nền tảng Firebase Authentication vào project nhưng chưa thay đổi UI đăng nhập.
+Frontend:
+1. Cài package firebase.
+2. Tạo FE/src/config/firebase.ts khởi tạo app và export auth.
+3. Đọc cấu hình từ VITE_FIREBASE_*; không hard-code key/config vào source.
+4. Cập nhật FE/.env.example với tên biến cần thiết, chỉ dùng placeholder.
+Backend:
+1. Thêm firebase-admin vào requirements.
+2. Mở rộng Settings để đọc FIREBASE_PROJECT_ID và credential phù hợp môi trường.
+3. Tạo BE/app/core/firebase.py khởi tạo Firebase Admin đúng một lần.
+4. Hỗ trợ credential qua GOOGLE_APPLICATION_CREDENTIALS hoặc JSON secret được mount; không commit service account JSON.
+5. Viết helper verify_firebase_token(id_token) trả decoded token hoặc lỗi xác thực chuẩn.
+Yêu cầu:
+- Không log token/secret.
+- Có xử lý trường hợp Firebase chưa cấu hình.
+- Có test import/initialization không làm server crash vô nghĩa.
+- Cập nhật hướng dẫn biến môi trường ngắn gọn.
+Tiêu chí nghiệm thu
+☐ 
+FE và BE có module Firebase riêng.
+☐ 
+Không có secret thật trong repository.
+☐ 
+Backend verify token qua Firebase Admin helper.
+☐ 
+Frontend build và backend import được khi cung cấp env hợp lệ.
+P3 — Chuẩn hóa mô hình tài khoản và role trong PostgreSQL
+Mục tiêu: 
+Tạo nguồn sự thật duy nhất cho role, không đăng nhập qua ba bảng rời rạc.
+Phạm vi file ưu tiên
+BE/app/models/postgres.py
+BE/app/schemas/auth_schemas.py
+BE/alembic/** hoặc migration tương đương
+BE/scripts/** nếu cần migration dữ liệu
+PROMPT COPY-PASTE P3
+Bạn đang làm việc trong repository GitHub Thu-Thao21/MULTI-FAMILY-GENEALOGY, nhánh dev.
+Stack hiện tại:
+- Frontend: React 18 + TypeScript + Vite + Axios.
+- Backend: FastAPI + SQLAlchemy AsyncSession + PostgreSQL.
+- Các file auth hiện tại nằm trong FE/src/components/auth, FE/src/context/AuthContext.tsx, FE/src/services/auth.service.ts và BE/app/routers/auth.py.
+Mục tiêu tổng thể:
+Hoàn thiện đăng ký, đăng nhập và quên mật khẩu bằng email thật, số điện thoại OTP, Google và Facebook; sau đăng nhập chuyển đúng sang trang Admin, Trưởng họ hoặc Member.
+Quy tắc không được vi phạm:
+1. Không lưu mật khẩu ở localStorage/sessionStorage.
+2. Không dùng mật khẩu tổng hoặc bypass xác thực.
+3. Không tạo token bằng chuỗi tự ghép.
+4. Role phải lấy từ PostgreSQL, không tin role do frontend gửi.
+5. Đăng ký công khai mặc định là member; family_head cần phê duyệt; admin không đăng ký công khai.
+6. Backend phải verify Firebase ID token trước khi xử lý dữ liệu bảo vệ.
+7. Không sửa các module cây gia phả/mạng lưới/hồ sơ nếu không cần cho auth.
+8. Không commit, push hoặc merge.
+Khi hoàn thành nhiệm vụ, hãy trả về:
+- Danh sách file đã sửa/tạo.
+- Tóm tắt quyết định kỹ thuật.
+- Lệnh cài dependency và lệnh chạy.
+- Test đã thực hiện và kết quả.
+- Rủi ro hoặc việc còn lại.
+- Không tuyên bố hoàn tất nếu chưa chạy test phù hợp.
+NHIỆM VỤ HIỆN TẠI:
+Hãy thiết kế và triển khai database model mới cho authentication, không xóa ngay Admin/FamilyHead/Member cũ.
+Tạo tối thiểu:
+1. accounts: id, firebase_uid unique, username unique nullable, email unique nullable, phone_e164 unique nullable, display_name, email_verified, phone_verified, status, timestamps.
+2. account_roles: id, account_id FK, role enum/string, family_id nullable, status, timestamps; unique(account_id, role, family_id).
+3. role_requests: account_id, requested_role, family_id, reason, status, reviewed_by, reviewed_at, timestamps.
+4. Có index cho firebase_uid, email, phone_e164, role/status.
+Quy tắc:
+- Role hợp lệ: admin, family_head, member.
+- Tài khoản mới mặc định member.
+- Không lưu password_hash trong accounts vì mật khẩu do Firebase quản lý.
+- Không xóa bảng cũ trong migration này; tạo chiến lược mapping/migration dần.
+- Dùng Alembic nếu project chưa có thì khởi tạo Alembic tối thiểu, không dựa vào create_all để thay đổi schema production.
+- Tạo Pydantic schemas cho AccountOut, RoleOut, RoleRequestCreate/Review.
+Hãy cung cấp migration up/down và kiểm tra chạy migration trên database rỗng.
+Tiêu chí nghiệm thu
+☐ 
+Có accounts/account_roles/role_requests.
+☐ 
+Có constraint/index cần thiết.
+☐ 
+Không lưu password trong bảng account mới.
+☐ 
+Migration chạy được trên DB rỗng.
+☐ 
+Bảng cũ chưa bị xóa.
+P4 — Backend xác minh token, bootstrap account và /auth/me
+Mục tiêu: 
+Tạo lõi backend cho mọi phương thức đăng nhập.
+Phạm vi file ưu tiên
+BE/app/dependencies/auth.py
+BE/app/routers/auth.py
+BE/app/services/auth_service.py
+BE/app/schemas/auth_schemas.py
+BE/app/main.py
+PROMPT COPY-PASTE P4
+Bạn đang làm việc trong repository GitHub Thu-Thao21/MULTI-FAMILY-GENEALOGY, nhánh dev.
+Stack hiện tại:
+- Frontend: React 18 + TypeScript + Vite + Axios.
+- Backend: FastAPI + SQLAlchemy AsyncSession + PostgreSQL.
+- Các file auth hiện tại nằm trong FE/src/components/auth, FE/src/context/AuthContext.tsx, FE/src/services/auth.service.ts và BE/app/routers/auth.py.
+Mục tiêu tổng thể:
+Hoàn thiện đăng ký, đăng nhập và quên mật khẩu bằng email thật, số điện thoại OTP, Google và Facebook; sau đăng nhập chuyển đúng sang trang Admin, Trưởng họ hoặc Member.
+Quy tắc không được vi phạm:
+1. Không lưu mật khẩu ở localStorage/sessionStorage.
+2. Không dùng mật khẩu tổng hoặc bypass xác thực.
+3. Không tạo token bằng chuỗi tự ghép.
+4. Role phải lấy từ PostgreSQL, không tin role do frontend gửi.
+5. Đăng ký công khai mặc định là member; family_head cần phê duyệt; admin không đăng ký công khai.
+6. Backend phải verify Firebase ID token trước khi xử lý dữ liệu bảo vệ.
+7. Không sửa các module cây gia phả/mạng lưới/hồ sơ nếu không cần cho auth.
+8. Không commit, push hoặc merge.
+Khi hoàn thành nhiệm vụ, hãy trả về:
+- Danh sách file đã sửa/tạo.
+- Tóm tắt quyết định kỹ thuật.
+- Lệnh cài dependency và lệnh chạy.
+- Test đã thực hiện và kết quả.
+- Rủi ro hoặc việc còn lại.
+- Không tuyên bố hoàn tất nếu chưa chạy test phù hợp.
+NHIỆM VỤ HIỆN TẠI:
+Hãy triển khai lõi authentication backend dựa trên Firebase ID token và role trong PostgreSQL.
+Tạo các thành phần:
+1. Dependency get_current_account đọc Authorization: Bearer <Firebase ID token>.
+2. Verify token bằng Firebase Admin helper; lấy uid, email, phone_number, name, email_verified, firebase.sign_in_provider.
+3. POST /api/auth/bootstrap:
+   - Yêu cầu token hợp lệ.
+   - Tìm account theo firebase_uid.
+   - Nếu chưa có thì tạo account và role member mặc định.
+   - Nếu email/phone trùng account cũ thì xử lý an toàn, không tự gộp mù quáng.
+4. GET /api/auth/me trả account, roles, primaryRole và quyền cơ bản.
+5. Chặn account status != active.
+6. Tạo require_roles(*roles) để dùng cho API sau này.
+7. Trả 401 cho token sai/hết hạn; 403 cho thiếu quyền.
+8. Không nhận role từ frontend ở bootstrap.
+Thêm test cho:
+- Token hợp lệ tạo member mới.
+- Token hợp lệ đọc account cũ.
+- Token sai trả 401.
+- Account bị khóa trả 403.
+- Frontend gửi role=admin không ảnh hưởng role DB.
+Tiêu chí nghiệm thu
+☐ 
+/bootstrap tạo member mặc định.
+☐ 
+/me trả role từ DB.
+☐ 
+Có dependency 401/403 chuẩn.
+☐ 
+Không tin role frontend.
+☐ 
+Có test backend chính.
+P5 — Viết lại AuthContext và session frontend theo Firebase
+Mục tiêu: 
+Frontend lấy session thật từ Firebase và account/role thật từ backend.
+Phạm vi file ưu tiên
+FE/src/context/AuthContext.tsx
+FE/src/hooks/useAuth.ts
+FE/src/services/auth.service.ts
+FE/src/api/axios.ts
+FE/src/types/auth.ts
+PROMPT COPY-PASTE P5
+Bạn đang làm việc trong repository GitHub Thu-Thao21/MULTI-FAMILY-GENEALOGY, nhánh dev.
+Stack hiện tại:
+- Frontend: React 18 + TypeScript + Vite + Axios.
+- Backend: FastAPI + SQLAlchemy AsyncSession + PostgreSQL.
+- Các file auth hiện tại nằm trong FE/src/components/auth, FE/src/context/AuthContext.tsx, FE/src/services/auth.service.ts và BE/app/routers/auth.py.
+Mục tiêu tổng thể:
+Hoàn thiện đăng ký, đăng nhập và quên mật khẩu bằng email thật, số điện thoại OTP, Google và Facebook; sau đăng nhập chuyển đúng sang trang Admin, Trưởng họ hoặc Member.
+Quy tắc không được vi phạm:
+1. Không lưu mật khẩu ở localStorage/sessionStorage.
+2. Không dùng mật khẩu tổng hoặc bypass xác thực.
+3. Không tạo token bằng chuỗi tự ghép.
+4. Role phải lấy từ PostgreSQL, không tin role do frontend gửi.
+5. Đăng ký công khai mặc định là member; family_head cần phê duyệt; admin không đăng ký công khai.
+6. Backend phải verify Firebase ID token trước khi xử lý dữ liệu bảo vệ.
+7. Không sửa các module cây gia phả/mạng lưới/hồ sơ nếu không cần cho auth.
+8. Không commit, push hoặc merge.
+Khi hoàn thành nhiệm vụ, hãy trả về:
+- Danh sách file đã sửa/tạo.
+- Tóm tắt quyết định kỹ thuật.
+- Lệnh cài dependency và lệnh chạy.
+- Test đã thực hiện và kết quả.
+- Rủi ro hoặc việc còn lại.
+- Không tuyên bố hoàn tất nếu chưa chạy test phù hợp.
+NHIỆM VỤ HIỆN TẠI:
+Hãy viết lại lớp auth frontend để dùng Firebase Authentication.
+Yêu cầu:
+1. AuthContext lắng nghe onAuthStateChanged hoặc onIdTokenChanged.
+2. Khi Firebase user tồn tại:
+   - Lấy ID token mới.
+   - Gọi POST /auth/bootstrap một lần khi cần.
+   - Gọi GET /auth/me để lấy account và roles.
+3. Axios interceptor lấy token từ Firebase currentUser.getIdToken(), không đọc token từ localStorage user tự tạo.
+4. Không lưu password, token hoặc role làm nguồn sự thật trong localStorage.
+5. Có các state: firebaseUser, account, loading, isAuthenticated, error.
+6. Có logout gọi Firebase signOut và xóa state app.
+7. Khi backend trả 401, thử refresh token đúng một lần rồi logout nếu vẫn lỗi.
+8. Định nghĩa type rõ cho Account, Role và AuthState.
+9. Không chuyển dashboard trước khi loading auth hoàn tất.
+Giữ API của hook dễ dùng cho các form sau: registerWithEmail, loginWithEmail, loginWithGoogle, loginWithFacebook, loginWithPhone, logout, refreshAccount.
+Tiêu chí nghiệm thu
+☐ 
+Không còn localStorage session giả.
+☐ 
+Axios dùng Firebase ID token.
+☐ 
+AuthContext có loading rõ ràng.
+☐ 
+Role lấy từ /auth/me.
+☐ 
+Logout xóa cả Firebase session và app state.
+P6 — Đăng ký bằng email/password và xác minh email
+Mục tiêu: 
+Hoàn thiện luồng đăng ký email thật.
+Phạm vi file ưu tiên
+FE/src/components/auth/RegisterForm/RegisterForm.tsx
+FE/src/services/auth.service.ts
+FE/src/pages/auth/Register.tsx
+FE/src/components/auth/**
+BE/app/routers/auth.py nếu cần profile bổ sung
+PROMPT COPY-PASTE P6
+Bạn đang làm việc trong repository GitHub Thu-Thao21/MULTI-FAMILY-GENEALOGY, nhánh dev.
+Stack hiện tại:
+- Frontend: React 18 + TypeScript + Vite + Axios.
+- Backend: FastAPI + SQLAlchemy AsyncSession + PostgreSQL.
+- Các file auth hiện tại nằm trong FE/src/components/auth, FE/src/context/AuthContext.tsx, FE/src/services/auth.service.ts và BE/app/routers/auth.py.
+Mục tiêu tổng thể:
+Hoàn thiện đăng ký, đăng nhập và quên mật khẩu bằng email thật, số điện thoại OTP, Google và Facebook; sau đăng nhập chuyển đúng sang trang Admin, Trưởng họ hoặc Member.
+Quy tắc không được vi phạm:
+1. Không lưu mật khẩu ở localStorage/sessionStorage.
+2. Không dùng mật khẩu tổng hoặc bypass xác thực.
+3. Không tạo token bằng chuỗi tự ghép.
+4. Role phải lấy từ PostgreSQL, không tin role do frontend gửi.
+5. Đăng ký công khai mặc định là member; family_head cần phê duyệt; admin không đăng ký công khai.
+6. Backend phải verify Firebase ID token trước khi xử lý dữ liệu bảo vệ.
+7. Không sửa các module cây gia phả/mạng lưới/hồ sơ nếu không cần cho auth.
+8. Không commit, push hoặc merge.
+Khi hoàn thành nhiệm vụ, hãy trả về:
+- Danh sách file đã sửa/tạo.
+- Tóm tắt quyết định kỹ thuật.
+- Lệnh cài dependency và lệnh chạy.
+- Test đã thực hiện và kết quả.
+- Rủi ro hoặc việc còn lại.
+- Không tuyên bố hoàn tất nếu chưa chạy test phù hợp.
+NHIỆM VỤ HIỆN TẠI:
+Hãy hoàn thiện đăng ký bằng email/password qua Firebase.
+Luồng bắt buộc:
+1. Form có họ tên, username, email, password, confirm password, đồng ý điều khoản.
+2. Validate email chuẩn; password tối thiểu 8 ký tự; confirm password phải khớp.
+3. createUserWithEmailAndPassword.
+4. updateProfile displayName.
+5. sendEmailVerification.
+6. Gọi /auth/bootstrap để tạo account member, nhưng account chưa xác minh phải được đánh dấu email_verified=false.
+7. Hiển thị màn hình “Kiểm tra email” và nút gửi lại email với cooldown.
+8. Không cho truy cập route bảo vệ yêu cầu email verified cho đến khi Firebase xác nhận.
+9. Không có lựa chọn tự đăng ký Admin hoặc Trưởng họ. Có link riêng “Yêu cầu trở thành Trưởng họ” sau khi tài khoản đã tạo/xác minh.
+10. Xử lý lỗi email đã tồn tại, email sai, password yếu và network.
+Thêm test UI/service cho validation và trạng thái verification.
+Tiêu chí nghiệm thu
+☐ 
+Đăng ký email tạo Firebase user và account member.
+☐ 
+Có email verification.
+☐ 
+Không đăng ký trực tiếp family_head/admin.
+☐ 
+Không lưu password.
+☐ 
+Có resend cooldown và xử lý lỗi.
+P7 — Đăng nhập email/password và điều hướng theo role
+Mục tiêu: 
+Hoàn thiện luồng đăng nhập cơ bản không cần chọn role.
+Phạm vi file ưu tiên
+FE/src/components/auth/LoginForm/LoginForm.tsx
+FE/src/services/auth.service.ts
+FE/src/routes/AppRoutes.tsx
+FE/src/routes/RoleGuard.tsx
+FE/src/App.tsx
+PROMPT COPY-PASTE P7
+Bạn đang làm việc trong repository GitHub Thu-Thao21/MULTI-FAMILY-GENEALOGY, nhánh dev.
+Stack hiện tại:
+- Frontend: React 18 + TypeScript + Vite + Axios.
+- Backend: FastAPI + SQLAlchemy AsyncSession + PostgreSQL.
+- Các file auth hiện tại nằm trong FE/src/components/auth, FE/src/context/AuthContext.tsx, FE/src/services/auth.service.ts và BE/app/routers/auth.py.
+Mục tiêu tổng thể:
+Hoàn thiện đăng ký, đăng nhập và quên mật khẩu bằng email thật, số điện thoại OTP, Google và Facebook; sau đăng nhập chuyển đúng sang trang Admin, Trưởng họ hoặc Member.
+Quy tắc không được vi phạm:
+1. Không lưu mật khẩu ở localStorage/sessionStorage.
+2. Không dùng mật khẩu tổng hoặc bypass xác thực.
+3. Không tạo token bằng chuỗi tự ghép.
+4. Role phải lấy từ PostgreSQL, không tin role do frontend gửi.
+5. Đăng ký công khai mặc định là member; family_head cần phê duyệt; admin không đăng ký công khai.
+6. Backend phải verify Firebase ID token trước khi xử lý dữ liệu bảo vệ.
+7. Không sửa các module cây gia phả/mạng lưới/hồ sơ nếu không cần cho auth.
+8. Không commit, push hoặc merge.
+Khi hoàn thành nhiệm vụ, hãy trả về:
+- Danh sách file đã sửa/tạo.
+- Tóm tắt quyết định kỹ thuật.
+- Lệnh cài dependency và lệnh chạy.
+- Test đã thực hiện và kết quả.
+- Rủi ro hoặc việc còn lại.
+- Không tuyên bố hoàn tất nếu chưa chạy test phù hợp.
+NHIỆM VỤ HIỆN TẠI:
+Hãy hoàn thiện đăng nhập email/password qua Firebase và bỏ lựa chọn role khỏi form.
+Yêu cầu:
+1. LoginForm chỉ nhận email và password; có show/hide password, remember UI hợp lý và link quên mật khẩu.
+2. signInWithEmailAndPassword.
+3. Sau login, gọi /auth/bootstrap và /auth/me.
+4. Điều hướng theo primaryRole thật:
+   - admin → /admin
+   - family_head → /family-head
+   - member → /member
+5. Nếu email chưa verify, chuyển sang trang verify-email thay vì dashboard.
+6. Nếu account pending/suspended/disabled, hiển thị thông báo phù hợp và logout.
+7. Dùng react-router-dom với route thật, không dùng biến view nội bộ làm router chính.
+8. Tạo ProtectedRoute và RoleGuard; nhưng ghi chú frontend guard không thay thế backend authorization.
+9. Không yêu cầu người dùng chọn Admin/Trưởng họ/Member trước khi đăng nhập.
+Thêm test cho redirect ba role và trường hợp email chưa xác minh.
+Tiêu chí nghiệm thu
+☐ 
+LoginForm không còn role selector.
+☐ 
+Redirect đúng ba role từ backend.
+☐ 
+Có route thật và guard.
+☐ 
+Email chưa verify không vào dashboard.
+☐ 
+Refresh URL vẫn giữ đúng trang.
+P8 — Đăng nhập Google thật
+Mục tiêu: 
+Kết nối nút Google với Firebase Google Provider.
+Phạm vi file ưu tiên
+FE/src/services/auth.service.ts
+FE/src/components/auth/LoginForm/LoginForm.tsx
+FE/src/components/auth/RegisterForm/RegisterForm.tsx
+FE/src/config/firebase.ts
+PROMPT COPY-PASTE P8
+Bạn đang làm việc trong repository GitHub Thu-Thao21/MULTI-FAMILY-GENEALOGY, nhánh dev.
+Stack hiện tại:
+- Frontend: React 18 + TypeScript + Vite + Axios.
+- Backend: FastAPI + SQLAlchemy AsyncSession + PostgreSQL.
+- Các file auth hiện tại nằm trong FE/src/components/auth, FE/src/context/AuthContext.tsx, FE/src/services/auth.service.ts và BE/app/routers/auth.py.
+Mục tiêu tổng thể:
+Hoàn thiện đăng ký, đăng nhập và quên mật khẩu bằng email thật, số điện thoại OTP, Google và Facebook; sau đăng nhập chuyển đúng sang trang Admin, Trưởng họ hoặc Member.
+Quy tắc không được vi phạm:
+1. Không lưu mật khẩu ở localStorage/sessionStorage.
+2. Không dùng mật khẩu tổng hoặc bypass xác thực.
+3. Không tạo token bằng chuỗi tự ghép.
+4. Role phải lấy từ PostgreSQL, không tin role do frontend gửi.
+5. Đăng ký công khai mặc định là member; family_head cần phê duyệt; admin không đăng ký công khai.
+6. Backend phải verify Firebase ID token trước khi xử lý dữ liệu bảo vệ.
+7. Không sửa các module cây gia phả/mạng lưới/hồ sơ nếu không cần cho auth.
+8. Không commit, push hoặc merge.
+Khi hoàn thành nhiệm vụ, hãy trả về:
+- Danh sách file đã sửa/tạo.
+- Tóm tắt quyết định kỹ thuật.
+- Lệnh cài dependency và lệnh chạy.
+- Test đã thực hiện và kết quả.
+- Rủi ro hoặc việc còn lại.
+- Không tuyên bố hoàn tất nếu chưa chạy test phù hợp.
+NHIỆM VỤ HIỆN TẠI:
+Hãy triển khai đăng nhập/đăng ký bằng Google qua Firebase Authentication.
+Yêu cầu:
+1. Dùng GoogleAuthProvider.
+2. Desktop ưu tiên signInWithPopup; có fallback signInWithRedirect khi popup bị chặn hoặc môi trường mobile phù hợp.
+3. Sau Firebase login, gọi /auth/bootstrap và /auth/me.
+4. Tài khoản mới nhận role member mặc định.
+5. Không tin email/name do frontend tự dựng; backend lấy từ decoded token.
+6. Xử lý account-exists-with-different-credential và hướng dẫn người dùng đăng nhập bằng provider cũ rồi liên kết tài khoản.
+7. Nút Google có loading/disabled/error state và accessibility label.
+8. Không cần Gmail API.
+9. Redirect theo role thật sau bootstrap.
+Thêm test service/mock cho success, popup closed, account exists with different credential và backend bootstrap failure.
+Tiêu chí nghiệm thu
+☐ 
+Nút Google hoạt động thật.
+☐ 
+Account mới là member.
+☐ 
+Có xử lý trùng provider.
+☐ 
+Không dùng Gmail API cho đăng nhập.
+☐ 
+Redirect theo role DB.
+P9 — Đăng nhập Facebook thật
+Mục tiêu: 
+Kết nối Meta/Facebook Login qua Firebase.
+Phạm vi file ưu tiên
+FE/src/services/auth.service.ts
+FE/src/components/auth/LoginForm/LoginForm.tsx
+FE/src/components/auth/RegisterForm/RegisterForm.tsx
+FE/.env.example
+docs/auth-setup.md
+PROMPT COPY-PASTE P9
+Bạn đang làm việc trong repository GitHub Thu-Thao21/MULTI-FAMILY-GENEALOGY, nhánh dev.
+Stack hiện tại:
+- Frontend: React 18 + TypeScript + Vite + Axios.
+- Backend: FastAPI + SQLAlchemy AsyncSession + PostgreSQL.
+- Các file auth hiện tại nằm trong FE/src/components/auth, FE/src/context/AuthContext.tsx, FE/src/services/auth.service.ts và BE/app/routers/auth.py.
+Mục tiêu tổng thể:
+Hoàn thiện đăng ký, đăng nhập và quên mật khẩu bằng email thật, số điện thoại OTP, Google và Facebook; sau đăng nhập chuyển đúng sang trang Admin, Trưởng họ hoặc Member.
+Quy tắc không được vi phạm:
+1. Không lưu mật khẩu ở localStorage/sessionStorage.
+2. Không dùng mật khẩu tổng hoặc bypass xác thực.
+3. Không tạo token bằng chuỗi tự ghép.
+4. Role phải lấy từ PostgreSQL, không tin role do frontend gửi.
+5. Đăng ký công khai mặc định là member; family_head cần phê duyệt; admin không đăng ký công khai.
+6. Backend phải verify Firebase ID token trước khi xử lý dữ liệu bảo vệ.
+7. Không sửa các module cây gia phả/mạng lưới/hồ sơ nếu không cần cho auth.
+8. Không commit, push hoặc merge.
+Khi hoàn thành nhiệm vụ, hãy trả về:
+- Danh sách file đã sửa/tạo.
+- Tóm tắt quyết định kỹ thuật.
+- Lệnh cài dependency và lệnh chạy.
+- Test đã thực hiện và kết quả.
+- Rủi ro hoặc việc còn lại.
+- Không tuyên bố hoàn tất nếu chưa chạy test phù hợp.
+NHIỆM VỤ HIỆN TẠI:
+Hãy triển khai đăng nhập/đăng ký Facebook bằng Firebase FacebookAuthProvider.
+Yêu cầu:
+1. Dùng popup với fallback redirect.
+2. Yêu cầu scope email khi phù hợp nhưng xử lý trường hợp Facebook không trả email.
+3. Sau login, gọi /auth/bootstrap và /auth/me.
+4. Nếu thiếu email và phone, chuyển người dùng tới bước “Hoàn thiện thông tin liên hệ” trước khi dùng tính năng chính.
+5. Xử lý account-exists-with-different-credential và provider linking an toàn.
+6. Không lưu Facebook access token trong localStorage.
+7. Nút Facebook có loading/error/accessibility.
+8. Tạo tài liệu cấu hình Meta App: App ID, App Secret chỉ ở Firebase Console/secret, Valid OAuth Redirect URI, domain phát triển và production.
+9. Redirect theo role DB.
+Không hard-code App Secret hoặc redirect URI production vào source.
+Tiêu chí nghiệm thu
+☐ 
+Facebook login hoạt động qua Firebase.
+☐ 
+Xử lý user không có email.
+☐ 
+Không lưu access token.
+☐ 
+Có tài liệu Meta redirect URI.
+☐ 
+Account mới là member.
+P10 — Đăng ký/đăng nhập bằng SĐT OTP thật
+Mục tiêu: 
+Xác minh quyền sở hữu số điện thoại bằng SMS OTP.
+Phạm vi file ưu tiên
+FE/src/components/auth/PhoneOtpForm/**
+FE/src/services/auth.service.ts
+FE/src/config/firebase.ts
+FE/src/pages/auth/**
+BE/app/services/auth_service.py
+PROMPT COPY-PASTE P10
+Bạn đang làm việc trong repository GitHub Thu-Thao21/MULTI-FAMILY-GENEALOGY, nhánh dev.
+Stack hiện tại:
+- Frontend: React 18 + TypeScript + Vite + Axios.
+- Backend: FastAPI + SQLAlchemy AsyncSession + PostgreSQL.
+- Các file auth hiện tại nằm trong FE/src/components/auth, FE/src/context/AuthContext.tsx, FE/src/services/auth.service.ts và BE/app/routers/auth.py.
+Mục tiêu tổng thể:
+Hoàn thiện đăng ký, đăng nhập và quên mật khẩu bằng email thật, số điện thoại OTP, Google và Facebook; sau đăng nhập chuyển đúng sang trang Admin, Trưởng họ hoặc Member.
+Quy tắc không được vi phạm:
+1. Không lưu mật khẩu ở localStorage/sessionStorage.
+2. Không dùng mật khẩu tổng hoặc bypass xác thực.
+3. Không tạo token bằng chuỗi tự ghép.
+4. Role phải lấy từ PostgreSQL, không tin role do frontend gửi.
+5. Đăng ký công khai mặc định là member; family_head cần phê duyệt; admin không đăng ký công khai.
+6. Backend phải verify Firebase ID token trước khi xử lý dữ liệu bảo vệ.
+7. Không sửa các module cây gia phả/mạng lưới/hồ sơ nếu không cần cho auth.
+8. Không commit, push hoặc merge.
+Khi hoàn thành nhiệm vụ, hãy trả về:
+- Danh sách file đã sửa/tạo.
+- Tóm tắt quyết định kỹ thuật.
+- Lệnh cài dependency và lệnh chạy.
+- Test đã thực hiện và kết quả.
+- Rủi ro hoặc việc còn lại.
+- Không tuyên bố hoàn tất nếu chưa chạy test phù hợp.
+NHIỆM VỤ HIỆN TẠI:
+Hãy triển khai đăng nhập và đăng ký bằng số điện thoại qua Firebase Phone Authentication.
+Yêu cầu:
+1. Chuẩn hóa số Việt Nam sang E.164, ví dụ 0912345678 → +84912345678.
+2. Dùng RecaptchaVerifier và signInWithPhoneNumber.
+3. Luồng hai bước: nhập SĐT → gửi OTP → nhập OTP → confirm.
+4. Có countdown gửi lại, giới hạn thao tác UI và thông báo quota/rate limit.
+5. Trong development hỗ trợ Firebase test phone numbers; không hard-code OTP production.
+6. Sau xác minh, gọi /auth/bootstrap và /auth/me.
+7. Backend lưu phone_e164 từ decoded token, phone_verified=true.
+8. Account mới là member.
+9. Xử lý reCAPTCHA hết hạn, OTP sai/hết hạn, quá nhiều request và network.
+10. Tài liệu hóa yêu cầu domain HTTPS/authorized domain cho phone auth.
+Không tự viết API gửi SMS nếu đã chọn Firebase Phone Auth.
+Tiêu chí nghiệm thu
+☐ 
+SĐT được chuẩn hóa E.164.
+☐ 
+OTP thật qua Firebase.
+☐ 
+Có reCAPTCHA và resend cooldown.
+☐ 
+Không có OTP mẫu production.
+☐ 
+Account mới là member.
+P11 — Quên mật khẩu qua email và xử lý tài khoản social/phone
+Mục tiêu: 
+Hoàn thiện luồng phục hồi phù hợp từng provider.
+Phạm vi file ưu tiên
+FE/src/components/auth/ForgotPasswordForm/ForgotPasswordForm.tsx
+FE/src/services/auth.service.ts
+FE/src/pages/auth/ForgotPassword.tsx
+BE/app/routers/auth.py nếu cần provider lookup an toàn
+PROMPT COPY-PASTE P11
+Bạn đang làm việc trong repository GitHub Thu-Thao21/MULTI-FAMILY-GENEALOGY, nhánh dev.
+Stack hiện tại:
+- Frontend: React 18 + TypeScript + Vite + Axios.
+- Backend: FastAPI + SQLAlchemy AsyncSession + PostgreSQL.
+- Các file auth hiện tại nằm trong FE/src/components/auth, FE/src/context/AuthContext.tsx, FE/src/services/auth.service.ts và BE/app/routers/auth.py.
+Mục tiêu tổng thể:
+Hoàn thiện đăng ký, đăng nhập và quên mật khẩu bằng email thật, số điện thoại OTP, Google và Facebook; sau đăng nhập chuyển đúng sang trang Admin, Trưởng họ hoặc Member.
+Quy tắc không được vi phạm:
+1. Không lưu mật khẩu ở localStorage/sessionStorage.
+2. Không dùng mật khẩu tổng hoặc bypass xác thực.
+3. Không tạo token bằng chuỗi tự ghép.
+4. Role phải lấy từ PostgreSQL, không tin role do frontend gửi.
+5. Đăng ký công khai mặc định là member; family_head cần phê duyệt; admin không đăng ký công khai.
+6. Backend phải verify Firebase ID token trước khi xử lý dữ liệu bảo vệ.
+7. Không sửa các module cây gia phả/mạng lưới/hồ sơ nếu không cần cho auth.
+8. Không commit, push hoặc merge.
+Khi hoàn thành nhiệm vụ, hãy trả về:
+- Danh sách file đã sửa/tạo.
+- Tóm tắt quyết định kỹ thuật.
+- Lệnh cài dependency và lệnh chạy.
+- Test đã thực hiện và kết quả.
+- Rủi ro hoặc việc còn lại.
+- Không tuyên bố hoàn tất nếu chưa chạy test phù hợp.
+NHIỆM VỤ HIỆN TẠI:
+Hãy viết lại chức năng quên mật khẩu.
+Luồng email/password:
+1. Người dùng nhập email.
+2. Gọi sendPasswordResetEmail của Firebase.
+3. Luôn hiển thị thông báo trung tính để tránh dò tài khoản.
+4. Có cooldown gửi lại.
+Luồng phone/social:
+1. Nếu đăng nhập bằng phone OTP thì hướng dẫn dùng “Đăng nhập bằng SĐT và OTP”, không tạo mật khẩu giả.
+2. Nếu provider là Google/Facebook thì hướng dẫn tiếp tục bằng provider tương ứng.
+3. Nếu cần endpoint backend để đọc provider, endpoint phải chống account enumeration và chỉ trả hướng dẫn chung hoặc yêu cầu token đã xác minh.
+Yêu cầu chung:
+- Xóa giao diện nhập OTP mẫu 888999.
+- Không trả OTP trong API response.
+- Không lưu OTP rõ trong DB/log.
+- Hỗ trợ Firebase action code settings để quay lại đúng domain/app.
+- Có trạng thái success/error/loading rõ ràng.
+Thêm test cho email hợp lệ, email không tồn tại, quota và provider social.
+Tiêu chí nghiệm thu
+☐ 
+Email reset dùng Firebase.
+☐ 
+Không lộ tài khoản tồn tại hay không.
+☐ 
+Không có OTP mẫu.
+☐ 
+Social/phone được hướng dẫn đúng.
+☐ 
+Có cooldown và lỗi thân thiện.
+P12 — Hoàn thiện route và layout Admin / Trưởng họ / Member
+Mục tiêu: 
+Sau xác thực, mỗi vai trò vào đúng không gian chức năng.
+Phạm vi file ưu tiên
+FE/src/routes/AppRoutes.tsx
+FE/src/routes/ProtectedRoute.tsx
+FE/src/routes/RoleGuard.tsx
+FE/src/pages/admin/**
+FE/src/pages/family-head/**
+FE/src/pages/member/**
+FE/src/App.tsx
+PROMPT COPY-PASTE P12
+Bạn đang làm việc trong repository GitHub Thu-Thao21/MULTI-FAMILY-GENEALOGY, nhánh dev.
+Stack hiện tại:
+- Frontend: React 18 + TypeScript + Vite + Axios.
+- Backend: FastAPI + SQLAlchemy AsyncSession + PostgreSQL.
+- Các file auth hiện tại nằm trong FE/src/components/auth, FE/src/context/AuthContext.tsx, FE/src/services/auth.service.ts và BE/app/routers/auth.py.
+Mục tiêu tổng thể:
+Hoàn thiện đăng ký, đăng nhập và quên mật khẩu bằng email thật, số điện thoại OTP, Google và Facebook; sau đăng nhập chuyển đúng sang trang Admin, Trưởng họ hoặc Member.
+Quy tắc không được vi phạm:
+1. Không lưu mật khẩu ở localStorage/sessionStorage.
+2. Không dùng mật khẩu tổng hoặc bypass xác thực.
+3. Không tạo token bằng chuỗi tự ghép.
+4. Role phải lấy từ PostgreSQL, không tin role do frontend gửi.
+5. Đăng ký công khai mặc định là member; family_head cần phê duyệt; admin không đăng ký công khai.
+6. Backend phải verify Firebase ID token trước khi xử lý dữ liệu bảo vệ.
+7. Không sửa các module cây gia phả/mạng lưới/hồ sơ nếu không cần cho auth.
+8. Không commit, push hoặc merge.
+Khi hoàn thành nhiệm vụ, hãy trả về:
+- Danh sách file đã sửa/tạo.
+- Tóm tắt quyết định kỹ thuật.
+- Lệnh cài dependency và lệnh chạy.
+- Test đã thực hiện và kết quả.
+- Rủi ro hoặc việc còn lại.
+- Không tuyên bố hoàn tất nếu chưa chạy test phù hợp.
+NHIỆM VỤ HIỆN TẠI:
+Hãy hoàn thiện routing theo role sau khi auth đã ổn định.
+Tạo route:
+- /login, /register, /forgot-password, /verify-email, /complete-profile.
+- /admin/* chỉ admin.
+- /family-head/* cho family_head và admin nếu thiết kế cho phép.
+- /member/* cho member, family_head và admin.
+Yêu cầu:
+1. ProtectedRoute chờ AuthContext loading xong.
+2. RoleGuard dùng roles trả từ /auth/me.
+3. Người không đủ quyền chuyển tới /forbidden, không tự nâng quyền.
+4. Refresh/deep-link giữ đúng route.
+5. Sau login chọn route mặc định theo primaryRole.
+6. Tạo layout tối thiểu cho ba role, tái sử dụng dashboard hiện có khi phù hợp.
+7. Ẩn menu theo role chỉ để UX; API backend vẫn phải có require_roles.
+8. Không lấy role từ query, URL hoặc localStorage làm nguồn thật.
+Thêm test route guard và redirect.
+Tiêu chí nghiệm thu
+☐ 
+Có URL thật cho ba role.
+☐ 
+Refresh không mất session.
+☐ 
+Role guard đúng.
+☐ 
+Có trang forbidden.
+☐ 
+Không tin role client.
+P13 — Yêu cầu và phê duyệt vai trò Trưởng họ
+Mục tiêu: 
+Không cho người dùng tự đăng ký quyền cao.
+Phạm vi file ưu tiên
+BE/app/routers/role_requests.py
+BE/app/services/role_service.py
+BE/app/main.py
+FE/src/pages/member/RoleRequestPage.tsx
+FE/src/pages/admin/RoleRequestsPage.tsx
+FE/src/services/role.service.ts
+PROMPT COPY-PASTE P13
+Bạn đang làm việc trong repository GitHub Thu-Thao21/MULTI-FAMILY-GENEALOGY, nhánh dev.
+Stack hiện tại:
+- Frontend: React 18 + TypeScript + Vite + Axios.
+- Backend: FastAPI + SQLAlchemy AsyncSession + PostgreSQL.
+- Các file auth hiện tại nằm trong FE/src/components/auth, FE/src/context/AuthContext.tsx, FE/src/services/auth.service.ts và BE/app/routers/auth.py.
+Mục tiêu tổng thể:
+Hoàn thiện đăng ký, đăng nhập và quên mật khẩu bằng email thật, số điện thoại OTP, Google và Facebook; sau đăng nhập chuyển đúng sang trang Admin, Trưởng họ hoặc Member.
+Quy tắc không được vi phạm:
+1. Không lưu mật khẩu ở localStorage/sessionStorage.
+2. Không dùng mật khẩu tổng hoặc bypass xác thực.
+3. Không tạo token bằng chuỗi tự ghép.
+4. Role phải lấy từ PostgreSQL, không tin role do frontend gửi.
+5. Đăng ký công khai mặc định là member; family_head cần phê duyệt; admin không đăng ký công khai.
+6. Backend phải verify Firebase ID token trước khi xử lý dữ liệu bảo vệ.
+7. Không sửa các module cây gia phả/mạng lưới/hồ sơ nếu không cần cho auth.
+8. Không commit, push hoặc merge.
+Khi hoàn thành nhiệm vụ, hãy trả về:
+- Danh sách file đã sửa/tạo.
+- Tóm tắt quyết định kỹ thuật.
+- Lệnh cài dependency và lệnh chạy.
+- Test đã thực hiện và kết quả.
+- Rủi ro hoặc việc còn lại.
+- Không tuyên bố hoàn tất nếu chưa chạy test phù hợp.
+NHIỆM VỤ HIỆN TẠI:
+Hãy triển khai workflow yêu cầu trở thành Trưởng họ.
+Backend:
+1. POST /api/auth/role-requests: account active/verified gửi requested_role=family_head, family_id, reason.
+2. Không cho tạo request admin.
+3. Chặn request trùng pending.
+4. GET /api/admin/role-requests chỉ admin.
+5. PATCH /api/admin/role-requests/{id}: approved/rejected, ghi reviewer và thời gian.
+6. Khi approved, thêm account_roles family_head; thao tác trong transaction.
+7. Ghi audit log.
+Frontend:
+1. Member có trang gửi yêu cầu.
+2. Admin có danh sách, chi tiết, duyệt/từ chối.
+3. Sau khi duyệt, user refreshAccount để nhận role mới.
+4. Có trạng thái pending/approved/rejected.
+Bảo mật:
+- require_roles('admin') cho API duyệt.
+- Không để frontend tự ghi role.
+- Kiểm tra family_id tồn tại.
+Tiêu chí nghiệm thu
+☐ 
+Member không tự nâng role.
+☐ 
+Chỉ admin duyệt.
+☐ 
+Có transaction và audit.
+☐ 
+Role mới phản ánh sau refresh.
+☐ 
+Request trùng bị chặn.
+P14 — Liên kết nhiều phương thức vào cùng một tài khoản
+Mục tiêu: 
+Tránh tạo trùng account khi cùng người dùng email, Google, Facebook hoặc phone.
+Phạm vi file ưu tiên
+FE/src/services/auth.service.ts
+FE/src/pages/account/SecurityPage.tsx
+BE/app/services/auth_service.py
+BE/app/models/postgres.py nếu cần provider metadata
+PROMPT COPY-PASTE P14
+Bạn đang làm việc trong repository GitHub Thu-Thao21/MULTI-FAMILY-GENEALOGY, nhánh dev.
+Stack hiện tại:
+- Frontend: React 18 + TypeScript + Vite + Axios.
+- Backend: FastAPI + SQLAlchemy AsyncSession + PostgreSQL.
+- Các file auth hiện tại nằm trong FE/src/components/auth, FE/src/context/AuthContext.tsx, FE/src/services/auth.service.ts và BE/app/routers/auth.py.
+Mục tiêu tổng thể:
+Hoàn thiện đăng ký, đăng nhập và quên mật khẩu bằng email thật, số điện thoại OTP, Google và Facebook; sau đăng nhập chuyển đúng sang trang Admin, Trưởng họ hoặc Member.
+Quy tắc không được vi phạm:
+1. Không lưu mật khẩu ở localStorage/sessionStorage.
+2. Không dùng mật khẩu tổng hoặc bypass xác thực.
+3. Không tạo token bằng chuỗi tự ghép.
+4. Role phải lấy từ PostgreSQL, không tin role do frontend gửi.
+5. Đăng ký công khai mặc định là member; family_head cần phê duyệt; admin không đăng ký công khai.
+6. Backend phải verify Firebase ID token trước khi xử lý dữ liệu bảo vệ.
+7. Không sửa các module cây gia phả/mạng lưới/hồ sơ nếu không cần cho auth.
+8. Không commit, push hoặc merge.
+Khi hoàn thành nhiệm vụ, hãy trả về:
+- Danh sách file đã sửa/tạo.
+- Tóm tắt quyết định kỹ thuật.
+- Lệnh cài dependency và lệnh chạy.
+- Test đã thực hiện và kết quả.
+- Rủi ro hoặc việc còn lại.
+- Không tuyên bố hoàn tất nếu chưa chạy test phù hợp.
+NHIỆM VỤ HIỆN TẠI:
+Hãy triển khai account linking giữa email/password, Google, Facebook và phone.
+Yêu cầu:
+1. Dùng Firebase linkWithCredential/linkWithPopup/linkWithPhoneNumber phù hợp.
+2. Chỉ cho liên kết khi người dùng đã đăng nhập và được re-authenticate nếu thao tác nhạy cảm.
+3. Hiển thị danh sách provider đã liên kết.
+4. Không tự gộp hai account PostgreSQL chỉ vì email giống nhau nếu chưa chứng minh quyền sở hữu.
+5. Xử lý auth/account-exists-with-different-credential bằng flow đăng nhập provider cũ rồi link provider mới.
+6. Ngăn unlink provider cuối cùng nếu làm user không còn cách đăng nhập.
+7. Backend vẫn dùng một firebase_uid cho account; nếu có migration/merge đặc biệt phải có audit và transaction.
+8. Có trang Security/Connected Accounts.
+Viết test cho liên kết thành công, credential trùng và unlink provider cuối cùng.
+Tiêu chí nghiệm thu
+☐ 
+Một user có thể có nhiều provider.
+☐ 
+Không tự merge mù quáng.
+☐ 
+Có re-authentication.
+☐ 
+Không unlink phương thức cuối.
+☐ 
+Có UI quản lý provider.
+P15 — Gia cố bảo mật production
+Mục tiêu: 
+Đưa module auth từ demo tới mức có thể triển khai thật.
+Phạm vi file ưu tiên
+BE/app/main.py
+BE/app/core/config.py
+BE/app/dependencies/auth.py
+BE/app/routers/auth.py
+docker-compose.yml
+FE/src/api/axios.ts
+.env.example files
+PROMPT COPY-PASTE P15
+Bạn đang làm việc trong repository GitHub Thu-Thao21/MULTI-FAMILY-GENEALOGY, nhánh dev.
+Stack hiện tại:
+- Frontend: React 18 + TypeScript + Vite + Axios.
+- Backend: FastAPI + SQLAlchemy AsyncSession + PostgreSQL.
+- Các file auth hiện tại nằm trong FE/src/components/auth, FE/src/context/AuthContext.tsx, FE/src/services/auth.service.ts và BE/app/routers/auth.py.
+Mục tiêu tổng thể:
+Hoàn thiện đăng ký, đăng nhập và quên mật khẩu bằng email thật, số điện thoại OTP, Google và Facebook; sau đăng nhập chuyển đúng sang trang Admin, Trưởng họ hoặc Member.
+Quy tắc không được vi phạm:
+1. Không lưu mật khẩu ở localStorage/sessionStorage.
+2. Không dùng mật khẩu tổng hoặc bypass xác thực.
+3. Không tạo token bằng chuỗi tự ghép.
+4. Role phải lấy từ PostgreSQL, không tin role do frontend gửi.
+5. Đăng ký công khai mặc định là member; family_head cần phê duyệt; admin không đăng ký công khai.
+6. Backend phải verify Firebase ID token trước khi xử lý dữ liệu bảo vệ.
+7. Không sửa các module cây gia phả/mạng lưới/hồ sơ nếu không cần cho auth.
+8. Không commit, push hoặc merge.
+Khi hoàn thành nhiệm vụ, hãy trả về:
+- Danh sách file đã sửa/tạo.
+- Tóm tắt quyết định kỹ thuật.
+- Lệnh cài dependency và lệnh chạy.
+- Test đã thực hiện và kết quả.
+- Rủi ro hoặc việc còn lại.
+- Không tuyên bố hoàn tất nếu chưa chạy test phù hợp.
+NHIỆM VỤ HIỆN TẠI:
+Hãy security hardening toàn bộ module auth.
+Checklist bắt buộc:
+1. CORS lấy danh sách origin từ env, không dùng * với credentials.
+2. Không log token, password, OTP, Firebase credential hay access token social.
+3. Rate limit các endpoint bootstrap/role request và các endpoint custom nhạy cảm.
+4. Security headers phù hợp qua reverse proxy/app.
+5. Chuẩn hóa 401/403/422 và không lộ thông tin tài khoản.
+6. Account status active/pending/suspended/disabled được enforce backend.
+7. Secrets chỉ qua env/secret mount; rotate mọi secret mẫu nhạy cảm.
+8. Firebase service-account JSON không nằm trong Git.
+9. Axios không lặp refresh vô hạn.
+10. Audit login failure/sensitive actions nhưng không ghi dữ liệu bí mật.
+11. Xem xét CSRF chỉ nếu dùng cookie; nếu dùng Bearer ID token thì giải thích threat model.
+12. Thêm dependency scan/lint cơ bản.
+Đầu ra gồm threat model ngắn và danh sách residual risks.
+Tiêu chí nghiệm thu
+☐ 
+CORS không mở toàn bộ production.
+☐ 
+Không log secret/token/OTP.
+☐ 
+Có rate limit phù hợp.
+☐ 
+Status account được enforce.
+☐ 
+Có threat model và residual risks.
+P16 — Test tự động cho toàn bộ Auth
+Mục tiêu: 
+Có bằng chứng luồng hoạt động và chống regression.
+Phạm vi file ưu tiên
+BE/tests/auth/**
+FE/src/**/*.test.tsx
+FE/src/**/*.test.ts
+CI config nếu có
+PROMPT COPY-PASTE P16
+Bạn đang làm việc trong repository GitHub Thu-Thao21/MULTI-FAMILY-GENEALOGY, nhánh dev.
+Stack hiện tại:
+- Frontend: React 18 + TypeScript + Vite + Axios.
+- Backend: FastAPI + SQLAlchemy AsyncSession + PostgreSQL.
+- Các file auth hiện tại nằm trong FE/src/components/auth, FE/src/context/AuthContext.tsx, FE/src/services/auth.service.ts và BE/app/routers/auth.py.
+Mục tiêu tổng thể:
+Hoàn thiện đăng ký, đăng nhập và quên mật khẩu bằng email thật, số điện thoại OTP, Google và Facebook; sau đăng nhập chuyển đúng sang trang Admin, Trưởng họ hoặc Member.
+Quy tắc không được vi phạm:
+1. Không lưu mật khẩu ở localStorage/sessionStorage.
+2. Không dùng mật khẩu tổng hoặc bypass xác thực.
+3. Không tạo token bằng chuỗi tự ghép.
+4. Role phải lấy từ PostgreSQL, không tin role do frontend gửi.
+5. Đăng ký công khai mặc định là member; family_head cần phê duyệt; admin không đăng ký công khai.
+6. Backend phải verify Firebase ID token trước khi xử lý dữ liệu bảo vệ.
+7. Không sửa các module cây gia phả/mạng lưới/hồ sơ nếu không cần cho auth.
+8. Không commit, push hoặc merge.
+Khi hoàn thành nhiệm vụ, hãy trả về:
+- Danh sách file đã sửa/tạo.
+- Tóm tắt quyết định kỹ thuật.
+- Lệnh cài dependency và lệnh chạy.
+- Test đã thực hiện và kết quả.
+- Rủi ro hoặc việc còn lại.
+- Không tuyên bố hoàn tất nếu chưa chạy test phù hợp.
+NHIỆM VỤ HIỆN TẠI:
+Hãy xây bộ test cho module auth mới.
+Backend test tối thiểu:
+- verify token hợp lệ/không hợp lệ/hết hạn.
+- bootstrap account mới và account cũ.
+- member mặc định.
+- suspended account bị chặn.
+- /auth/me.
+- require_roles.
+- role request và admin approval.
+- không thể tự yêu cầu admin.
+Frontend test tối thiểu:
+- đăng ký email validation.
+- login email và redirect role.
+- Google/Facebook success/error mock.
+- phone OTP states.
+- forgot password.
+- AuthContext loading/logout/token refresh.
+- ProtectedRoute/RoleGuard.
+E2E smoke flow:
+1. Member email đăng ký → verify → login → /member.
+2. Admin login → /admin.
+3. Member yêu cầu family_head → admin duyệt → user refresh → /family-head.
+Không gọi SMS/email/social thật trong unit test; dùng Firebase emulator hoặc mocks. Cung cấp lệnh chạy và coverage summary.
+Tiêu chí nghiệm thu
+☐ 
+Backend và frontend test chạy được.
+☐ 
+Có E2E smoke flow hoặc kế hoạch emulator rõ.
+☐ 
+Không gửi SMS/email thật trong test.
+☐ 
+Có coverage summary.
+☐ 
+Các lỗi bảo mật chính có regression test.
+P17 — Docker, môi trường phát triển và tài liệu cấu hình
+Mục tiêu: 
+Người khác clone repo có thể cấu hình auth đúng mà không nhận secret.
+Phạm vi file ưu tiên
+docker-compose.yml
+BE/Dockerfile
+FE/Dockerfile
+BE/.env.example
+FE/.env.example
+README.md
+docs/auth-setup.md
+PROMPT COPY-PASTE P17
+Bạn đang làm việc trong repository GitHub Thu-Thao21/MULTI-FAMILY-GENEALOGY, nhánh dev.
+Stack hiện tại:
+- Frontend: React 18 + TypeScript + Vite + Axios.
+- Backend: FastAPI + SQLAlchemy AsyncSession + PostgreSQL.
+- Các file auth hiện tại nằm trong FE/src/components/auth, FE/src/context/AuthContext.tsx, FE/src/services/auth.service.ts và BE/app/routers/auth.py.
+Mục tiêu tổng thể:
+Hoàn thiện đăng ký, đăng nhập và quên mật khẩu bằng email thật, số điện thoại OTP, Google và Facebook; sau đăng nhập chuyển đúng sang trang Admin, Trưởng họ hoặc Member.
+Quy tắc không được vi phạm:
+1. Không lưu mật khẩu ở localStorage/sessionStorage.
+2. Không dùng mật khẩu tổng hoặc bypass xác thực.
+3. Không tạo token bằng chuỗi tự ghép.
+4. Role phải lấy từ PostgreSQL, không tin role do frontend gửi.
+5. Đăng ký công khai mặc định là member; family_head cần phê duyệt; admin không đăng ký công khai.
+6. Backend phải verify Firebase ID token trước khi xử lý dữ liệu bảo vệ.
+7. Không sửa các module cây gia phả/mạng lưới/hồ sơ nếu không cần cho auth.
+8. Không commit, push hoặc merge.
+Khi hoàn thành nhiệm vụ, hãy trả về:
+- Danh sách file đã sửa/tạo.
+- Tóm tắt quyết định kỹ thuật.
+- Lệnh cài dependency và lệnh chạy.
+- Test đã thực hiện và kết quả.
+- Rủi ro hoặc việc còn lại.
+- Không tuyên bố hoàn tất nếu chưa chạy test phù hợp.
+NHIỆM VỤ HIỆN TẠI:
+Hãy hoàn thiện cấu hình chạy local/staging/production cho auth.
+Yêu cầu:
+1. Cập nhật .env.example FE/BE chỉ chứa tên biến và placeholder.
+2. Tài liệu tạo Firebase project, bật Email/Password, Google, Facebook, Phone.
+3. Tài liệu Meta App và Valid OAuth Redirect URI.
+4. Tài liệu Authorized Domains, HTTPS và phone auth.
+5. Backend credential dùng GOOGLE_APPLICATION_CREDENTIALS hoặc secret mount.
+6. Docker Compose không chứa password/secret production cứng.
+7. PostgreSQL có healthcheck; backend chờ DB ready.
+8. Ghi rõ lệnh migration, start BE, start FE và test.
+9. Có bảng cấu hình cho local/staging/production.
+10. Không đưa service account JSON vào image hoặc repository.
+Kiểm tra docker compose config và build nếu môi trường cho phép.
+Tiêu chí nghiệm thu
+☐ 
+Có auth-setup.md đầy đủ.
+☐ 
+.env.example không chứa secret thật.
+☐ 
+Docker không hard-code secret production.
+☐ 
+Có DB healthcheck.
+☐ 
+Có lệnh chạy/migration/test rõ.
+P18 — Review tích hợp cuối và checklist release
+Mục tiêu: 
+Xác nhận module mở đầu hoàn thiện trước khi chuyển sang module khác.
+Phạm vi file ưu tiên
+Toàn bộ file auth đã thay đổi; không mở rộng sang module ngoài auth
+PROMPT COPY-PASTE P18
+Bạn đang làm việc trong repository GitHub Thu-Thao21/MULTI-FAMILY-GENEALOGY, nhánh dev.
+Stack hiện tại:
+- Frontend: React 18 + TypeScript + Vite + Axios.
+- Backend: FastAPI + SQLAlchemy AsyncSession + PostgreSQL.
+- Các file auth hiện tại nằm trong FE/src/components/auth, FE/src/context/AuthContext.tsx, FE/src/services/auth.service.ts và BE/app/routers/auth.py.
+Mục tiêu tổng thể:
+Hoàn thiện đăng ký, đăng nhập và quên mật khẩu bằng email thật, số điện thoại OTP, Google và Facebook; sau đăng nhập chuyển đúng sang trang Admin, Trưởng họ hoặc Member.
+Quy tắc không được vi phạm:
+1. Không lưu mật khẩu ở localStorage/sessionStorage.
+2. Không dùng mật khẩu tổng hoặc bypass xác thực.
+3. Không tạo token bằng chuỗi tự ghép.
+4. Role phải lấy từ PostgreSQL, không tin role do frontend gửi.
+5. Đăng ký công khai mặc định là member; family_head cần phê duyệt; admin không đăng ký công khai.
+6. Backend phải verify Firebase ID token trước khi xử lý dữ liệu bảo vệ.
+7. Không sửa các module cây gia phả/mạng lưới/hồ sơ nếu không cần cho auth.
+8. Không commit, push hoặc merge.
+Khi hoàn thành nhiệm vụ, hãy trả về:
+- Danh sách file đã sửa/tạo.
+- Tóm tắt quyết định kỹ thuật.
+- Lệnh cài dependency và lệnh chạy.
+- Test đã thực hiện và kết quả.
+- Rủi ro hoặc việc còn lại.
+- Không tuyên bố hoàn tất nếu chưa chạy test phù hợp.
+NHIỆM VỤ HIỆN TẠI:
+Hãy thực hiện review tích hợp cuối cho phần đăng ký/đăng nhập/quên mật khẩu trên nhánh hiện tại.
+Kiểm tra bắt buộc:
+1. Build frontend.
+2. Import/start backend và chạy migration.
+3. Chạy toàn bộ auth tests.
+4. Tìm kiếm toàn repo các dấu hiệu nguy hiểm: password trong localStorage, token_<role>, mật khẩu bypass, OTP mẫu, secret hard-code, role lấy từ frontend.
+5. Kiểm tra redirect Admin/Family Head/Member.
+6. Kiểm tra email verify, Google, Facebook, phone OTP và forgot password bằng emulator/test account hợp lệ.
+7. Kiểm tra account linking và role approval.
+8. Kiểm tra CORS, error codes, logout, refresh/deep-link.
+9. Liệt kê file ngoài phạm vi auth bị thay đổi và giải thích lý do.
+10. Không tự sửa thêm tính năng ngoài phạm vi; chỉ sửa blocker auth rõ ràng.
+Đầu ra:
+- PASS/FAIL từng mục.
+- Lỗi còn lại theo severity.
+- Hướng dẫn manual smoke test.
+- Kết luận có đủ điều kiện demo, staging hay production hay chưa.
+Tiêu chí nghiệm thu
+☐ 
+Có kết quả PASS/FAIL cụ thể.
+☐ 
+Build/test/migration được xác minh.
+☐ 
+Không còn pattern bảo mật cũ.
+☐ 
+Có manual smoke test.
+☐ 
+Kết luận release trung thực.
+6. Checklist theo dõi thực hiện
+Prompt
+Trạng thái
+Kết quả test
+Commit/PR
+Ghi chú
+P0
+☐ Chưa làm
+Audit riêng module Auth và lập baseline
+P1
+☐ Chưa làm
+Dọn lỗ hổng nghiêm trọng trong auth hiện tại
+P2
+☐ Chưa làm
+Tạo cấu hình Firebase cho Frontend và Backend
+P3
+☐ Chưa làm
+Chuẩn hóa mô hình tài khoản và role trong PostgreSQL
+P4
+☐ Chưa làm
+Backend xác minh token, bootstrap account và /auth/me
+P5
+☐ Chưa làm
+Viết lại AuthContext và session frontend theo Firebase
+P6
+☐ Chưa làm
+Đăng ký bằng email/password và xác minh email
+P7
+☐ Chưa làm
+Đăng nhập email/password và điều hướng theo role
+P8
+☐ Chưa làm
+Đăng nhập Google thật
+P9
+☐ Chưa làm
+Đăng nhập Facebook thật
+P10
+☐ Chưa làm
+Đăng ký/đăng nhập bằng SĐT OTP thật
+P11
+☐ Chưa làm
+Quên mật khẩu qua email và xử lý tài khoản social/phone
+P12
+☐ Chưa làm
+Hoàn thiện route và layout Admin / Trưởng họ / Member
+P13
+☐ Chưa làm
+Yêu cầu và phê duyệt vai trò Trưởng họ
+P14
+☐ Chưa làm
+Liên kết nhiều phương thức vào cùng một tài khoản
+P15
+☐ Chưa làm
+Gia cố bảo mật production
+P16
+☐ Chưa làm
+Test tự động cho toàn bộ Auth
+P17
+☐ Chưa làm
+Docker, môi trường phát triển và tài liệu cấu hình
+P18
+☐ Chưa làm
+Review tích hợp cuối và checklist release
+7. Prompt tổng hợp dùng khi cần giao toàn bộ dự án cho một AI agent
+LƯU Ý: Prompt tổng hợp dưới đây chỉ nên dùng khi agent có khả năng làm việc theo checkpoint. Vẫn nên yêu cầu agent dừng sau từng giai đoạn để bạn kiểm tra.
+PROMPT TỔNG HỢP — dùng với agent có checkpoint
+Bạn đang làm việc trong repository GitHub Thu-Thao21/MULTI-FAMILY-GENEALOGY, nhánh dev.
+Stack hiện tại:
+- Frontend: React 18 + TypeScript + Vite + Axios.
+- Backend: FastAPI + SQLAlchemy AsyncSession + PostgreSQL.
+- Các file auth hiện tại nằm trong FE/src/components/auth, FE/src/context/AuthContext.tsx, FE/src/services/auth.service.ts và BE/app/routers/auth.py.
+Mục tiêu tổng thể:
+Hoàn thiện đăng ký, đăng nhập và quên mật khẩu bằng email thật, số điện thoại OTP, Google và Facebook; sau đăng nhập chuyển đúng sang trang Admin, Trưởng họ hoặc Member.
+Quy tắc không được vi phạm:
+1. Không lưu mật khẩu ở localStorage/sessionStorage.
+2. Không dùng mật khẩu tổng hoặc bypass xác thực.
+3. Không tạo token bằng chuỗi tự ghép.
+4. Role phải lấy từ PostgreSQL, không tin role do frontend gửi.
+5. Đăng ký công khai mặc định là member; family_head cần phê duyệt; admin không đăng ký công khai.
+6. Backend phải verify Firebase ID token trước khi xử lý dữ liệu bảo vệ.
+7. Không sửa các module cây gia phả/mạng lưới/hồ sơ nếu không cần cho auth.
+8. Không commit, push hoặc merge.
+Khi hoàn thành nhiệm vụ, hãy trả về:
+- Danh sách file đã sửa/tạo.
+- Tóm tắt quyết định kỹ thuật.
+- Lệnh cài dependency và lệnh chạy.
+- Test đã thực hiện và kết quả.
+- Rủi ro hoặc việc còn lại.
+- Không tuyên bố hoàn tất nếu chưa chạy test phù hợp.
+Hãy triển khai toàn bộ module auth theo 4 giai đoạn và dừng xin xác nhận sau mỗi giai đoạn:
+Giai đoạn A — Foundation:
+- Audit auth.
+- Xóa bypass/password localStorage/token giả.
+- Tích hợp Firebase SDK FE/BE.
+- Tạo accounts/account_roles/role_requests bằng migration.
+- Tạo /auth/bootstrap, /auth/me, get_current_account và require_roles.
+Giai đoạn B — Authentication methods:
+- Viết lại AuthContext/Axios session.
+- Email registration + verification.
+- Email login.
+- Google Login.
+- Facebook Login.
+- Phone OTP.
+- Forgot password.
+Giai đoạn C — Roles:
+- React Router routes thật.
+- /admin, /family-head, /member.
+- ProtectedRoute/RoleGuard.
+- Workflow yêu cầu và duyệt family_head.
+- Account linking.
+Giai đoạn D — Production readiness:
+- CORS/secrets/rate limiting/audit.
+- Tests backend/frontend/E2E.
+- Docker/env/docs.
+- Final integration review.
+Sau mỗi giai đoạn:
+1. Dừng lại.
+2. Liệt kê diff theo file.
+3. Chạy test/build/migration phù hợp.
+4. Nêu PASS/FAIL và blocker.
+5. Chờ xác nhận trước khi sang giai đoạn tiếp theo.
+Không commit/push/merge. Không chỉnh module ngoài auth trừ khi là dependency bắt buộc và phải giải thích trước.
+8. Definition of Done cho phần mở đầu website
+☐ 
+Người dùng đăng ký email/password, nhận email xác minh và chỉ vào hệ thống sau xác minh.
+☐ 
+Người dùng đăng nhập Google và Facebook bằng provider thật.
+☐ 
+Người dùng đăng nhập/đăng ký bằng SĐT OTP thật, có reCAPTCHA và chống spam cơ bản.
+☐ 
+Quên mật khẩu email hoạt động; social/phone được hướng dẫn đúng provider.
+☐ 
+Backend xác minh Firebase ID token cho mọi API bảo vệ.
+☐ 
+Role chỉ lấy từ PostgreSQL; người dùng không tự chọn hoặc tự nâng role.
+☐ 
+Đăng nhập chuyển đúng /admin, /family-head, /member và refresh không mất route/session.
+☐ 
+Member có thể yêu cầu làm Trưởng họ và chỉ Admin được duyệt.
+☐ 
+Không còn password trong localStorage, token giả, mật khẩu tổng, OTP mẫu hoặc secret hard-code.
+☐ 
+Migration, frontend build, backend tests và auth smoke tests đều PASS.
+☐ 
+Có tài liệu cấu hình Firebase/Meta/env và cách chạy local/staging.

@@ -1,0 +1,21 @@
+/* AccountTab Styles */
+.account-tab-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.account-role-text {
+  color: #2563eb;
+  font-weight: 800;
+}
+
+.account-status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: #dcfce7;
+  color: #15803d;
+  font-size: 12px;
+  font-weight: 700;
+}

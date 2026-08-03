@@ -1,0 +1,202 @@
+.family-tree-preview-card {
+  background-color: #ffffff;
+  border-radius: 32px;
+  border: 1px solid #e2e8f0;
+  padding: 32px;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.05);
+  margin-bottom: 28px;
+}
+
+.family-tree-preview-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 28px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.family-tree-preview-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.family-tree-preview-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.family-tree-preview-desc {
+  margin: 6px 0 0;
+  font-size: 14px;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+.family-tree-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #f8fafc;
+  padding: 6px;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+}
+
+.family-tree-filter-btn {
+  padding: 9px 16px;
+  border-radius: 12px;
+  border: none;
+  background-color: transparent;
+  color: #64748b;
+  font-weight: 600;
+  font-size: 13.5px;
+  cursor: pointer;
+}
+
+.family-tree-filter-btn.active {
+  background-color: #ffffff;
+  color: #2563eb;
+  font-weight: 800;
+}
+
+.family-tree-empty-box {
+  padding: 60px 20px;
+  text-align: center;
+  color: #94a3b8;
+}
+
+.family-tree-empty-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.family-tree-empty-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #475569;
+  margin-bottom: 6px;
+}
+
+.family-tree-empty-desc {
+  font-size: 13.5px;
+  color: #94a3b8;
+}
+
+.family-tree-gen-container {
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+  position: relative;
+}
+
+.family-tree-gen-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.family-tree-gen-badge {
+  padding: 6px 16px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.family-tree-gen-badge.gen1 {
+  background-color: #eff6ff;
+  color: #2563eb;
+}
+
+.family-tree-gen-badge.gen2 {
+  background-color: #f5f3ff;
+  color: #7c3aed;
+}
+
+.family-tree-gen-badge.gen3 {
+  background-color: #ecfdf5;
+  color: #059669;
+}
+
+.family-tree-gen-line {
+  height: 1px;
+  flex: 1;
+  background-color: #e2e8f0;
+}
+
+.family-tree-nodes-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 22px;
+}
+
+.family-tree-node-card {
+  width: 270px;
+  padding: 20px;
+  border-radius: 24px;
+  background-color: #ffffff;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.04);
+  cursor: pointer;
+}
+
+.family-tree-node-card.gen1 {
+  border: 1.5px solid #bfdbfe;
+}
+
+.family-tree-node-card.gen2 {
+  border: 1.5px solid #ddd6fe;
+}
+
+.family-tree-node-card.gen3 {
+  border: 1.5px solid #a7f3d0;
+}
+
+.family-tree-node-inner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.family-tree-node-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 18px;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 22px;
+}
+
+.family-tree-node-avatar.gen1 {
+  background-color: #2563eb;
+}
+
+.family-tree-node-avatar.gen2 {
+  background-color: #7c3aed;
+}
+
+.family-tree-node-avatar.gen3 {
+  background-color: #10b981;
+}
+
+.family-tree-node-name {
+  font-size: 16px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.family-tree-node-meta {
+  font-size: 12px;
+  color: #64748b;
+}
