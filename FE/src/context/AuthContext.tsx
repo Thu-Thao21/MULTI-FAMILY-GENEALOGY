@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { onAuthStateChanged, signOut, type User as FirebaseUser } from 'firebase/auth';
+import { onAuthStateChanged, signOut, sendEmailVerification, type User as FirebaseUser } from 'firebase/auth';
 import { auth } from '../config/firebase';
 import apiClient from '../api/axios';
 import { processAuthRedirectResult } from '../services/auth.service';
@@ -32,6 +32,8 @@ interface AuthContextType {
   loading: boolean;
   primaryRole: string;
   refreshAccount: () => Promise<AccountProfile | null>;
+  sendVerificationEmail: () => Promise<void>;
+  reloadUserStatus: () => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -58,6 +60,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setAccount(null);
         return null;
       }
+    }
+  };
+
+  const sendVerificationEmail = async (): Promise<void> => {
+    if (auth.currentUser) {
+      await sendEmailVerification(auth.currentUser);
+    } else {
+      throw new Error('Chưa đăng nhập tài khoản.');
+    }
+  };
+
+  const reloadUserStatus = async (): Promise<void> => {
+    if (auth.currentUser) {
+      await auth.currentUser.reload();
+      await fetchAccount();
     }
   };
 
@@ -109,6 +126,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         loading,
         primaryRole,
         refreshAccount: fetchAccount,
+        sendVerificationEmail,
+        reloadUserStatus,
         logout,
       }}
     >

@@ -1,70 +1,38 @@
 import React from 'react';
-import './Dashboard.css';
+import { useAuthContext } from '../../context/AuthContext';
 
-interface FamilyHeadDashboardProps {
-  userName: string;
-  onLogout: () => void;
-}
+export const FamilyHeadDashboard: React.FC = () => {
+  const { account, logout } = useAuthContext();
 
-export const FamilyHeadDashboard: React.FC<FamilyHeadDashboardProps> = ({ userName, onLogout }) => {
   return (
-    <div className="dashboard-container">
-      <header className="dashboard-header">
-        <div className="dashboard-title-area">
-          <span className="role-badge family-head">📜 TRƯỞNG HỌ (FAMILY HEAD)</span>
-          <h2>Quản Lý Gia Phả & Chi Tộc Dòng Họ</h2>
+    <div style={{ padding: '32px', fontFamily: 'sans-serif', maxWidth: '1000px', margin: '0 auto' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+        <div>
+          <span style={{ background: '#d97706', color: '#fff', padding: '4px 12px', borderRadius: '12px', fontSize: '12px', fontWeight: 'bold' }}>
+            TRƯỞNG HỌ / ĐẠI DIỆN GIA TỘC (FAMILY HEAD)
+          </span>
+          <h1 style={{ marginTop: '8px', color: '#0f172a' }}>Khu Vực Quản Lý Gia Tộc</h1>
         </div>
-        <div className="user-profile-widget">
-          <span>Xin chào Trưởng Họ, <strong>{userName}</strong></span>
-          <button onClick={onLogout} className="logout-button">Đăng xuất</button>
-        </div>
-      </header>
+        <button
+          onClick={logout}
+          style={{ background: '#ef4444', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}
+        >
+          Đăng xuất
+        </button>
+      </div>
 
-      <main className="dashboard-main">
-        <section className="stats-grid">
-          <div className="stat-card">
-            <h3>Chi Tộc Quản Lý</h3>
-            <p className="stat-number">01</p>
-          </div>
-          <div className="stat-card">
-            <h3>Thành Viên Dòng Họ</h3>
-            <p className="stat-number">128</p>
-          </div>
-          <div className="stat-card">
-            <h3>Quyền Hạn</h3>
-            <p className="stat-role">Quản trị Cây Gia Phả</p>
-          </div>
-        </section>
-
-        <section className="dashboard-section">
-          <div className="section-header">
-            <h3>Bảng Điều Khiển Trưởng Họ</h3>
-          </div>
-
-          <div className="action-cards-grid">
-            <div className="action-card">
-              <div className="card-icon">🌳</div>
-              <h4>Cây Gia Phả Dòng Họ</h4>
-              <p>Quản lý sơ đồ phả hệ, thêm bớt thế hệ và thông tin chi tộc.</p>
-              <button className="card-action-btn">Vào Quản Lý Cây</button>
-            </div>
-
-            <div className="action-card">
-              <div className="card-icon">👥</div>
-              <h4>Danh Sách Thành Viên</h4>
-              <p>Phê duyệt hồ sơ thành viên mới tham gia vào cây gia phả dòng họ.</p>
-              <button className="card-action-btn">Duyệt Thành Viên</button>
-            </div>
-
-            <div className="action-card">
-              <div className="card-icon">📖</div>
-              <h4>Sử Tộc & Ngày Giỗ</h4>
-              <p>Cập nhật văn khấn, sử tộc dòng họ và lịch giỗ tổ tiên hàng năm.</p>
-              <button className="card-action-btn">Cập Nhật Sử Tộc</button>
-            </div>
-          </div>
-        </section>
-      </main>
+      <div style={{ background: '#fffbe6', border: '1px solid #fef08a', borderRadius: '16px', padding: '24px' }}>
+        <h2>Xin chào Trưởng họ, {account?.display_name || account?.email}!</h2>
+        <p>Email: <strong>{account?.email || 'N/A'}</strong></p>
+        <p>Vai trò chính: <strong style={{ color: '#d97706' }}>{account?.primary_role}</strong></p>
+        <hr style={{ border: 'none', borderTop: '1px solid #fef08a', margin: '20px 0' }} />
+        <h3>Chức năng Trưởng Họ:</h3>
+        <ul>
+          <li>Quản lý Cây Gia phả của Họ tộc</li>
+          <li>Thêm/Sửa/Cập nhật thông tin thành viên dòng họ</li>
+          <li>Tạo các mối quan hệ liên họ và phả hệ</li>
+        </ul>
+      </div>
     </div>
   );
 };

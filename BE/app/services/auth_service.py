@@ -10,21 +10,49 @@ from app.schemas.auth_schemas import AccountOut, RoleOut
 logger = logging.getLogger("mfg.auth_service")
 
 
-from sqlalchemy import or_
-
 async def get_account_by_firebase_uid(db: AsyncSession, firebase_uid: str) -> Optional[Account]:
     stmt = select(Account).options(selectinload(Account.roles)).where(Account.firebase_uid == firebase_uid)
     result = await db.execute(stmt)
     return result.scalar_one_or_none()
 
 
-async def get_account_by_uid_or_email(db: AsyncSession, firebase_uid: str, email: Optional[str] = None) -> Optional[Account]:
-    conditions = [Account.firebase_uid == firebase_uid]
-    if email:
-        conditions.append(Account.email == email)
-    stmt = select(Account).options(selectinload(Account.roles)).where(or_(*conditions))
-    result = await db.execute(stmt)
-    return result.scalars().first()
+async def link_verified_firebase_identity_to_legacy_account(
+    db: AsyncSession,
+    firebase_uid: str,
+    email: Optional[str],
+    email_verified: bool,
+) -> Optional[Account]:
+    """
+    Safely links a legacy account to a Firebase UID ONLY if:
+    1. The token's email is verified (email_verified == True)
+    2. The legacy account has matching email
+    3. The legacy account DOES NOT already have a firebase_uid linked.
+    """
+    if not email or not email_verified:
+        return None
+
+    normalized_email = email.strip().lower()
+    stmt = (
+        select(Account)
+        .options(selectinload(Account.roles))
+        .where(
+            Account.email == normalized_email,
+            Account.firebase_uid.is_(None),
+        )
+    )
+    res = await db.execute(stmt)
+    legacy_account = res.scalars().first()
+
+    if legacy_account:
+        legacy_account.firebase_uid = firebase_uid
+        legacy_account.email_verified = True
+        logger.info(
+            f"[AUDIT LOG] Successfully linked verified Firebase identity (UID: {firebase_uid}) "
+            f"to legacy account ID: {legacy_account.id} (Email: {normalized_email})"
+        )
+        return legacy_account
+
+    return None
 
 
 async def bootstrap_account(
@@ -32,8 +60,9 @@ async def bootstrap_account(
     decoded_token: Dict[str, Any],
 ) -> Account:
     """
-    Finds an existing account by firebase_uid or email, or creates a new Account with default 'member' role.
-    If the account email matches default super-admin, grants 'admin' role automatically.
+    Finds an existing account strictly by firebase_uid, or attempts a safe legacy link for verified emails.
+    Otherwise creates a new Account with default 'member' role.
+    REMOVED all hard-coded admin email logic. All new users receive 'member' role.
     """
     firebase_uid = decoded_token.get("uid")
     email = decoded_token.get("email")
@@ -42,38 +71,42 @@ async def bootstrap_account(
     display_name = decoded_token.get("name") or decoded_token.get("email") or phone_e164 or "Thành viên gia phả"
 
     if not firebase_uid:
-        raise ValueError("Firebase token không chứa UID.")
+        raise ValueError("Firebase token không chứa UID hợp lệ.")
 
-    account = await get_account_by_uid_or_email(db, firebase_uid, email)
+    # 1. Primary lookup by exact firebase_uid
+    account = await get_account_by_firebase_uid(db, firebase_uid)
+
+    # 2. If not found by firebase_uid, attempt safe migration link for legacy accounts with verified email
+    if not account and email and email_verified:
+        account = await link_verified_firebase_identity_to_legacy_account(db, firebase_uid, email, email_verified)
 
     if account:
-        # Link firebase_uid if missing or updated
-        if account.firebase_uid != firebase_uid:
-            account.firebase_uid = firebase_uid
-        if email and account.email != email:
+        # Sync verified claims and display name if updated
+        if email and email_verified and account.email != email:
             account.email = email
         if email_verified != account.email_verified:
             account.email_verified = email_verified
-        if phone_e164 and account.phone_e164 != phone_e164:
+        if phone_e164:
             account.phone_e164 = phone_e164
             account.phone_verified = True
         if display_name and not account.display_name:
             account.display_name = display_name
-        
+
+        # Ensure account has at least 'member' role if roles list is empty
         if not account.roles:
-            default_role = "admin" if (email and email.lower() == "thuthaor120608@gmail.com") else "member"
             role_obj = AccountRole(
                 account_id=account.id,
-                role=default_role,
+                role="member",
                 status="active",
             )
             db.add(role_obj)
+            logger.info(f"[AUDIT LOG] Assigned default 'member' role to account ID: {account.id}")
 
         await db.commit()
         await db.refresh(account)
         return account
 
-    # Create new account
+    # 3. Create new Account with strictly default 'member' role
     account = Account(
         firebase_uid=firebase_uid,
         email=email,
@@ -86,15 +119,14 @@ async def bootstrap_account(
     db.add(account)
     await db.flush()
 
-    # Determine default roles
-    default_role = "admin" if (email and email.lower() == "thuthaor120608@gmail.com") else "member"
-
+    # Assign default 'member' role ONLY
     role_obj = AccountRole(
         account_id=account.id,
-        role=default_role,
+        role="member",
         status="active",
     )
     db.add(role_obj)
+    logger.info(f"[AUDIT LOG] Created new Account ID: {account.id} with default 'member' role for UID: {firebase_uid}")
 
     await db.commit()
     return await get_account_by_firebase_uid(db, firebase_uid)
@@ -120,7 +152,6 @@ def format_account_me(account: Account) -> AccountOut:
             status=r.status,
             created_at=r.created_at,
         )
-        for r in account.roles
     ]
 
     return AccountOut(

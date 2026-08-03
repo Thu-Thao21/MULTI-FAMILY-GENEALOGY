@@ -35,7 +35,7 @@
 
 .register-form-header {
   text-align: center;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
   position: relative;
   z-index: 1;
 }
@@ -44,7 +44,7 @@
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 18px;
+  margin-bottom: 14px;
 }
 
 .register-form-badge-dot {
@@ -71,9 +71,40 @@
 }
 
 .register-form-subtitle {
-  margin: 14px 0 0;
+  margin: 10px 0 0;
   color: #475569;
-  line-height: 1.7;
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+
+.register-method-tabs {
+  display: flex;
+  background-color: #f1f5f9;
+  border-radius: 16px;
+  padding: 4px;
+  margin-bottom: 20px;
+  position: relative;
+  z-index: 1;
+}
+
+.register-tab-btn {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.register-tab-btn.active {
+  background-color: #ffffff;
+  color: #2563eb;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .register-form-body {
@@ -92,6 +123,7 @@
   margin-bottom: 6px;
   font-weight: 600;
   color: #334155;
+  font-size: 13px;
 }
 
 .register-form-input {
@@ -142,15 +174,16 @@
 .register-form-footer-note {
   margin: 10px 0 0;
   color: #64748b;
-  font-size: 13px;
-  line-height: 1.6;
+  font-size: 12.5px;
+  line-height: 1.5;
+  text-align: center;
 }
 
 .register-form-divider {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin: 20px 0;
+  margin: 16px 0;
 }
 
 .register-form-divider-line {
@@ -161,7 +194,7 @@
 
 .register-form-divider-text {
   color: #64748b;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
 }
 

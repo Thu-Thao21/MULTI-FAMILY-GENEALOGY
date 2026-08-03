@@ -1,5 +1,6 @@
 import asyncio
 import sys
+import logging
 
 if sys.platform.startswith("win"):
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
@@ -7,14 +8,20 @@ if sys.platform.startswith("win"):
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
+from app.core.firebase import get_firebase_app
 from app.db.postgres import init_db, close_db
 from app.routers import health, users, auth, members, networks, role_requests
 
+logger = logging.getLogger("mfg.main")
+
 app = FastAPI(title="Multi-family Genealogy API")
+
+origins = settings.cors_origins_list
+logger.info(f"Allowed CORS Origins: {origins}")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -22,9 +29,19 @@ app.add_middleware(
 
 @app.on_event("startup")
 async def startup_event():
-    # Initialize PostgreSQL DB and create tables / seed data if needed
+    # 1. Fail-fast check for Firebase Admin SDK initialization
+    try:
+        get_firebase_app()
+        print("[INFO] Firebase Admin SDK checked and ready at startup.")
+    except Exception as e:
+        print(f"[FATAL] Firebase Admin SDK startup failed: {e}")
+        # Re-raise to prevent starting backend in broken auth state
+        raise e
+
+    # 2. Initialize PostgreSQL DB and create tables / seed data if needed
     try:
         await init_db()
+        print("[INFO] PostgreSQL init_db completed.")
     except Exception as e:
         print(f"[WARN] Postgres init_db error: {e}")
 

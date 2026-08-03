@@ -1,188 +1,39 @@
-import React, { useEffect, useState } from 'react';
-import { getAdminRoleRequests, reviewRoleRequest, type RoleRequestItem } from '../../services/roleRequest.service';
-import './Dashboard.css';
+import React from 'react';
+import { useAuthContext } from '../../context/AuthContext';
 
-interface AdminDashboardProps {
-  userName: string;
-  onLogout: () => void;
-}
-
-export const AdminDashboard: React.FC<AdminDashboardProps> = ({ userName, onLogout }) => {
-  const [requests, setRequests] = useState<RoleRequestItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<string>('pending');
-  const [processingId, setProcessingId] = useState<string | null>(null);
-  const [actionNotes, setActionNotes] = useState<{ [key: string]: string }>({});
-  const [msg, setMsg] = useState('');
-
-  const fetchRequests = async () => {
-    setLoading(true);
-    try {
-      const data = await getAdminRoleRequests(filter || undefined);
-      setRequests(data);
-    } catch (err: any) {
-      console.error('Failed to load role requests:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchRequests();
-  }, [filter]);
-
-  const handleReview = async (id: string, newStatus: 'approved' | 'rejected') => {
-    setProcessingId(id);
-    setMsg('');
-    try {
-      const notes = actionNotes[id] || '';
-      await reviewRoleRequest(id, { status: newStatus, reviewer_notes: notes });
-      setMsg(`Đã ${newStatus === 'approved' ? 'phê duyệt' : 'từ chối'} yêu cầu thành công.`);
-      fetchRequests();
-    } catch (err: any) {
-      setMsg(`Lỗi: ${err.response?.data?.detail || err.message}`);
-    } finally {
-      setProcessingId(null);
-    }
-  };
+export const AdminDashboard: React.FC = () => {
+  const { account, logout } = useAuthContext();
 
   return (
-    <div className="dashboard-container">
-      <header className="dashboard-header">
-        <div className="dashboard-title-area">
-          <span className="role-badge admin">👑 QUẢN TRỊ VIÊN (ADMIN)</span>
-          <h2>Hệ Thống Phê Duyệt & Quản Lý Gia Phả</h2>
+    <div style={{ padding: '32px', fontFamily: 'sans-serif', maxWidth: '1000px', margin: '0 auto' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+        <div>
+          <span style={{ background: '#dc2626', color: '#fff', padding: '4px 12px', borderRadius: '12px', fontSize: '12px', fontWeight: 'bold' }}>
+            QUẢN TRỊ VIÊN HỆ THỐNG (ADMIN)
+          </span>
+          <h1 style={{ marginTop: '8px', color: '#0f172a' }}>Khu Vực Quản Trị Hệ Thống Gia Phả</h1>
         </div>
-        <div className="user-profile-widget">
-          <span>Xin chào, <strong>{userName}</strong></span>
-          <button onClick={onLogout} className="logout-button">Đăng xuất</button>
-        </div>
-      </header>
+        <button
+          onClick={logout}
+          style={{ background: '#ef4444', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}
+        >
+          Đăng xuất
+        </button>
+      </div>
 
-      <main className="dashboard-main">
-        {msg ? <div className="dashboard-alert">📢 {msg}</div> : null}
-
-        <section className="stats-grid">
-          <div className="stat-card">
-            <h3>Yêu cầu chờ duyệt</h3>
-            <p className="stat-number">{requests.filter(r => r.status === 'pending').length}</p>
-          </div>
-          <div className="stat-card">
-            <h3>Trạng thái lọc</h3>
-            <p className="stat-status">{filter.toUpperCase()}</p>
-          </div>
-          <div className="stat-card">
-            <h3>Quyền Hạn</h3>
-            <p className="stat-role">Toàn quyền Hệ thống</p>
-          </div>
-        </section>
-
-        <section className="dashboard-section">
-          <div className="section-header">
-            <h3>Danh Sách Yêu Cầu Nâng Vai Trò (Trưởng Họ)</h3>
-            <div className="filter-buttons">
-              <button
-                className={`filter-btn ${filter === 'pending' ? 'active' : ''}`}
-                onClick={() => setFilter('pending')}
-              >
-                Chờ duyệt
-              </button>
-              <button
-                className={`filter-btn ${filter === 'approved' ? 'active' : ''}`}
-                onClick={() => setFilter('approved')}
-              >
-                Đã duyệt
-              </button>
-              <button
-                className={`filter-btn ${filter === 'rejected' ? 'active' : ''}`}
-                onClick={() => setFilter('rejected')}
-              >
-                Đã từ chối
-              </button>
-              <button
-                className={`filter-btn ${filter === '' ? 'active' : ''}`}
-                onClick={() => setFilter('')}
-              >
-                Tất cả
-              </button>
-            </div>
-          </div>
-
-          {loading ? (
-            <p className="loading-text">Đang tải danh sách yêu cầu...</p>
-          ) : requests.length === 0 ? (
-            <p className="empty-text">Không có yêu cầu nào trong danh mục này.</p>
-          ) : (
-            <div className="table-responsive">
-              <table className="custom-table">
-                <thead>
-                  <tr>
-                    <th>Mã Yêu Cầu</th>
-                    <th>Account ID</th>
-                    <th>Vai Trò Yêu Cầu</th>
-                    <th>Mã Dòng Họ</th>
-                    <th>Lý Do</th>
-                    <th>Trạng Thái</th>
-                    <th>Ghi Chú Admin</th>
-                    <th>Thao Tác</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {requests.map((item) => (
-                    <tr key={item.id}>
-                      <td><code>{item.id.slice(0, 8)}...</code></td>
-                      <td><code>{item.account_id.slice(0, 8)}...</code></td>
-                      <td><span className="badge-role">{item.requested_role}</span></td>
-                      <td>{item.family_id || 'N/A'}</td>
-                      <td>{item.reason || 'Không có'}</td>
-                      <td>
-                        <span className={`status-pill ${item.status}`}>
-                          {item.status === 'pending' ? 'Chờ duyệt' : item.status === 'approved' ? 'Đã duyệt' : 'Từ chối'}
-                        </span>
-                      </td>
-                      <td>
-                        {item.status === 'pending' ? (
-                          <input
-                            type="text"
-                            className="notes-input"
-                            placeholder="Nhập ghi chú..."
-                            value={actionNotes[item.id] || ''}
-                            onChange={(e) => setActionNotes({ ...actionNotes, [item.id]: e.target.value })}
-                          />
-                        ) : (
-                          item.reviewer_notes || '—'
-                        )}
-                      </td>
-                      <td>
-                        {item.status === 'pending' ? (
-                          <div className="action-btn-group">
-                            <button
-                              disabled={processingId === item.id}
-                              onClick={() => handleReview(item.id, 'approved')}
-                              className="btn-approve"
-                            >
-                              Phê duyệt
-                            </button>
-                            <button
-                              disabled={processingId === item.id}
-                              onClick={() => handleReview(item.id, 'rejected')}
-                              className="btn-reject"
-                            >
-                              Từ chối
-                            </button>
-                          </div>
-                        ) : (
-                          <span className="completed-label">Đã xử lý</span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </section>
-      </main>
+      <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '24px' }}>
+        <h2>Xin chào, {account?.display_name || account?.email || 'Admin'}!</h2>
+        <p>Email: <strong>{account?.email || 'N/A'}</strong></p>
+        <p>Firebase UID: <code>{account?.firebase_uid}</code></p>
+        <p>Vai trò chính: <strong style={{ color: '#dc2626' }}>{account?.primary_role}</strong></p>
+        <hr style={{ border: 'none', borderTop: '1px solid #e2e8f0', margin: '20px 0' }} />
+        <h3>Chức năng Quản trị viên:</h3>
+        <ul>
+          <li>Phê duyệt Yêu cầu cấp quyền Trưởng họ (`RoleRequest`)</li>
+          <li>Quản lý Danh sách Gia tộc và Thành viên</li>
+          <li>Cấu hình Hệ thống và Phân quyền API</li>
+        </ul>
+      </div>
     </div>
   );
 };

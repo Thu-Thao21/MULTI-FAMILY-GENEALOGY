@@ -1,12 +1,12 @@
-# HƯỚNG DẪN CẤU HÌNH & CHẠY HỆ THỐNG FIREBASE AUTHENTICATION (FOR DEV TEAM)
+# 🔐 HƯỚNG DẪN THIẾT LẬP VÀ VẬN HÀNH XÁC THỰC FIREBASE (AUTH SETUP GUIDE)
 
-Tài liệu này hướng dẫn chi tiết cho các thành viên trong nhóm phát triển cách khởi chạy ứng dụng **MULTI-FAMILY GENEALOGY**, thiết lập biến môi trường Firebase Web Config, cấu hình Authorized Domains và Facebook Developer Console.
+Tài liệu này hướng dẫn chi tiết cho các thành viên trong nhóm cách thiết lập, cấu hình biến môi trường và vận hành hệ thống xác thực an toàn trong dự án **Multi-Family Genealogy**.
 
 ---
 
-## 1. QUY TRÌNH THIẾT LẬP DÀNH CHO THÀNH VIÊN NHÓM
+## 📌 1. QUY TRÌNH THIẾT LẬP BAN ĐẦU (CHO THÀNH VIÊN MỚI)
 
-### Bước 1: Clone Repository & Checkout Branch
+### Bước 1: Clone và Checkout đúng nhánh Feature
 ```bash
 git clone https://github.com/Thu-Thao21/MULTI-FAMILY-GENEALOGY.git
 cd MULTI-FAMILY-GENEALOGY
@@ -14,14 +14,14 @@ git checkout feature/da-hoan-thanh-phan-quyen-dang-nhap-dang-ky-quen-mat-khau-fb
 ```
 
 ### Bước 2: Cấu hình Môi trường Frontend (`FE/.env`)
-1. Tạo file `FE/.env` bằng cách copy từ file mẫu `FE/.env.example`:
+1. Tạo file `FE/.env` từ file mẫu `FE/.env.example`:
    ```bash
-   cp FE/.env.example FE/.env   # On macOS / Linux / Git Bash
-   copy FE\.env.example FE\.env # On Windows Command Prompt
+   cp FE/.env.example FE/.env   # MacOS / Linux / Git Bash
+   copy FE\.env.example FE\.env # Windows CMD
    ```
 2. Điền thông tin Firebase Web Config chung của dự án DEV vào `FE/.env`:
    ```env
-   VITE_API_BASE_URL=http://localhost:8000/api
+   VITE_API_BASE_URL=http://localhost:8001/api
 
    VITE_FIREBASE_API_KEY=<DEV_PROJECT_API_KEY>
    VITE_FIREBASE_AUTH_DOMAIN=<DEV_PROJECT_ID>.firebaseapp.com
@@ -30,94 +30,84 @@ git checkout feature/da-hoan-thanh-phan-quyen-dang-nhap-dang-ky-quen-mat-khau-fb
    VITE_FIREBASE_MESSAGING_SENDER_ID=<DEV_SENDER_ID>
    VITE_FIREBASE_APP_ID=<DEV_APP_ID>
    ```
-   > ⚠️ **Lưu ý:** Bộ biến môi trường trên là Web Configuration công khai dành cho client side. **Tuyệt đối KHÔNG commit file `FE/.env` lên Git.**
+   > ⚠️ **Lưu ý:** `FE/.env` là public configuration dùng cho client-side. **Tuyệt đối KHÔNG commit file `FE/.env` lên Git.**
 
 ### Bước 3: Cấu hình Backend (`BE/.env` & Credentials)
 1. Tạo file `BE/.env` từ `BE/.env.example`:
    ```bash
    cp BE/.env.example BE/.env
    ```
-2. Xin file `firebase-service-account.json` từ quản trị viên nhóm (hoặc tải từ Firebase Console -> Project Settings -> Service accounts) và lưu tại:
+2. Xin file **Service Account Key File** (`firebase-service-account.json`) từ Admin dự án và lưu tại đường dẫn:
    `BE/secrets/firebase-service-account.json`
-3. Cập nhật `BE/.env`:
+
+3. Cập nhật file `BE/.env`:
    ```env
+   APP_ENV=development
    DATABASE_URL=postgresql+psycopg://postgres:postgres@localhost:5433/multi_family_db
+
    FIREBASE_PROJECT_ID=<DEV_PROJECT_ID>
-   FIREBASE_CREDENTIALS_PATH=BE/secrets/firebase-service-account.json
+   FIREBASE_CREDENTIALS_PATH=secrets/firebase-service-account.json
+
+   CORS_ORIGINS=http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173
    ```
+   > ⚠️ **CẢNH BÁO BẢO MẬT:** File `firebase-service-account.json` là **Private Key cấp cao nhất của Backend**. Tuyệt đối **KHÔNG ĐƯỢC COMMIT LÊN GIT/GITHUB**. File này đã được chặn trong `.gitignore`.
 
 ---
 
-## 2. CẤU HÌNH THỜI GIAN THỰC TRÊN CONSOLE (NGOÀI CODE)
+## 🚀 2. HƯỚNG DẪN KHỞI CHẠY VÀ CHẠY TEST
 
-### A. Firebase Console Checklist
-1. **Bật Provider:** Truy cập Firebase Console -> **Authentication** -> **Sign-in method**:
-   - Bật **Email/Password**.
-   - Bật **Google** provider.
-   - Bật **Facebook** provider (Điền App ID và App Secret lấy từ Meta for Developers).
-2. **Authorized Domains:** Truy cập **Authentication** -> **Settings** -> **Authorized domains**:
-   - Thêm `localhost`.
-   - Thêm IP hoặc domain của môi trường DEV (VD: `127.0.0.1`).
+### 🔹 Cách 1: Chạy Local trực tiếp (Frontend & Backend)
+1. **Khởi chạy Backend (FastAPI):**
+   ```bash
+   cd BE
+   pip install -r requirements.txt
+   uvicorn app.main:app --reload --port 8001
+   ```
+   *Nếu thiếu `secrets/firebase-service-account.json`, Backend sẽ Fail-Fast và dừng ngay lập tức để bảo vệ hệ thống.*
 
-### B. Meta (Facebook) for Developers Checklist
-1. **OAuth Redirect URI:**
-   - Trong Meta App Dashboard -> **Facebook Login** -> **Settings**:
-   - Thêm OAuth Redirect URI: `https://<DEV_PROJECT_ID>.firebaseapp.com/__/auth/handler`
-2. **Phân quyền Tester (Khi App ở chế độ Development):**
-   - Truy cập **App Roles** -> **Roles** -> **Testers**.
-   - Thêm tài khoản Facebook của các thành viên nhóm làm Tester.
-   - Thành viên cần đăng nhập tài khoản Facebook cá nhân và chấp nhận lời mời tại [Facebook Developer Requests](https://developers.facebook.com/requests/).
+2. **Khởi chạy Frontend (Vite + React):**
+   ```bash
+   cd FE
+   npm install
+   npm run dev
+   ```
+   *Ứng dụng sẽ chạy tại `http://localhost:5173`.*
 
 ---
 
-## 3. HƯỚNG DẪN KHỞI CHẠY (LOCAL & DOCKER)
-
-### Cách A: Khởi chạy Local (Nhanh nhất cho Dev)
+### 🔹 Cách 2: Chạy bằng Docker Compose
 ```bash
-# 1. Chạy Frontend
-cd FE
-npm install
-npm run dev
-
-# 2. Chạy Backend (Terminal khác)
-cd BE
-python -m venv venv
-# On Windows: venv\Scripts\activate | On macOS/Linux: source venv/bin/activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8000
+docker-compose up --build
 ```
-
-### Cách B: Khởi chạy bằng Docker Compose
-Tạo file `.env` ở thư mục gốc chứa các biến `VITE_FIREBASE_*`, sau đó chạy:
-```bash
-docker compose config   # Kiểm tra cú pháp cấu hình
-docker compose build    # Build các container images
-docker compose up -d    # Khởi chạy toàn bộ ứng dụng
-```
-Mở trình duyệt tại: `http://localhost:3000`
+> **Lưu ý:** Docker compose đã được cấu hình Volume Mount chế độ Read-Only cho file `firebase-service-account.json` tại `/run/secrets/firebase-service-account.json`.
 
 ---
 
-## 4. BẢNG MÃ LỖI THƯỜNG GẶP (TROUBLESHOOTING)
+## 🔐 3. BẢNG PHÂN QUYỀN & ROUTING THEO VAI TRÒ (ROLES)
 
-| Mã lỗi / Thông báo | Nguyên nhân chính | Cách xử lý |
+| Đường Dẫn Route | Quyền Hạn Truy Cập | Mô Tả Chức Năng |
 | :--- | :--- | :--- |
-| `Thiếu cấu hình Firebase: VITE_FIREBASE_API_KEY...` | Chưa tạo file `FE/.env` hoặc chưa khởi động lại Vite server. | Copy `FE/.env.example` thành `FE/.env`, điền giá trị và chạy lại `npm run dev`. |
-| `auth/unauthorized-domain` | Domain hiện tại chưa được cấp phép trong Firebase Authorized domains. | Vào Firebase Console -> Authentication -> Settings -> Authorized domains và thêm `localhost`. |
-| `auth/operation-not-allowed` | Phương thức đăng nhập (Google/Facebook) chưa được bật trong Firebase. | Vào Firebase Console -> Authentication -> Sign-in method và Bật provider tương ứng. |
-| `auth/popup-blocked` | Trình duyệt chặn Popup mở cửa sổ OAuth. | Cho phép Pop-up cho trang web hoặc ứng dụng sẽ tự động fallback sang `signInWithRedirect`. |
-| `Facebook chỉ chủ app đăng nhập được` | App Facebook đang ở Development Mode và người dùng chưa được cấp quyền Tester. | Vào Meta for Developers -> App Roles -> Testers -> Thêm email Facebook của thành viên và chấp nhận lời mời. |
-| `HTTP 401 Unauthorized (Backend)` | Token gửi lên sai chữ ký, hết hạn hoặc sử dụng token giả `token_...`. | Đảm bảo Frontend gửi Firebase ID Token thật từ `auth.currentUser.getIdToken()`. |
-| `RuntimeError: Firebase Admin SDK chưa được cấu hình...` | Backend không tìm thấy file credential hoặc không có Auth Emulator. | Tải `firebase-service-account.json` lưu vào `BE/secrets/` và kiểm tra `FIREBASE_CREDENTIALS_PATH` trong `BE/.env`. |
+| `/login` | Public | Đăng nhập bằng Email, SĐT OTP hoặc Google |
+| `/register` | Public | Đăng ký tài khoản Email hoặc SĐT mới (Mặc định: `member`) |
+| `/forgot-password` | Public | Khôi phục mật khẩu Email (qua Firebase Reset Link) / SĐT OTP |
+| `/member/*` | `member`, `family_head`, `admin` | Khu vực dành cho Thành viên gia phả |
+| `/family-head/*` | `family_head`, `admin` | Khu vực Quản lý Họ tộc (Dành cho Trưởng Họ) |
+| `/admin/*` | `admin` | Khu vực Quản trị Hệ thống |
+| `/403` | Public | Trang báo lỗi Truy Cập Bị Từ Chối (Forbidden) |
+
+> 🛠 **Gán quyền Admin:** Mọi tài khoản mới đăng ký đều là `member`. Để cấp quyền `admin` cho một tài khoản, chạy lệnh CLI sau tại thư mục `BE`:
+> ```bash
+> python scripts/manage_admin.py grant --email=admin@example.com
+> ```
 
 ---
 
-## 5. CHECKLIST KIỂM THỬ TRÊN HAI MÁY SẠCH (ACCEPTANCE CHECKLIST)
+## 🛠 4. BẢNG XỬ LÝ LỖI THƯỜNG GẶP (TROUBLESHOOTING)
 
-- [ ] **Máy A & Máy B:** Clone branch mới trên 2 máy độc lập.
-- [ ] **Tạo `.env`:** Tạo `FE/.env` từ `FE/.env.example` với bộ Web Config DEV project.
-- [ ] **Đăng nhập Google:** Đăng nhập thành công, tài khoản xuất hiện trên Firebase Console Users và được bootstrap thành công vào PostgreSQL với role mặc định `member`.
-- [ ] **Đăng nhập Facebook:** Cả hai máy (với tài khoản Tester) đăng nhập Facebook thành công qua Popup/Redirect.
-- [ ] **Bảo mật Token:** Backend từ chối request đính kèm token chuỗi giả dạng `token_admin_001` với HTTP 401.
-- [ ] **Lưu phiên:** Refresh trang không làm mất session (khôi phục qua `onAuthStateChanged`).
-- [ ] **Đăng xuất:** Đăng xuất xóa sạch Firebase session và reset state `account` thành `null`.
+| Mã / Nội Dung Lỗi | Nguyên Nhân | Cách Khắc Phục |
+| :--- | :--- | :--- |
+| `Firebase Admin SDK chưa được cấu hình credential hợp lệ` | Backend không tìm thấy file `secrets/firebase-service-account.json` tại startup. | Kiểm tra file JSON đã được đặt đúng tại `BE/secrets/firebase-service-account.json` và kiểm tra lại `FIREBASE_CREDENTIALS_PATH` trong `BE/.env`. |
+| `auth/unauthorized-domain` | Tên miền `localhost` chưa được cấp phép trong Firebase Console. | Truy cập Firebase Console -> Auth -> Settings -> Authorized Domains -> Thêm `localhost` và `127.0.0.1`. |
+| `CORS Error / Access-Control-Allow-Origin` | Origin của Frontend không khớp với danh sách `CORS_ORIGINS`. | Kiểm tra file `BE/.env`, đảm bảo `CORS_ORIGINS` chứa `http://localhost:5173`. |
+| `auth/invalid-api-key` | `VITE_FIREBASE_API_KEY` trong `FE/.env` bị trống hoặc sai. | Copy lại đúng API Key từ Firebase Console Web App Config. |
+| `auth/quota-exceeded` (Phone OTP) | Vượt quá hạn ngạch SMS OTP của Firebase Free Plan. | Đăng ký SĐT thử nghiệm (Test Phone Numbers) trong Firebase Console -> Auth -> Sign-in method -> Phone. |
