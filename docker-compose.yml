@@ -23,6 +23,10 @@ services:
     environment:
       DATABASE_URL: postgresql+psycopg://postgres:postgres@postgres:5432/multi_family_db
       SECRET_KEY: supersecretkey123
+      FIREBASE_PROJECT_ID: ${VITE_FIREBASE_PROJECT_ID:-multi-family-genealogy}
+      GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/firebase-service-account.json
+    volumes:
+      - ./BE/secrets/firebase-service-account.json:/run/secrets/firebase-service-account.json:ro
     depends_on:
       - postgres
     ports:
@@ -43,10 +47,18 @@ services:
   frontend:
     build:
       context: ./FE
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8000/api}
+        VITE_FIREBASE_API_KEY: ${VITE_FIREBASE_API_KEY}
+        VITE_FIREBASE_AUTH_DOMAIN: ${VITE_FIREBASE_AUTH_DOMAIN}
+        VITE_FIREBASE_PROJECT_ID: ${VITE_FIREBASE_PROJECT_ID}
+        VITE_FIREBASE_STORAGE_BUCKET: ${VITE_FIREBASE_STORAGE_BUCKET}
+        VITE_FIREBASE_MESSAGING_SENDER_ID: ${VITE_FIREBASE_MESSAGING_SENDER_ID}
+        VITE_FIREBASE_APP_ID: ${VITE_FIREBASE_APP_ID}
     container_name: mfg-frontend
     restart: unless-stopped
     ports:
-      - "3000:80" # serve nginx on container:80, expose on host 3000 to match dev origin
+      - "3000:80"
     depends_on:
       - backend
 

@@ -1,5 +1,13 @@
 __pycache__/
 .env
+.env.*
+!.env.example
 venv/
 dist/
 *.pyc
+
+# Sensitive Firebase Credentials
+serviceAccountKey.json
+firebase-service-account*.json
+credentials/
+secrets/

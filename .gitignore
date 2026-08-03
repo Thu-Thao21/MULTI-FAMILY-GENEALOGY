@@ -4,6 +4,14 @@ __pycache__/
 *.pyc
 dist/
 .env
+.env.*
+!.env.example
 .vscode/
 .DS_Store
 *.log
+
+# Sensitive Credentials & Keys
+serviceAccountKey.json
+firebase-service-account*.json
+credentials/
+secrets/

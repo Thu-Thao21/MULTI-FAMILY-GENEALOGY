@@ -13,64 +13,62 @@ _firebase_app = None
 
 def get_firebase_app():
     global _firebase_app
-    if _firebase_app is None:
-        if not firebase_admin._apps:
-            cred_path = settings.FIREBASE_CREDENTIALS_PATH or os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
-            if cred_path and os.path.exists(cred_path):
-                cred = credentials.Certificate(cred_path)
-                _firebase_app = firebase_admin.initialize_app(cred)
-                logger.info(f"Firebase Admin initialized with certificate: {cred_path}")
-            else:
-                _firebase_app = firebase_admin.initialize_app(
-                    options={"projectId": settings.FIREBASE_PROJECT_ID}
-                )
-                logger.info(f"Firebase Admin initialized with project ID: {settings.FIREBASE_PROJECT_ID}")
-        else:
-            _firebase_app = firebase_admin.get_app()
-    return _firebase_app
+    if _firebase_app is not None:
+        return _firebase_app
 
+    if firebase_admin._apps:
+        _firebase_app = firebase_admin.get_app()
+        return _firebase_app
 
-import time
-import jwt
+    emulator_host = settings.FIREBASE_AUTH_EMULATOR_HOST or os.getenv("FIREBASE_AUTH_EMULATOR_HOST")
+    cred_path = settings.FIREBASE_CREDENTIALS_PATH or os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+
+    if cred_path and os.path.exists(cred_path):
+        cred = credentials.Certificate(cred_path)
+        _firebase_app = firebase_admin.initialize_app(cred)
+        logger.info(f"Firebase Admin SDK initialized with certificate: {cred_path}")
+        return _firebase_app
+
+    if emulator_host:
+        os.environ["FIREBASE_AUTH_EMULATOR_HOST"] = emulator_host
+        _firebase_app = firebase_admin.initialize_app(options={"projectId": settings.FIREBASE_PROJECT_ID})
+        logger.info(f"Firebase Admin SDK initialized with Auth Emulator: {emulator_host}")
+        return _firebase_app
+
+    try:
+        # Try Application Default Credentials (ADC)
+        _firebase_app = firebase_admin.initialize_app(options={"projectId": settings.FIREBASE_PROJECT_ID})
+        logger.info(f"Firebase Admin SDK initialized with ADC (Project ID: {settings.FIREBASE_PROJECT_ID})")
+        return _firebase_app
+    except Exception as e:
+        logger.error(f"Firebase Admin initialization error: {e}")
+        raise RuntimeError(
+            "Firebase Admin SDK chưa được cấu hình credential hợp lệ (FIREBASE_CREDENTIALS_PATH / GOOGLE_APPLICATION_CREDENTIALS) "
+            "và FIREBASE_AUTH_EMULATOR_HOST không được bật. Vui lòng cung cấp Service Account Key JSON để bảo mật."
+        )
+
 
 def verify_firebase_token(id_token: str) -> Dict[str, Any]:
     """
-    Verifies a Firebase ID token sent from Frontend.
-    Returns decoded token dict or raises Exception on invalid/expired token.
-    Uses instant non-blocking JWT decoding for local dev environment when Google credentials file is not mounted.
+    Verifies a Firebase ID token sent from Frontend using official Firebase Admin SDK.
+    Strictly verifies token signature, issuer, audience and revocation state.
+    Raises ValueError on invalid/expired token.
     """
-    cred_path = settings.FIREBASE_CREDENTIALS_PATH or os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
-
-    # If Service Account certificate file is present, try official Admin SDK verification
-    if cred_path and os.path.exists(cred_path):
-        try:
-            get_firebase_app()
-            return firebase_auth.verify_id_token(id_token, clock_skew_seconds=10)
-        except Exception as e:
-            logger.warning(f"Firebase Admin SDK verification failed, falling back to JWT: {e}")
-
-    # Fast non-blocking JWT decoding for local development environment
+    app = get_firebase_app()
     try:
-        decoded = jwt.decode(id_token, options={"verify_signature": False})
-
-        # Basic validation of claims
-        now = time.time()
-        if decoded.get("exp") and decoded["exp"] < now:
-            raise ValueError("Token đã hết hạn.")
-
-        uid = decoded.get("uid") or decoded.get("user_id") or decoded.get("sub")
-        if not uid:
-            raise ValueError("Token thiếu UID hợp lệ.")
-
-        # Standardize claims to match firebase_admin output
-        decoded["uid"] = uid
-        decoded["email"] = decoded.get("email")
-        decoded["name"] = decoded.get("name") or decoded.get("displayName")
-        decoded["email_verified"] = decoded.get("email_verified", False)
-
+        decoded = firebase_auth.verify_id_token(
+            id_token,
+            app=app,
+            check_revoked=True,
+            clock_skew_seconds=10
+        )
         return decoded
-    except Exception as jwt_err:
-        logger.error(f"JWT fallback decoding failed: {jwt_err}")
-        raise ValueError(f"Xác thực Firebase Token thất bại: {jwt_err}")
-
-
+    except firebase_auth.RevokedIdTokenError:
+        logger.warning("Firebase token has been revoked.")
+        raise ValueError("Token đã bị thu hồi.")
+    except firebase_auth.ExpiredIdTokenError:
+        logger.warning("Firebase token has expired.")
+        raise ValueError("Token đã hết hạn.")
+    except Exception as err:
+        logger.error(f"Firebase token verification failed: {err}")
+        raise ValueError(f"Xác thực Firebase Token thất bại: {err}")

@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { onAuthStateChanged, signOut, getRedirectResult, type User as FirebaseUser } from 'firebase/auth';
+import { onAuthStateChanged, signOut, type User as FirebaseUser } from 'firebase/auth';
 import { auth } from '../config/firebase';
 import apiClient from '../api/axios';
+import { processAuthRedirectResult } from '../services/auth.service';
 
 export interface AccountRoleInfo {
   id: string;
@@ -61,27 +62,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   useEffect(() => {
-    const localToken = localStorage.getItem('auth_token');
-    if (localToken) {
-      fetchAccount().finally(() => setLoading(false));
-    }
+    // 1. Process redirect result first if returning from redirect sign-in flow
+    processAuthRedirectResult().catch((err) => {
+      console.warn('Redirect result check:', err.message);
+    });
 
-    getRedirectResult(auth)
-      .then(async (result) => {
-        if (result?.user) {
-          await fetchAccount();
-        }
-      })
-      .catch((err) => {
-        console.warn('getRedirectResult warning:', err);
-      });
+    // 2. Clear old legacy token if present in local storage
+    localStorage.removeItem('auth_token');
 
+    // 3. Listen to Firebase auth state changes
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setFirebaseUser(user);
       if (user) {
-        localStorage.removeItem('auth_token');
         await fetchAccount();
-      } else if (!localStorage.getItem('auth_token')) {
+      } else {
         setAccount(null);
       }
       setLoading(false);
@@ -111,7 +105,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       value={{
         firebaseUser,
         account,
-        isAuthenticated: Boolean(firebaseUser || account),
+        isAuthenticated: Boolean(firebaseUser && account),
         loading,
         primaryRole,
         refreshAccount: fetchAccount,
@@ -121,7 +115,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       {children}
     </AuthContext.Provider>
   );
-
 };
 
 export function useAuthContext() {
