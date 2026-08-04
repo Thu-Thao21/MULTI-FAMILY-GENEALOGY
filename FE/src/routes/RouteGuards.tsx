@@ -1,6 +1,7 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuthContext } from '../context/AuthContext';
+import './RouteGuards.css';
 
 // Standard React Router v6 imports handled safely
 interface ProtectedRouteProps {
@@ -12,7 +13,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+      <div className="route-loading-screen">
         <p>Đang xác thực thông tin tài khoản...</p>
       </div>
     );
@@ -35,7 +36,7 @@ export const RoleGuard: React.FC<RoleGuardProps> = ({ allowedRoles, children }) 
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+      <div className="route-loading-screen">
         <p>Đang kiểm tra quyền truy cập...</p>
       </div>
     );

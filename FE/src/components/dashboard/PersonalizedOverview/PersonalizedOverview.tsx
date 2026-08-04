@@ -63,12 +63,6 @@ export const PersonalizedOverview: React.FC<PersonalizedOverviewProps> = ({
             Chào mừng bạn quay trở lại với không gian gia tộc <strong>{familyBranch}</strong> thuộc <strong>{generationLevel}</strong>.
           </p>
         </div>
-
-        {userRole === 'Thành viên' && onRequestRole && (
-          <button onClick={onRequestRole} className="btn-request-role">
-            ⭐ Yêu cầu quyền Trưởng Họ
-          </button>
-        )}
       </div>
 
       <div className="personalized-overview-cards-grid">

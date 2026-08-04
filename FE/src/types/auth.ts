@@ -4,7 +4,7 @@ export interface AuthUser {
   email?: string;
   phone?: string;
   displayName: string;
-  role?: 'admin' | 'family_head' | 'member' | string;
+  role?: 'admin' | 'member' | string;
   token?: string;
 }
 
@@ -14,13 +14,13 @@ export interface RegisterPayload {
   displayName: string;
   password: string;
   confirmPassword: string;
-  role?: 'family_head' | 'member' | string;
+  role?: 'member' | string;
 }
 
 export interface LoginPayload {
   emailOrPhone: string;
   password: string;
-  role?: 'admin' | 'family_head' | 'member' | string;
+  role?: 'admin' | 'member' | string;
 }
 
 export interface AuthResponse {

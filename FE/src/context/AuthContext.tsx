@@ -21,7 +21,7 @@ export interface AccountProfile {
   phone_verified: boolean;
   status: string;
   roles: AccountRoleInfo[];
-  primary_role: 'admin' | 'family_head' | 'member' | string;
+  primary_role: 'admin' | 'member' | string;
 }
 
 interface AuthContextType {
@@ -30,6 +30,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   loading: boolean;
   primaryRole: string;
+  login: (payload: { emailOrPhone: string; password: string; role?: string }) => Promise<AccountProfile>;
   refreshAccount: () => Promise<AccountProfile | null>;
   logout: () => Promise<void>;
 }
@@ -58,6 +59,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return null;
       }
     }
+  };
+
+  const login = async (payload: { emailOrPhone: string; password: string; role?: string }): Promise<AccountProfile> => {
+    const { loginWithEmailPassword } = await import('../services/auth.service');
+    const profile = await loginWithEmailPassword({
+      email: payload.emailOrPhone,
+      password: payload.password,
+      role: payload.role,
+    });
+    setAccount(profile);
+    return profile;
   };
 
   useEffect(() => {
@@ -114,6 +126,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isAuthenticated: Boolean(firebaseUser || account),
         loading,
         primaryRole,
+        login,
         refreshAccount: fetchAccount,
         logout,
       }}

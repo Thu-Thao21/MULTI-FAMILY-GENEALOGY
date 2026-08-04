@@ -11,7 +11,7 @@ export interface TopBarProps {
 
 export const TopBar: React.FC<TopBarProps> = ({
   userName,
-  userRole = 'Trưởng họ',
+  userRole = 'Thành viên',
   onLogout,
   isSidebarCollapsed,
   onToggleSidebar,
@@ -23,7 +23,7 @@ export const TopBar: React.FC<TopBarProps> = ({
   const notifications: Array<{ id: number; title: string; desc: string; time: string; unread: boolean }> = [];
 
   const roleClass =
-    userRole === 'Admin' ? 'admin' : userRole === 'Trưởng họ' ? 'head' : 'member';
+    userRole === 'Admin' ? 'admin' : 'member';
 
   return (
     <header className="topbar-header">
@@ -62,7 +62,7 @@ export const TopBar: React.FC<TopBarProps> = ({
       </div>
 
       <div className="topbar-right-group">
-        <div style={{ position: 'relative' }}>
+        <div className="topbar-notif-wrapper">
           <button
             onClick={() => setShowNotifications(!showNotifications)}
             className="topbar-notif-btn"
@@ -78,59 +78,32 @@ export const TopBar: React.FC<TopBarProps> = ({
           </button>
 
           {showNotifications && (
-            <div
-              style={{
-                position: 'absolute',
-                right: 0,
-                top: '56px',
-                width: '360px',
-                backgroundColor: '#ffffff',
-                borderRadius: '24px',
-                boxShadow: '0 24px 60px rgba(15, 23, 42, 0.16)',
-                border: '1px solid #e2e8f0',
-                padding: '20px',
-                zIndex: 200,
-              }}
-            >
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  marginBottom: '14px',
-                  paddingBottom: '10px',
-                  borderBottom: '1px solid #f1f5f9',
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ fontWeight: 800, color: '#0f172a', fontSize: '15px', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+            <div className="topbar-notif-dropdown">
+              <div className="topbar-notif-dropdown-header">
+                <div className="topbar-notif-dropdown-title-row">
+                  <span className="topbar-notif-dropdown-title">
                     Trung Tâm Thông Báo
                   </span>
                 </div>
-                <span style={{ fontSize: '12px', color: '#2563eb', fontWeight: 700, cursor: 'pointer' }}>
+                <span className="topbar-notif-mark-read">
                   Đánh dấu đã đọc
                 </span>
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div className="topbar-notif-list">
                 {notifications.length === 0 ? (
-                  <div style={{ padding: '20px 0', textAlign: 'center', color: '#94a3b8', fontSize: '13px' }}>
+                  <div className="topbar-notif-empty">
                     Không có thông báo mới nào.
                   </div>
                 ) : (
                   notifications.map((item) => (
                     <div
                       key={item.id}
-                      style={{
-                        padding: '12px 14px',
-                        borderRadius: '14px',
-                        backgroundColor: item.unread ? '#eff6ff' : '#f8fafc',
-                        borderLeft: item.unread ? '4px solid #2563eb' : 'none',
-                      }}
+                      className={`topbar-notif-item ${item.unread ? 'unread' : 'read'}`}
                     >
-                      <div style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a' }}>{item.title}</div>
-                      <div style={{ fontSize: '12px', color: '#475569', marginTop: '2px', lineHeight: 1.4 }}>{item.desc}</div>
-                      <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '4px' }}>{item.time}</div>
+                      <div className="topbar-notif-item-title">{item.title}</div>
+                      <div className="topbar-notif-item-desc">{item.desc}</div>
+                      <div className="topbar-notif-item-time">{item.time}</div>
                     </div>
                   ))
                 )}
@@ -139,25 +112,25 @@ export const TopBar: React.FC<TopBarProps> = ({
           )}
         </div>
 
-        <div style={{ position: 'relative' }}>
+        <div className="topbar-profile-wrapper">
           <button onClick={() => setShowProfileMenu(!showProfileMenu)} className="topbar-user-btn">
             <div className="topbar-user-avatar">{userName.charAt(0).toUpperCase()}</div>
 
-            <div style={{ textAlign: 'left' }}>
+            <div className="topbar-user-info">
               <div className="topbar-user-name">{userName}</div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
+              <div className="topbar-user-role-row">
                 <span className={`topbar-user-role-badge ${roleClass}`}>{userRole}</span>
               </div>
             </div>
 
-            <span style={{ fontSize: '11px', color: '#94a3b8' }}>▼</span>
+            <span className="topbar-user-arrow">▼</span>
           </button>
 
           {showProfileMenu && (
             <div className="topbar-profile-dropdown">
-              <div style={{ padding: '12px', borderBottom: '1px solid #f1f5f9' }}>
-                <div style={{ fontSize: '14px', fontWeight: 800, color: '#0f172a' }}>{userName}</div>
-                <div style={{ fontSize: '11px', color: '#2563eb', fontWeight: 600 }}>{userRole}</div>
+              <div className="topbar-profile-header">
+                <div className="topbar-profile-name">{userName}</div>
+                <div className="topbar-profile-role">{userRole}</div>
               </div>
 
               <button className="topbar-menu-item" onClick={() => alert('Hồ sơ cá nhân')}>
@@ -168,7 +141,7 @@ export const TopBar: React.FC<TopBarProps> = ({
                 Cài đặt tài khoản
               </button>
 
-              <div style={{ margin: '4px 0', borderTop: '1px solid #f1f5f9' }} />
+              <div className="topbar-profile-divider" />
 
               <button onClick={onLogout} className="topbar-menu-item-logout">
                 Đăng xuất

@@ -21,13 +21,13 @@ export interface RegisterPayload {
   password: string;
   confirmPassword?: string;
   displayName?: string;
-  role?: 'family_head' | 'member' | string;
+  role?: 'member' | string;
 }
 
 export interface LoginPayload {
   email: string;
   password: string;
-  role?: 'member' | 'family_head' | 'admin' | string;
+  role?: 'member' | 'admin' | string;
 }
 
 function handleAuthError(err: any, providerName: string): string {
@@ -161,12 +161,11 @@ export async function loginWithEmailPassword(payload: LoginPayload): Promise<Acc
     }
   } catch (backendErr: any) {
     if (backendErr?.response?.data?.detail) {
-      const detail = backendErr.response.data.detail;
-      if (detail.includes('Mật khẩu không chính xác') || detail.includes('Tài khoản hoặc Email/Số điện thoại')) {
-        throw new Error(detail);
-      }
+      throw new Error(backendErr.response.data.detail);
     }
-    console.warn('Backend login fallback to Firebase:', backendErr);
+    if (backendErr?.message && (backendErr.message.includes('Network Error') || backendErr.message.includes('ERR_CONNECTION_REFUSED'))) {
+      throw new Error('Không thể kết nối đến máy chủ Backend. Vui lòng kiểm tra kết nối mạng.');
+    }
   }
 
   // 2. Fallback to Firebase Auth

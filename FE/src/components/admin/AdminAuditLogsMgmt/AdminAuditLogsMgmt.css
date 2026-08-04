@@ -1,0 +1,31 @@
+.admin-audit-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  animation: profileFadeIn 0.3s ease-out;
+}
+
+.admin-audit-actor {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.admin-audit-action {
+  background: #f1f5f9;
+  color: #0f172a;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.admin-audit-target {
+  font-size: 13px;
+  color: #2563eb;
+  font-weight: 700;
+}
+
+.admin-audit-meta {
+  font-size: 12px;
+  color: #64748b;
+}

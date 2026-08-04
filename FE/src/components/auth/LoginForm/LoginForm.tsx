@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../../hooks/useAuth';
-import { loginWithGoogle, loginWithFacebook, loginWithEmailPassword } from '../../../services/auth.service';
 import './LoginForm.css';
+
+import { loginWithGoogle, loginWithFacebook } from '../../../services/auth.service';
 
 export interface LoginFormProps {
   onSwitchToRegister: () => void;
@@ -14,30 +15,11 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   onSwitchToForgotPassword,
   onSuccess,
 }) => {
-  const { refreshAccount } = useAuth();
+  const { login } = useAuth();
+  const [selectedRole, setSelectedRole] = useState<'admin' | 'member'>('member');
   const [formData, setFormData] = useState({ emailOrPhone: '', password: '' });
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const handleGoogleLogin = async () => {
-    setError('');
-    try {
-      await loginWithGoogle();
-      onSuccess();
-    } catch (err: any) {
-      setError(err.message || 'Đăng nhập Google thất bại.');
-    }
-  };
-
-  const handleFacebookLogin = async () => {
-    setError('');
-    try {
-      await loginWithFacebook();
-      onSuccess();
-    } catch (err: any) {
-      setError(err.message || 'Đăng nhập Facebook thất bại.');
-    }
-  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -50,14 +32,40 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     setIsSubmitting(true);
 
     try {
-      await loginWithEmailPassword({
-        email: formData.emailOrPhone,
+      await login({
+        emailOrPhone: formData.emailOrPhone,
         password: formData.password,
+        role: selectedRole,
       });
-      await refreshAccount();
       onSuccess();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Đăng nhập thất bại.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setError('');
+    setIsSubmitting(true);
+    try {
+      await loginWithGoogle();
+      onSuccess();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Đăng nhập Google thất bại.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleFacebookLogin = async () => {
+    setError('');
+    setIsSubmitting(true);
+    try {
+      await loginWithFacebook();
+      onSuccess();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Đăng nhập Facebook thất bại.');
     } finally {
       setIsSubmitting(false);
     }
@@ -74,18 +82,45 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           <span className="login-form-badge-text">ĐĂNG NHẬP HỆ THỐNG</span>
         </div>
         <h1 className="login-form-title">Chào mừng bạn trở lại!</h1>
-        <p className="login-form-subtitle">Vui lòng nhập Email / Số điện thoại và mật khẩu để tiếp tục.</p>
+        <p className="login-form-subtitle">Vui lòng chọn vai trò và đăng nhập để truy cập dữ liệu.</p>
+      </div>
+
+      {/* Role Selection Tabs */}
+      <div className="login-role-selector">
+        <button
+          type="button"
+          onClick={() => setSelectedRole('member')}
+          className={`login-role-btn ${selectedRole === 'member' ? 'active' : ''}`}
+        >
+          Thành Viên
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setSelectedRole('admin')}
+          className={`login-role-btn ${selectedRole === 'admin' ? 'active' : ''}`}
+        >
+          Admin
+        </button>
       </div>
 
       <form onSubmit={handleSubmit} className="login-form-body">
         <div className="login-form-group">
-          <label className="login-form-label">Email hoặc Số điện thoại</label>
+          <label className="login-form-label">
+            {selectedRole === 'admin'
+              ? 'Tên đăng nhập hoặc Email Admin'
+              : 'Email / SĐT Thành Viên'}
+          </label>
           <input
             type="text"
             name="emailOrPhone"
             value={formData.emailOrPhone}
             onChange={handleChange}
-            placeholder="email@example.com hoặc 0912345678"
+            placeholder={
+              selectedRole === 'admin'
+                ? 'thuthaor120608@gmail.com'
+                : 'email@example.com hoặc 0912345678'
+            }
             required
             className="login-form-input"
           />
@@ -118,37 +153,49 @@ export const LoginForm: React.FC<LoginFormProps> = ({
         {error ? <p className="login-form-error">{error}</p> : null}
 
         <button type="submit" disabled={isSubmitting} className="login-form-submit">
-          {isSubmitting ? 'Đang đăng nhập...' : 'Đăng nhập'}
+          {isSubmitting
+            ? 'Đang đăng nhập...'
+            : selectedRole === 'admin'
+              ? 'Đăng nhập Quyền Admin'
+              : 'Đăng nhập Quyền Thành Viên'}
         </button>
 
         <p className="login-form-footer-note">
-          Dữ liệu được bảo mật và tự động phân quyền theo vai trò trong hệ thống.
+          {selectedRole === 'admin'
+            ? 'Tài khoản Admin đã được tạo sẵn trong hệ thống database.'
+            : 'Dữ liệu được bảo mật và phân quyền truy cập theo vai trò.'}
         </p>
 
-        <div className="login-form-divider">
-          <span className="login-form-divider-line" />
-          <span className="login-form-divider-text">HOẶC</span>
-          <span className="login-form-divider-line" />
-        </div>
+        {selectedRole !== 'admin' && (
+          <>
+            <div className="login-form-divider">
+              <span className="login-form-divider-line" />
+              <span className="login-form-divider-text">HOẶC</span>
+              <span className="login-form-divider-line" />
+            </div>
 
-        <div className="login-form-socials">
-          <button type="button" onClick={handleGoogleLogin} className="btn-social-google">
-            <span className="btn-social-icon-google">G</span>
-            <span>Google</span>
-          </button>
-          <button type="button" onClick={handleFacebookLogin} className="btn-social-facebook">
-            <span className="btn-social-icon-facebook">F</span>
-            <span>Facebook</span>
-          </button>
-        </div>
+            <div className="login-form-socials">
+              <button type="button" onClick={handleGoogleLogin} className="btn-social-google">
+                <span className="btn-social-icon-google">G</span>
+                <span>Google</span>
+              </button>
+              <button type="button" onClick={handleFacebookLogin} className="btn-social-facebook">
+                <span className="btn-social-icon-facebook">F</span>
+                <span>Facebook</span>
+              </button>
+            </div>
+          </>
+        )}
       </form>
 
-      <div className="login-form-switch">
-        Chưa có tài khoản?{' '}
-        <button type="button" onClick={onSwitchToRegister} className="btn-switch-link">
-          Đăng ký ngay
-        </button>
-      </div>
+      {selectedRole !== 'admin' && (
+        <div className="login-form-switch">
+          Chưa có tài khoản?{' '}
+          <button type="button" onClick={onSwitchToRegister} className="btn-switch-link">
+            Đăng ký ngay
+          </button>
+        </div>
+      )}
     </div>
   );
 };

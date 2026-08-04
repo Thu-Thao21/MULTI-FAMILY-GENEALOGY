@@ -12,7 +12,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   activeTab,
   onSelectTab,
   isCollapsed,
-  userRole = 'Trưởng họ',
+  userRole = 'Thành viên',
 }) => {
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
     tree: true,
@@ -27,7 +27,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     setExpandedGroups((prev) => ({ ...prev, [groupId]: !prev[groupId] }));
   };
 
-  const isAdminOrLeader = userRole === 'Admin' || userRole === 'Trưởng họ';
+  const isAdmin = userRole === 'Admin';
 
   const menuGroups = [
     {
@@ -128,7 +128,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     },
   ];
 
-  if (isAdminOrLeader) {
+  if (isAdmin) {
     menuGroups.push({
       id: 'admin',
       label: 'Quản trị hệ thống',
@@ -140,7 +140,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
       ),
       badge: userRole,
       items: [
-        { id: 'admin-role-requests', label: '⭐ Phê duyệt quyền Trưởng Họ' },
         { id: 'admin-permissions', label: 'Phân quyền thành viên' },
         { id: 'admin-approval', label: 'Phê duyệt chỉnh sửa' },
         { id: 'admin-logs', label: 'Lịch sử thay đổi gia phả' },

@@ -1,45 +1,99 @@
 import React from 'react';
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import LoginPage from '../pages/auth/Login';
 import RegisterPage from '../pages/auth/Register';
 import ForgotPasswordPage from '../pages/auth/ForgotPassword';
 import Dashboard from '../pages/dashboard/Dashboard';
+import { ProtectedRoute } from './RouteGuards';
 
 export type AuthView = 'login' | 'register' | 'forgot-password' | 'dashboard';
 
 interface AppRoutesProps {
-  view: AuthView;
-  onNavigate: (view: AuthView) => void;
-  onAuthSuccess: () => void;
   userName: string;
-  userRoles?: string[];
+  primaryRole: string;
+  isAuthenticated: boolean;
   onLogout: () => void;
 }
 
 const AppRoutes: React.FC<AppRoutesProps> = ({
-  view,
-  onNavigate,
-  onAuthSuccess,
   userName,
+  primaryRole,
+  isAuthenticated,
   onLogout,
 }) => {
-  if (view === 'register') {
-    return <RegisterPage onSwitchToLogin={() => onNavigate('login')} onSuccess={onAuthSuccess} />;
-  }
+  const navigate = useNavigate();
 
-  if (view === 'forgot-password') {
-    return <ForgotPasswordPage onSwitchToLogin={() => onNavigate('login')} />;
-  }
+  const handleAuthSuccess = () => {
+    if (primaryRole === 'admin') {
+      navigate('/admin');
+    } else {
+      navigate('/user');
+    }
+  };
 
-  if (view === 'dashboard') {
-    return <Dashboard userName={userName} onLogout={onLogout} />;
-  }
+  const handleLogout = () => {
+    onLogout();
+    navigate('/login');
+  };
 
   return (
-    <LoginPage
-      onSwitchToRegister={() => onNavigate('register')}
-      onSwitchToForgotPassword={() => onNavigate('forgot-password')}
-      onSuccess={onAuthSuccess}
-    />
+    <Routes>
+      <Route
+        path="/login"
+        element={
+          isAuthenticated ? (
+            <Navigate to={primaryRole === 'admin' ? '/admin' : '/user'} replace />
+          ) : (
+            <LoginPage
+              onSwitchToRegister={() => navigate('/register')}
+              onSwitchToForgotPassword={() => navigate('/forgot-password')}
+              onSuccess={handleAuthSuccess}
+            />
+          )
+        }
+      />
+      <Route
+        path="/register"
+        element={
+          <RegisterPage
+            onSwitchToLogin={() => navigate('/login')}
+            onSuccess={handleAuthSuccess}
+          />
+        }
+      />
+      <Route
+        path="/forgot-password"
+        element={
+          <ForgotPasswordPage onSwitchToLogin={() => navigate('/login')} />
+        }
+      />
+      <Route
+        path="/user/*"
+        element={
+          <ProtectedRoute>
+            <Dashboard userName={userName} onLogout={handleLogout} />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/*"
+        element={
+          <ProtectedRoute>
+            <Dashboard userName={userName} onLogout={handleLogout} />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="*"
+        element={
+          isAuthenticated ? (
+            <Navigate to={primaryRole === 'admin' ? '/admin' : '/user'} replace />
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        }
+      />
+    </Routes>
   );
 };
 

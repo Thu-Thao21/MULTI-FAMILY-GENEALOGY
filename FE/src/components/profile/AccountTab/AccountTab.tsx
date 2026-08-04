@@ -22,7 +22,7 @@ export const AccountTab: React.FC<AccountTabProps> = ({ member }) => {
           <div className="profile-info-item">
             <span className="profile-info-label">Quyền hạn gia tộc</span>
             <span className="profile-info-value account-role-text">
-              {member.isPrimary ? 'Trưởng tộc / Quản trị gia phả' : 'Thành viên gia tộc'}
+              {member.isPrimary ? 'Chủ dòng họ / Quản trị gia phả' : 'Thành viên gia tộc'}
             </span>
           </div>
 

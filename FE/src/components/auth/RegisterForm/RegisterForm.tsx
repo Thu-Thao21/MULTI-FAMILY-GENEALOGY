@@ -151,7 +151,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin, onS
         </button>
 
         <p className="register-form-footer-note">
-          Tài khoản đăng ký mặc định là Thành viên. Bạn có thể gửi yêu cầu quyền Trưởng Họ sau khi đăng nhập.
+          Tài khoản đăng ký mặc định là Thành viên. Bạn có thể tạo dòng họ của riêng mình sau khi đăng nhập.
         </p>
 
         <div className="register-form-divider">
