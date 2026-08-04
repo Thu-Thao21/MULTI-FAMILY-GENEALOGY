@@ -52,12 +52,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <rect x="3" y="14" width="7" height="7" />
         </svg>
       ),
-      badge: 'Trực quan',
-      items: [
-        { id: 'tree-vertical', label: 'Sơ đồ đứng (Vertical)' },
-        { id: 'tree-horizontal', label: 'Sơ đồ ngang (Horizontal)' },
-        { id: 'tree-focus', label: 'Chế độ Tập trung (Focus View)' },
-      ],
+      singleTab: 'tree',
     },
     {
       id: 'network',

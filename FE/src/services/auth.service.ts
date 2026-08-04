@@ -133,7 +133,7 @@ export async function registerWithEmailPassword(payload: RegisterPayload): Promi
  * Automatically bootstraps and returns PostgreSQL account details.
  */
 export async function loginWithEmailPassword(payload: LoginPayload): Promise<AccountProfile> {
-  // 1. Try Backend API first (validates updated password_hash from password reset)
+  // 1. Try Backend API first (validates updated password_hash, username, email, or phone)
   try {
     const res = await apiClient.post('/auth/login', {
       email_or_phone: payload.email.trim(),
@@ -166,23 +166,10 @@ export async function loginWithEmailPassword(payload: LoginPayload): Promise<Acc
     if (backendErr?.message && (backendErr.message.includes('Network Error') || backendErr.message.includes('ERR_CONNECTION_REFUSED'))) {
       throw new Error('Không thể kết nối đến máy chủ Backend. Vui lòng kiểm tra kết nối mạng.');
     }
+    throw new Error('Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin đăng nhập.');
   }
 
-  // 2. Fallback to Firebase Auth
-  try {
-    await signInWithEmailAndPassword(auth, payload.email.trim(), payload.password);
-    const res = await apiClient.post<AccountProfile>('/auth/bootstrap');
-    return res.data;
-  } catch (err: any) {
-    console.error('Email Login Error:', err);
-    if (err.code === 'auth/invalid-email') {
-      throw new Error('Định dạng Email không hợp lệ (ví dụ: your_name@gmail.com).');
-    }
-    if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
-      throw new Error('Email hoặc mật khẩu không chính xác.');
-    }
-    throw new Error(err.message || 'Đăng nhập thất bại. Vui lòng thử lại.');
-  }
+  throw new Error('Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin đăng nhập.');
 }
 
 

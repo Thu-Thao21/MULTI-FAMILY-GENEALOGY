@@ -13,19 +13,20 @@ export async function fetchMembers(params?: {
         family_id: params?.familyId,
         search: params?.search,
         page: params?.page || 1,
-        limit: params?.limit || 20,
+        limit: params?.limit || 100,
       },
     });
+    const items = Array.isArray(res.data?.items) ? res.data.items : Array.isArray(res.data) ? res.data : [];
     return {
-      items: Array.isArray(res.data?.items) ? res.data.items : Array.isArray(res.data) ? res.data : [],
-      total: res.data?.total || 0,
+      items,
+      total: res.data?.total || items.length,
       page: res.data?.page || 1,
-      limit: res.data?.limit || 20,
-      totalPages: res.data?.totalPages || 0,
+      limit: res.data?.limit || 100,
+      totalPages: res.data?.totalPages || 1,
     };
   } catch (err) {
-    console.warn('API fetchMembers error (DB empty or endpoint offline):', err);
-    return { items: [], total: 0, page: 1, limit: 20, totalPages: 0 };
+    console.error('API fetchMembers error:', err);
+    return { items: [], total: 0, page: 1, limit: 100, totalPages: 0 };
   }
 }
 
@@ -34,7 +35,7 @@ export async function fetchMemberDetail(memberId: string): Promise<MemberDetail 
     const res = await apiClient.get(`/members/${memberId}`);
     return res.data ?? null;
   } catch (err) {
-    console.warn(`API fetchMemberDetail error for ${memberId}:`, err);
+    console.error(`API fetchMemberDetail error for ${memberId}:`, err);
     return null;
   }
 }
@@ -42,9 +43,10 @@ export async function fetchMemberDetail(memberId: string): Promise<MemberDetail 
 export async function fetchFamilies(): Promise<Family[]> {
   try {
     const res = await apiClient.get('/families');
-    return Array.isArray(res.data) ? res.data : Array.isArray(res.data?.items) ? res.data.items : [];
+    const fams = Array.isArray(res.data) ? res.data : Array.isArray(res.data?.items) ? res.data.items : [];
+    return fams;
   } catch (err) {
-    console.warn('API fetchFamilies error (DB empty or endpoint offline):', err);
+    console.error('API fetchFamilies error:', err);
     return [];
   }
 }

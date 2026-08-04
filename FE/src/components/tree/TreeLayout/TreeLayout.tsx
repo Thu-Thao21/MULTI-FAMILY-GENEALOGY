@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { fetchFamilies } from '../../../services/member.service';
 import { buildErgoTreeFromDB } from '../../../services/tree.service';
 import type { Family, Member } from '../../../types/member';
-import type { ErgoTreeNode, TreeContextMenuState, TreeViewMode } from '../../../types/tree';
+import type { ErgoTreeNode, TreeContextMenuState } from '../../../types/tree';
 import { ErgoTreeCanvas } from '../ErgoTreeCanvas';
 import { TreeContextMenu } from '../TreeContextMenu';
 import { NotificationModal } from '../../common/NotificationModal';
@@ -10,20 +10,18 @@ import '../Tree.css';
 import './TreeLayout.css';
 
 export interface TreeLayoutProps {
-  initialMode?: TreeViewMode;
   onSelectMemberProfile?: (memberId: string) => void;
 }
 
 export const TreeLayout: React.FC<TreeLayoutProps> = ({
-  initialMode = 'vertical',
   onSelectMemberProfile,
 }) => {
-  const [viewMode, setViewMode] = useState<TreeViewMode>(initialMode);
   const [families, setFamilies] = useState<Family[]>([]);
   const [selectedFamilyId, setSelectedFamilyId] = useState<string>('');
   const [allMembers, setAllMembers] = useState<Member[]>([]);
   const [treeNodes, setTreeNodes] = useState<ErgoTreeNode[]>([]);
   const [focusMemberId, setFocusMemberId] = useState<string | undefined>(undefined);
+  const [treeDirection, setTreeDirection] = useState<'vertical' | 'horizontal'>('vertical');
   const [zoomScale, setZoomScale] = useState<number>(1);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -78,7 +76,6 @@ export const TreeLayout: React.FC<TreeLayoutProps> = ({
 
   const handleSelectFocus = (node: ErgoTreeNode) => {
     setFocusMemberId(node.id);
-    setViewMode('focus');
     setContextMenu((prev) => ({ ...prev, isOpen: false }));
   };
 
@@ -94,42 +91,58 @@ export const TreeLayout: React.FC<TreeLayoutProps> = ({
     setIsToastOpen(true);
   };
 
+  // Quick stats calculation
+  const maleCount = allMembers.filter((m) => m.gender === 'male').length;
+  const femaleCount = allMembers.filter((m) => m.gender === 'female').length;
+  const maxGen = allMembers.length > 0 ? Math.max(...allMembers.map((m) => m.generation || 1)) : 1;
+
   return (
     <div className="tree-page-layout">
       {/* Top Controls Toolbar */}
       <div className="tree-toolbar-card">
-        <div>
-          <h2 className="tree-toolbar-title">
-            🌳 Cây Gia Phả Trực Hệ (Mô hình ERGO-Centric)
-          </h2>
+        <div className="tree-toolbar-header-info">
+          <div className="tree-toolbar-title-row">
+            <h2 className="tree-toolbar-title">
+              Cây Gia Phả Trực Hệ
+            </h2>
+            <div className="tree-stats-pill-group">
+              <span className="tree-stat-pill blue">{allMembers.length} Thành viên</span>
+              <span className="tree-stat-pill purple">{maxGen} Thế hệ</span>
+              <span className="tree-stat-pill teal">{maleCount} Nam</span>
+              <span className="tree-stat-pill pink">{femaleCount} Nữ</span>
+            </div>
+          </div>
           <p className="tree-toolbar-subtitle">
-            {viewMode === 'focus'
-              ? '🎯 Đang hiển thị chế độ Tập trung (Focus View) theo người làm trung tâm.'
-              : 'Hiển thị sơ đồ trực hệ đa thế hệ từ dữ liệu PostgreSQL.'}
+            {focusMemberId
+              ? 'Đang hiển thị phân nhánh sơ đồ theo người làm trung tâm.'
+              : 'Hiển thị sơ đồ trực hệ đa thế hệ kết nối gia tộc.'}
           </p>
         </div>
 
         <div className="tree-toolbar-right">
-          {/* Mode Selector */}
-          <div className="tree-mode-group">
+          {/* Tree Direction Toggle: Vertical (Dọc) vs Horizontal (Ngang) */}
+          <div className="tree-dir-toggle-group">
             <button
-              className={`tree-mode-btn ${viewMode === 'vertical' ? 'active' : ''}`}
-              onClick={() => setViewMode('vertical')}
+              className={`tree-dir-btn ${treeDirection === 'vertical' ? 'active' : ''}`}
+              onClick={() => setTreeDirection('vertical')}
+              title="Chuyển sơ đồ dọc (Từ trên xuống)"
             >
-              📊 Sơ đồ đứng
+              ⬇ Dọc
             </button>
             <button
-              className={`tree-mode-btn ${viewMode === 'horizontal' ? 'active' : ''}`}
-              onClick={() => setViewMode('horizontal')}
+              className={`tree-dir-btn ${treeDirection === 'horizontal' ? 'active' : ''}`}
+              onClick={() => setTreeDirection('horizontal')}
+              title="Chuyển sơ đồ ngang (Từ trái sang phải)"
             >
-              ↔ Sơ đồ ngang
+              ➔ Ngang
             </button>
-            <button
-              className={`tree-mode-btn ${viewMode === 'focus' ? 'active' : ''}`}
-              onClick={() => setViewMode('focus')}
-            >
-              🎯 Tập trung (Focus)
-            </button>
+          </div>
+
+          {/* Legend Badges */}
+          <div className="tree-legend-group">
+            <span className="tree-legend-item male">Nam</span>
+            <span className="tree-legend-item female">Nữ (Dâu)</span>
+            <span className="tree-legend-item focus">Đang chọn</span>
           </div>
 
           {/* Family Dropdown */}
@@ -140,19 +153,16 @@ export const TreeLayout: React.FC<TreeLayoutProps> = ({
           >
             {families.map((f) => (
               <option key={f.id} value={f.id}>
-                {f.name} ({f.memberCount} thành viên)
+                {f.name} ({f.memberCount || allMembers.length} thành viên)
               </option>
             ))}
           </select>
 
           {/* Focus Member Dropdown */}
           <select
-            className="tree-control-select"
+            className="tree-control-select focus-select"
             value={focusMemberId || ''}
-            onChange={(e) => {
-              setFocusMemberId(e.target.value || undefined);
-              if (e.target.value) setViewMode('focus');
-            }}
+            onChange={(e) => setFocusMemberId(e.target.value || undefined)}
           >
             <option value="">-- Chọn người làm trung tâm --</option>
             {allMembers.map((m) => (
@@ -163,26 +173,43 @@ export const TreeLayout: React.FC<TreeLayoutProps> = ({
           </select>
 
           {/* Zoom Buttons */}
-          <button className="tree-control-btn" onClick={() => setZoomScale((z) => Math.min(1.6, z + 0.15))}>
-            🔍 +
-          </button>
-          <button className="tree-control-btn" onClick={() => setZoomScale((z) => Math.max(0.5, z - 0.15))}>
-            🔍 -
-          </button>
-          <button className="tree-control-btn" onClick={() => setZoomScale(1)}>
-            ↺ 100%
-          </button>
+          <div className="tree-zoom-btn-group">
+            <button
+              className="tree-control-btn"
+              onClick={() => setZoomScale((z) => Math.min(1.6, z + 0.15))}
+              title="Phóng to"
+            >
+              +
+            </button>
+            <button
+              className="tree-control-btn"
+              onClick={() => setZoomScale((z) => Math.max(0.5, z - 0.15))}
+              title="Thu nhỏ"
+            >
+              -
+            </button>
+            <button
+              className="tree-control-btn reset"
+              onClick={() => {
+                setZoomScale(1);
+                setFocusMemberId(undefined);
+              }}
+              title="Đặt lại góc nhìn"
+            >
+              {Math.round(zoomScale * 100)}%
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Canvas Area */}
       {loading ? (
         <div className="tree-canvas-prompt-loading">
-          🔄 Đang tính toán sơ đồ trực hệ ERGO từ cơ sở dữ liệu...
+          Đang tính toán sơ đồ trực hệ gia phả...
         </div>
       ) : treeNodes.length === 0 ? (
         <div className="tree-canvas-prompt-empty">
-          📂 Chưa có dữ liệu cây gia phả phù hợp.
+          Chưa có dữ liệu cây gia phả phù hợp.
         </div>
       ) : (
         <ErgoTreeCanvas
@@ -190,6 +217,7 @@ export const TreeLayout: React.FC<TreeLayoutProps> = ({
           onCardClick={handleCardClick}
           onContextMenu={handleContextMenu}
           zoomScale={zoomScale}
+          direction={treeDirection}
         />
       )}
 
@@ -205,11 +233,10 @@ export const TreeLayout: React.FC<TreeLayoutProps> = ({
         onActionToast={handleActionToast}
       />
 
-      {/* Toast */}
+      {/* Notification Toast */}
       <NotificationModal
         isOpen={isToastOpen}
         onClose={() => setIsToastOpen(false)}
-        icon="🌳"
       />
     </div>
   );

@@ -39,39 +39,39 @@ export const TreeContextMenu: React.FC<TreeContextMenuProps> = ({
       onClick={(e) => e.stopPropagation()}
     >
       <button className="tree-context-menu-item" onClick={() => onActionToast('Chỉnh sửa')}>
-        📝 Sửa
+        Sửa
       </button>
 
       <button className="tree-context-menu-item" onClick={() => onViewBio(node)}>
-        ▶ Xem tiểu sử
+        Xem tiểu sử
       </button>
 
       <button className="tree-context-menu-item danger" onClick={() => onActionToast('Xóa')}>
-        🗑 Xóa
+        Xóa
       </button>
 
       <div className="tree-context-menu-divider" />
 
       <button className="tree-context-menu-item" onClick={() => onActionToast('Di chuyển')}>
-        ✛ Di chuyển
+        Di chuyển
       </button>
 
       <button className="tree-context-menu-item" onClick={() => onActionToast('Thêm con')}>
-        ➕ Thêm con
+        Thêm con
       </button>
 
       <button className="tree-context-menu-item" onClick={() => onActionToast('Thêm Vợ/Chồng')}>
-        ➕ Thêm Vợ/Chồng
+        Thêm Vợ/Chồng
       </button>
 
       <button className="tree-context-menu-item" onClick={() => onSelectFocus(node)}>
-        🌲 Duyệt riêng nhánh này
+        Duyệt riêng nhánh này
       </button>
 
       <div className="tree-context-menu-divider" />
 
       <button className="tree-context-menu-item" onClick={onClose}>
-        ✖ Thoát
+        Thoát
       </button>
     </div>
   );

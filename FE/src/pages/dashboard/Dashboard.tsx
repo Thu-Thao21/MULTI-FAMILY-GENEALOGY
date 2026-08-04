@@ -30,9 +30,10 @@ import './Dashboard.css';
 const TAB_TO_ROUTE: Record<string, string> = {
   // User / Member tabs
   'dashboard':            '', // will resolve to /user or /admin root
-  'tree-vertical':        ROUTES.USER.TREE_VERTICAL,
+  'tree':                 ROUTES.USER.TREE_HORIZONTAL,
+  'tree-vertical':        ROUTES.USER.TREE_HORIZONTAL,
   'tree-horizontal':      ROUTES.USER.TREE_HORIZONTAL,
-  'tree-focus':           ROUTES.USER.TREE_FOCUS,
+  'tree-focus':           ROUTES.USER.TREE_HORIZONTAL,
   'net-noi':              ROUTES.USER.NETWORK_NOI,
   'net-ngoai':            ROUTES.USER.NETWORK_NGOAI,
   'net-dau-re':           ROUTES.USER.NETWORK_DAU_RE,
@@ -76,9 +77,10 @@ const ROUTE_TO_TAB: Array<[string, string]> = [
   [ROUTES.USER.FAMILY_LOGS,          'family-logs'],
   [ROUTES.USER.FAMILY_MANAGEMENT,    'family-management'],
   // User Tree routes
-  [ROUTES.USER.TREE_VERTICAL,   'tree-vertical'],
-  [ROUTES.USER.TREE_HORIZONTAL, 'tree-horizontal'],
-  [ROUTES.USER.TREE_FOCUS,      'tree-focus'],
+  [ROUTES.USER.TREE,            'tree'],
+  [ROUTES.USER.TREE_VERTICAL,   'tree'],
+  [ROUTES.USER.TREE_HORIZONTAL, 'tree'],
+  [ROUTES.USER.TREE_FOCUS,      'tree'],
   // User Network routes
   [ROUTES.USER.NETWORK_NOI,      'net-noi'],
   [ROUTES.USER.NETWORK_NGOAI,    'net-ngoai'],

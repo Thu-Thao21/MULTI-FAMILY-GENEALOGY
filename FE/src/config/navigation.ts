@@ -22,11 +22,7 @@ export const memberNavigation: NavGroup[] = [
       {
         id: 'tree',
         label: 'Cây Gia Phả',
-        children: [
-          { id: 'tree-vertical', label: 'Sơ đồ đứng (Vertical)', route: ROUTES.USER.TREE_VERTICAL },
-          { id: 'tree-horizontal', label: 'Sơ đồ ngang (Horizontal)', route: ROUTES.USER.TREE_HORIZONTAL },
-          { id: 'tree-focus', label: 'Chế độ Tập trung (Focus View)', route: ROUTES.USER.TREE_FOCUS },
-        ],
+        route: ROUTES.USER.TREE_HORIZONTAL,
       },
       {
         id: 'network',
