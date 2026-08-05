@@ -33,11 +33,11 @@ export const TopBar: React.FC<TopBarProps> = ({
           className="topbar-toggle-btn"
           title={isSidebarCollapsed ? 'Mở rộng Menu' : 'Thu gọn Menu'}
         >
-          {isSidebarCollapsed ? '☰' : '◀'}
+          {isSidebarCollapsed ? '☰' : ''}
         </button>
 
         <div className="topbar-brand-box">
-          <div className="topbar-logo-icon">🌱</div>
+          <div className="topbar-logo-icon"></div>
           <div>
             <div className="topbar-system-tag">HỆ THỐNG GIA PHẢ LIÊN HỌ</div>
             <div className="topbar-brand-title">Gia Phả Việt</div>

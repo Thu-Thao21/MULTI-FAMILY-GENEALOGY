@@ -42,7 +42,7 @@ export const ProfileLayout: React.FC<ProfileLayoutProps> = ({ memberId, onBack }
   if (!member) {
     return (
       <div className="profile-not-found-box">
-        <p className="profile-not-found-text">⚠️ Không tìm thấy dữ liệu hồ sơ thành viên.</p>
+        <p className="profile-not-found-text"> Không tìm thấy dữ liệu hồ sơ thành viên.</p>
         {onBack && (
           <button className="profile-back-btn" onClick={onBack}>
             ← Quay lại danh sách
@@ -52,14 +52,14 @@ export const ProfileLayout: React.FC<ProfileLayoutProps> = ({ memberId, onBack }
     );
   }
 
-  const tabs: Array<{ key: ProfileTabKey; label: string; icon: string }> = [
-    { key: 'personal', label: 'Thông tin cá nhân', icon: '👤' },
-    { key: 'biography', label: 'Tiểu sử & Dòng thời gian', icon: '📜' },
-    { key: 'contact', label: 'Thông tin liên hệ', icon: '📞' },
-    { key: 'photos', label: 'Thư viện hình ảnh', icon: '🖼️' },
-    { key: 'contributions', label: 'Đóng góp & Năng lực', icon: '🏅' },
-    { key: 'status', label: 'Trạng thái & An táng', icon: '🕯️' },
-    { key: 'account', label: 'Tài khoản hệ thống', icon: '🔐' },
+  const tabs: Array<{ key: ProfileTabKey; label: string; icon?: string }> = [
+    { key: 'personal', label: 'Thông tin cá nhân' },
+    { key: 'biography', label: 'Tiểu sử & Dòng thời gian' },
+    { key: 'contact', label: 'Thông tin liên hệ' },
+    { key: 'photos', label: 'Thư viện hình ảnh' },
+    { key: 'contributions', label: 'Đóng góp & Năng lực' },
+    { key: 'status', label: 'Trạng thái & An táng' },
+    { key: 'account', label: 'Tài khoản hệ thống' },
   ];
 
   return (
@@ -97,13 +97,13 @@ export const ProfileLayout: React.FC<ProfileLayoutProps> = ({ memberId, onBack }
 
             <div className="profile-header-meta">
               <div className="profile-meta-item">
-                💼 <strong>{member.occupation || 'Chưa cập nhật nghề nghiệp'}</strong>
+                <strong>{member.occupation || 'Chưa cập nhật nghề nghiệp'}</strong>
               </div>
               <div className="profile-meta-item">
-                🎓 <strong>{member.education || 'Chưa cập nhật học vấn'}</strong>
+                <strong>{member.education || 'Chưa cập nhật học vấn'}</strong>
               </div>
               <div className="profile-meta-item">
-                {member.isAlive ? '🟢 Còn sống' : '🕯️ Đã mất'}
+                {member.isAlive ? 'Còn sống' : 'Đã mất'}
               </div>
             </div>
           </div>
@@ -118,7 +118,7 @@ export const ProfileLayout: React.FC<ProfileLayoutProps> = ({ memberId, onBack }
             className={`profile-tab-btn ${activeTab === t.key ? 'active' : ''}`}
             onClick={() => setActiveTab(t.key)}
           >
-            <span>{t.icon}</span>
+            {t.icon && <span>{t.icon}</span>}
             <span>{t.label}</span>
           </button>
         ))}

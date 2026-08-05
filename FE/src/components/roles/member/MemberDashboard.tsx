@@ -28,7 +28,7 @@ export const MemberDashboard: React.FC<MemberDashboardProps> = ({
         <div className="member-dash-head-section">
           <div className="member-dash-head-header">
             <div className="member-dash-head-title-row">
-              <span className="member-dash-head-icon">👑</span>
+              <span className="member-dash-head-icon"></span>
               <h3 className="member-dash-head-title">
                 Khu Vực Quản Lý Dòng Họ
               </h3>
@@ -46,25 +46,25 @@ export const MemberDashboard: React.FC<MemberDashboardProps> = ({
               onClick={() => onNavigateTab && onNavigateTab('family-management')}
               className="member-dash-head-btn"
             >
-              👥 Quản lý thành viên
+               Quản lý thành viên
             </button>
             <button
               onClick={() => onNavigateTab && onNavigateTab('family-branches')}
               className="member-dash-head-btn"
             >
-              🌿 Quản lý Chi & Nhánh
+               Quản lý Chi & Nhánh
             </button>
             <button
               onClick={() => onNavigateTab && onNavigateTab('family-approvals')}
               className="member-dash-head-btn"
             >
-              ✅ Phê duyệt đề xuất
+               Phê duyệt đề xuất
             </button>
             <button
               onClick={() => onNavigateTab && onNavigateTab('family-import-export')}
               className="member-dash-head-btn"
             >
-              📥 Xuất nhập dữ liệu
+               Xuất nhập dữ liệu
             </button>
           </div>
         </div>

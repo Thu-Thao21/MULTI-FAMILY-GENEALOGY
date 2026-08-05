@@ -28,13 +28,13 @@ export const InLawMarriagesTab: React.FC = () => {
             {marriages.map((m) => (
               <div key={m.id} className="network-marriage-row">
                 <div className="network-marriage-person">
-                  <div className="network-marriage-avatar-icon">🤵</div>
+                  <div className="network-marriage-avatar-icon"></div>
                   <div className="network-marriage-name">{m.husbandName}</div>
                   <div className="network-marriage-family">{m.husbandFamily}</div>
                 </div>
 
                 <div className="network-marriage-center-col">
-                  <div className="network-marriage-heart">💍</div>
+                  <div className="network-marriage-heart"></div>
                   <div className="network-marriage-date">
                     {m.marriageDate || 'Chưa rõ ngày'}
                   </div>
@@ -42,7 +42,7 @@ export const InLawMarriagesTab: React.FC = () => {
                 </div>
 
                 <div className="network-marriage-person">
-                  <div className="network-marriage-avatar-icon">👰</div>
+                  <div className="network-marriage-avatar-icon"></div>
                   <div className="network-marriage-name">{m.wifeName}</div>
                   <div className="network-marriage-family">{m.wifeFamily}</div>
                 </div>

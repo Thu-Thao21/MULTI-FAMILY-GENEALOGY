@@ -19,7 +19,7 @@ export const ContactTab: React.FC<ContactTabProps> = ({ member }) => {
             {contacts.map((c) => (
               <div key={c.id} className="contact-item-row">
                 <div className="contact-icon-badge">
-                  {c.contactType === 'email' ? '✉️' : c.contactType === 'phone' ? '📱' : '💬'}
+                  {c.contactType === 'email' ? '' : c.contactType === 'phone' ? '' : ''}
                 </div>
                 <div className="contact-item-content">
                   <div className="contact-type-label">
@@ -34,7 +34,7 @@ export const ContactTab: React.FC<ContactTabProps> = ({ member }) => {
           <div className="contact-item-list">
             {member.contact.phone && (
               <div className="contact-item-row">
-                <div className="contact-icon-badge">📱</div>
+                <div className="contact-icon-badge"></div>
                 <div>
                   <div className="contact-type-label">SỐ ĐIỆN THOẠI</div>
                   <div className="contact-value-text">{member.contact.phone}</div>
@@ -43,7 +43,7 @@ export const ContactTab: React.FC<ContactTabProps> = ({ member }) => {
             )}
             {member.contact.email && (
               <div className="contact-item-row">
-                <div className="contact-icon-badge">✉️</div>
+                <div className="contact-icon-badge"></div>
                 <div>
                   <div className="contact-type-label">EMAIL</div>
                   <div className="contact-value-text">{member.contact.email}</div>
@@ -52,7 +52,7 @@ export const ContactTab: React.FC<ContactTabProps> = ({ member }) => {
             )}
             {member.contact.address && (
               <div className="contact-item-row">
-                <div className="contact-icon-badge">🏠</div>
+                <div className="contact-icon-badge"></div>
                 <div>
                   <div className="contact-type-label">ĐỊA CHỈ THƯỜNG TRÚ</div>
                   <div className="contact-value-text">{member.contact.address}</div>

@@ -34,7 +34,7 @@ export const AffiliatedFamiliesTab: React.FC = () => {
                 </p>
                 <div className="network-family-meta">
                   <span className="network-meta-chip amber">{f.memberCount} thành viên</span>
-                  <span className="network-meta-chip">📍 {f.originPlace || 'Chưa rõ quê quán'}</span>
+                  <span className="network-meta-chip"> {f.originPlace || 'Chưa rõ quê quán'}</span>
                   <span className="network-meta-chip purple">Thông gia</span>
                 </div>
               </div>

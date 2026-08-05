@@ -25,7 +25,7 @@ export const BiographyTab: React.FC<BiographyTabProps> = ({ member }) => {
               <div key={evt.id} className="profile-timeline-item">
                 <div className="profile-timeline-year">{evt.eventDate || 'Thời gian chưa rõ'}</div>
                 <div className="profile-timeline-title">{evt.title}</div>
-                {evt.location && <div className="biography-location">📍 {evt.location}</div>}
+                {evt.location && <div className="biography-location"> {evt.location}</div>}
                 {evt.description && <div className="profile-timeline-desc">{evt.description}</div>}
               </div>
             ))}

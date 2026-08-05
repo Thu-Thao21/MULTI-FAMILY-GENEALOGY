@@ -12,7 +12,7 @@ export const StatusTab: React.FC<StatusTabProps> = ({ member }) => {
     <div className="status-tab-wrapper">
       <div className={`profile-card ${member.isAlive ? 'status-alive-card' : 'status-deceased-card'}`}>
         <h3 className="profile-card-title">
-          {member.isAlive ? '🟢 Trạng Thái: Đang Sinh Sống' : '🕯️ Trạng Thái: Đã Qua Đời (Tưởng Niệm)'}
+          {member.isAlive ? 'Trạng Thái: Đang Sinh Sống' : 'Trạng Thái: Đã Qua Đời (Tưởng Niệm)'}
         </h3>
 
         <div className="profile-info-grid">

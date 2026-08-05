@@ -34,7 +34,7 @@ export const FamilyMaternalTab: React.FC = () => {
                 </p>
                 <div className="network-family-meta">
                   <span className="network-meta-chip purple">{f.memberCount} thành viên</span>
-                  <span className="network-meta-chip">📍 {f.originPlace || 'Chưa rõ quê quán'}</span>
+                  <span className="network-meta-chip"> {f.originPlace || 'Chưa rõ quê quán'}</span>
                   {f.branches.map((b, i) => (
                     <span key={i} className="network-meta-chip amber">{b}</span>
                   ))}

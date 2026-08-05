@@ -25,7 +25,7 @@ import { ROUTES } from '../../config/routes';
 import type { TreeViewMode } from '../../types/tree';
 import './Dashboard.css';
 
-// ===== Tab ID ↔ URL Route Mapping =====
+// ===== Tab ID  URL Route Mapping =====
 // Maps every sidebar/card tab ID to a URL route from routes.ts
 const TAB_TO_ROUTE: Record<string, string> = {
   // User / Member tabs
@@ -105,7 +105,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ userName, onLogout }) => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
   const [isProcessingToastOpen, setIsProcessingToastOpen] = useState(false);
-  const [toastIcon, setToastIcon] = useState('🌳');
+  const [toastIcon, setToastIcon] = useState('');
 
   const displayUserName = account?.display_name || account?.username || firebaseUser?.displayName || userName || 'Người dùng';
   const primaryRole = account?.primary_role || 'member';
@@ -145,19 +145,19 @@ export const Dashboard: React.FC<DashboardProps> = ({ userName, onLogout }) => {
     } else if (tabId === 'member-profile') {
       // keep selectedMemberId
     } else if (tabId === 'member-add') {
-      setToastIcon('👤');
+      setToastIcon('');
       setIsProcessingToastOpen(true);
     } else if (tabId === 'finder-auto' || tabId === 'finder-path') {
-      setToastIcon('🔍');
+      setToastIcon('');
       setIsProcessingToastOpen(true);
     } else if (tabId === 'export-pdf' || tabId === 'export-excel') {
-      setToastIcon('📄');
+      setToastIcon('');
       setIsProcessingToastOpen(true);
     } else if (tabId === 'import-data') {
-      setToastIcon('📥');
+      setToastIcon('');
       setIsProcessingToastOpen(true);
     } else if (tabId === 'admin-role-requests') {
-      setToastIcon('⭐');
+      setToastIcon('');
       setIsProcessingToastOpen(true);
     }
   }, [navigate, basePath]);
@@ -283,7 +283,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ userName, onLogout }) => {
 
       <footer className="dashboard-footer">
         <div className="dashboard-footer-inner">
-          <strong className="dashboard-footer-brand">MULTI-FAMILY GENEALOGY SYSTEM</strong> © 2026 •
+          <strong className="dashboard-footer-brand">MULTI-FAMILY GENEALOGY SYSTEM</strong>  2026 •
           Số hóa & Gắn kết các dòng họ Việt Nam.
         </div>
       </footer>

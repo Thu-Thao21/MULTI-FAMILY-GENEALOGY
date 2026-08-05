@@ -127,7 +127,7 @@ export const TreeLayout: React.FC<TreeLayoutProps> = ({
               onClick={() => setTreeDirection('vertical')}
               title="Chuyển sơ đồ dọc (Từ trên xuống)"
             >
-              ⬇ Dọc
+               Dọc
             </button>
             <button
               className={`tree-dir-btn ${treeDirection === 'horizontal' ? 'active' : ''}`}

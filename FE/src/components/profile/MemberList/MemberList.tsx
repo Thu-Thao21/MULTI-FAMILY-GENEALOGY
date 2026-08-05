@@ -45,7 +45,7 @@ export const MemberList: React.FC<MemberListProps> = ({ onSelectMember }) => {
           <input
             type="text"
             className="member-search-input"
-            placeholder="🔍 Tìm tên, nghề nghiệp..."
+            placeholder=" Tìm tên, nghề nghiệp..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -68,11 +68,11 @@ export const MemberList: React.FC<MemberListProps> = ({ onSelectMember }) => {
       <div className="member-table-card">
         {loading ? (
           <div className="member-table-prompt-loading">
-            🔄 Đang tải danh sách thành viên từ cơ sở dữ liệu...
+             Đang tải danh sách thành viên từ cơ sở dữ liệu...
           </div>
         ) : members.length === 0 ? (
           <div className="member-table-prompt-empty">
-            📂 Chưa có thành viên nào phù hợp với bộ lọc.
+             Chưa có thành viên nào phù hợp với bộ lọc.
           </div>
         ) : (
           <table className="member-table">
@@ -103,7 +103,7 @@ export const MemberList: React.FC<MemberListProps> = ({ onSelectMember }) => {
                       </div>
                     </div>
                   </td>
-                  <td>{m.gender === 'male' ? 'Nam 👨' : 'Nữ 👩'}</td>
+                  <td>{m.gender === 'male' ? 'Nam ' : 'Nữ '}</td>
                   <td>
                     <span className="member-generation-text">Đời {m.generation}</span>
                   </td>

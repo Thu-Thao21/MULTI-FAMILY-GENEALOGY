@@ -10,7 +10,7 @@ export interface NotificationModalProps {
 export const NotificationModal: React.FC<NotificationModalProps> = ({
   isOpen,
   onClose,
-  icon = '🌳',
+  icon = '',
 }) => {
   useEffect(() => {
     if (!isOpen) return;

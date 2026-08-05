@@ -19,7 +19,7 @@ export const ContributionsTab: React.FC<ContributionsTabProps> = ({ member }) =>
           <div className="contributions-skills-grid">
             {skills.map((s) => (
               <div key={s.id} className="contribution-badge-chip">
-                <span>⭐</span>
+                <span></span>
                 <span>{s.skillName}</span>
                 <span className="contribution-level-text">({s.proficiencyLevel})</span>
               </div>
@@ -31,7 +31,7 @@ export const ContributionsTab: React.FC<ContributionsTabProps> = ({ member }) =>
       </div>
 
       <div className="profile-card">
-        <h3 className="profile-card-title">🤝 Đóng Góp Với Dòng Họ & Xã Hội</h3>
+        <h3 className="profile-card-title">Đóng Góp Với Dòng Họ & Xã Hội</h3>
         {contrib ? (
           <div className="profile-info-grid">
             <div className="profile-info-item">

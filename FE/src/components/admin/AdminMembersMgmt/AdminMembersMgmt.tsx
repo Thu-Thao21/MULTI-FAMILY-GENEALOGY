@@ -295,8 +295,8 @@ export const AdminMembersMgmt: React.FC = () => {
                         value={formData.gender || 'male'}
                         onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
                       >
-                        <option value="male">👨 Nam</option>
-                        <option value="female">👩 Nữ</option>
+                        <option value="male"> Nam</option>
+                        <option value="female"> Nữ</option>
                       </select>
                     </div>
 
@@ -317,8 +317,8 @@ export const AdminMembersMgmt: React.FC = () => {
                         value={formData.is_alive ? 'true' : 'false'}
                         onChange={(e) => setFormData({ ...formData, is_alive: e.target.value === 'true' })}
                       >
-                        <option value="true">🟢 Còn sống</option>
-                        <option value="false">⚪ Đã mất</option>
+                        <option value="true"> Còn sống</option>
+                        <option value="false"> Đã mất</option>
                       </select>
                     </div>
                   </div>

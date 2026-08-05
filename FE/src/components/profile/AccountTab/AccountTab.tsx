@@ -29,7 +29,7 @@ export const AccountTab: React.FC<AccountTabProps> = ({ member }) => {
           <div className="profile-info-item">
             <span className="profile-info-label">Trạng thái tài khoản</span>
             <div>
-              <span className="account-status-badge">🟢 Đã kích hoạt</span>
+              <span className="account-status-badge"> Đã kích hoạt</span>
             </div>
           </div>
         </div>

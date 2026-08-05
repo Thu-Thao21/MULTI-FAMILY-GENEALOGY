@@ -44,7 +44,7 @@ export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onSwitch
           }
           const result = await sendPhoneOtp(emailOrPhone, recaptchaRef.current);
           setConfirmationResult(result);
-          setOtpTip(`📲 Mã SMS OTP đã được gửi trực tiếp về số điện thoại ${emailOrPhone}. Vui lòng kiểm tra tin nhắn SMS.`);
+          setOtpTip(` Mã SMS OTP đã được gửi trực tiếp về số điện thoại ${emailOrPhone}. Vui lòng kiểm tra tin nhắn SMS.`);
         } catch (fbErr: any) {
           console.warn('Firebase SMS Error/Billing restriction, falling back to Backend OTP:', fbErr);
           const res = await requestPasswordResetOTP(emailOrPhone);
@@ -130,7 +130,7 @@ export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onSwitch
         </form>
       ) : (
         <form onSubmit={handleResetPassword} className="forgot-form-body">
-          {otpTip ? <p className="forgot-form-otp-tip">📩 {otpTip}</p> : null}
+          {otpTip ? <p className="forgot-form-otp-tip"> {otpTip}</p> : null}
 
           <div className="forgot-form-group">
             <label className="forgot-form-label">Mã OTP xác thực (6 chữ số)</label>
@@ -170,7 +170,7 @@ export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onSwitch
           </div>
 
           {error ? <p className="forgot-form-error">{error}</p> : null}
-          {successMsg ? <p className="forgot-form-success">✅ {successMsg}</p> : null}
+          {successMsg ? <p className="forgot-form-success"> {successMsg}</p> : null}
 
           <button type="submit" disabled={isSubmitting} className="forgot-form-submit">
             {isSubmitting ? 'Đang đặt lại...' : 'Xác nhận đặt lại mật khẩu'}
