@@ -59,7 +59,7 @@ export const AdminApprovalsMgmt: React.FC = () => {
       {/* Header */}
       <div className="admin-account-header">
         <div>
-          <h2 className="admin-account-title">📋 Trung Tâm Phê Duyệt & Đề Xuất Thay Đổi Dữ Liệu</h2>
+          <h2 className="admin-account-title">Trung Tâm Phê Duyệt & Đề Xuất Thay Đổi Dữ Liệu</h2>
           <p className="admin-account-subtitle">
             Phê duyệt hoặc từ chối mọi đề xuất thay đổi hồ sơ, cây gia phả và thông tin thân tộc từ người dùng.
           </p>
@@ -134,15 +134,15 @@ export const AdminApprovalsMgmt: React.FC = () => {
                     {p.status === 'pending' ? (
                       <div className="action-btn-row">
                         <button className="btn-icon-action unlock" onClick={() => handleApprove(p)}>
-                          ✓ Phê duyệt
+                          Phê duyệt
                         </button>
                         <button className="btn-icon-action lock" onClick={() => handleOpenRejectModal(p)}>
-                          ✕ Từ chối
+                          Từ chối
                         </button>
                       </div>
                     ) : (
                       <span className={p.status === 'approved' ? 'status-badge-active' : 'status-badge-locked'}>
-                        {p.status === 'approved' ? '🟢 Đã phê duyệt' : '🔴 Đã từ chối'}
+                        {p.status === 'approved' ? 'Đã phê duyệt' : 'Đã từ chối'}
                       </span>
                     )}
                   </td>
@@ -158,7 +158,7 @@ export const AdminApprovalsMgmt: React.FC = () => {
         <div className="admin-modal-overlay">
           <div className="admin-modal-box">
             <div className="admin-modal-header">
-              <h3>✕ Từ Chối Đề Xuất Thay Đổi</h3>
+              <h3>Từ Chối Đề Xuất Thay Đổi</h3>
               <button className="admin-modal-close" onClick={() => setIsRejectModalOpen(false)}>✕</button>
             </div>
 

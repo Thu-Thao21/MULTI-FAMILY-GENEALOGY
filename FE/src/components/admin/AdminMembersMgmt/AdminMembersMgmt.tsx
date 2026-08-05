@@ -135,7 +135,7 @@ export const AdminMembersMgmt: React.FC = () => {
       {/* Header Controls */}
       <div className="admin-account-header">
         <div>
-          <h2 className="admin-account-title">👥 Quản Lý Hồ Sơ & Thành Viên Toàn Gia Tộc</h2>
+          <h2 className="admin-account-title">Quản Lý Hồ Sơ & Thành Viên Toàn Gia Tộc</h2>
           <p className="admin-account-subtitle">
             Thêm, sửa, xóa hồ sơ thành viên, trạng thái an táng, tiểu sử, học vấn, thành tựu, liên hệ và năng lực đóng góp.
           </p>
@@ -145,7 +145,7 @@ export const AdminMembersMgmt: React.FC = () => {
           <input
             type="text"
             className="admin-search-input"
-            placeholder="🔍 Tìm tên, nghề nghiệp, chi nhánh..."
+            placeholder="Tìm tên, nghề nghiệp, chi nhánh..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -155,11 +155,11 @@ export const AdminMembersMgmt: React.FC = () => {
             onChange={(e) => setStatusFilter(e.target.value)}
           >
             <option value="">Tất cả trạng thái</option>
-            <option value="alive">🟢 Còn sống</option>
-            <option value="deceased">⚪ Đã mất</option>
+            <option value="alive">Còn sống</option>
+            <option value="deceased">Đã mất</option>
           </select>
           <button className="admin-btn-primary" onClick={handleOpenAddModal}>
-            ➕ Thêm Thành Viên Mới
+            Thêm Thành Viên Mới
           </button>
         </div>
       </div>
@@ -192,7 +192,7 @@ export const AdminMembersMgmt: React.FC = () => {
                     {m.other_name && <div className="admin-mem-othername">{m.other_name}</div>}
                   </td>
                   <td>
-                    <div>{m.gender === 'male' ? '👨 Nam' : '👩 Nữ'}</div>
+                    <div>{m.gender === 'male' ? 'Nam' : 'Nữ'}</div>
                     <div className="admin-mem-generation">Đời thứ {m.generation}</div>
                   </td>
                   <td>
@@ -202,10 +202,10 @@ export const AdminMembersMgmt: React.FC = () => {
                   </td>
                   <td>
                     <span className={m.is_alive ? 'status-badge-active status-badge-alive' : 'status-badge-locked status-badge-deceased'}>
-                      {m.is_alive ? '🟢 Còn sống' : '⚪ Đã mất'}
+                      {m.is_alive ? 'Còn sống' : 'Đã mất'}
                     </span>
                     {!m.is_alive && m.burial_place && (
-                      <div className="admin-mem-burial">🪦 {m.burial_place}</div>
+                      <div className="admin-mem-burial">Mộ phần: {m.burial_place}</div>
                     )}
                   </td>
                   <td>
@@ -214,8 +214,8 @@ export const AdminMembersMgmt: React.FC = () => {
                   </td>
                   <td>
                     <div className="action-btn-row">
-                      <button className="btn-icon-action" onClick={() => handleOpenEditModal(m)}>✏️ Chỉnh sửa</button>
-                      <button className="btn-icon-action lock" onClick={() => handleDeleteMember(m)}>🗑️ Xóa</button>
+                      <button className="btn-icon-action" onClick={() => handleOpenEditModal(m)}>Chỉnh sửa</button>
+                      <button className="btn-icon-action lock" onClick={() => handleDeleteMember(m)}>Xóa</button>
                     </div>
                   </td>
                 </tr>
@@ -230,7 +230,7 @@ export const AdminMembersMgmt: React.FC = () => {
         <div className="admin-modal-overlay">
           <div className="admin-modal-box admin-modal-box-lg">
             <div className="admin-modal-header">
-              <h3>{editingMember ? '✏️ Chỉnh Sửa Hồ Sơ Thành Viên' : '➕ Thêm Thành Viên Mới'}</h3>
+              <h3>{editingMember ? 'Chỉnh Sửa Hồ Sơ Thành Viên' : 'Thêm Thành Viên Mới'}</h3>
               <button className="admin-modal-close" onClick={() => setIsModalOpen(false)}>✕</button>
             </div>
 

@@ -46,15 +46,26 @@ export const RoleGuard: React.FC<RoleGuardProps> = ({ allowedRoles, children }) 
     return <Navigate to="/login" replace />;
   }
 
-  const activeRoles = account.roles
+  const primaryRole = (account.primary_role || '').toLowerCase();
+  const activeRoles = (account.roles || [])
     .filter((r) => r.status === 'active')
     .map((r) => r.role.toLowerCase());
 
-  // Super Admin has access to all spaces
-  const hasAccess = activeRoles.includes('admin') || allowedRoles.some((r) => activeRoles.includes(r.toLowerCase()));
+  const isAdmin = primaryRole === 'admin' || activeRoles.includes('admin');
+  const isRequireAdmin = allowedRoles.map((r) => r.toLowerCase()).includes('admin');
 
-  if (!hasAccess) {
-    return <Navigate to="/forbidden" replace />;
+  if (isRequireAdmin) {
+    if (!isAdmin) {
+      return <Navigate to="/user" replace />;
+    }
+  } else {
+    if (isAdmin) {
+      return <Navigate to="/admin" replace />;
+    }
+    const hasRole = allowedRoles.some((r) => activeRoles.includes(r.toLowerCase()) || primaryRole === r.toLowerCase());
+    if (!hasRole) {
+      return <Navigate to="/login" replace />;
+    }
   }
 
   return <>{children}</>;

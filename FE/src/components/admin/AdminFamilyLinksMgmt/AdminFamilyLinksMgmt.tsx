@@ -94,7 +94,7 @@ export const AdminFamilyLinksMgmt: React.FC = () => {
       {/* Header */}
       <div className="admin-account-header">
         <div>
-          <h2 className="admin-account-title">🌐 Mạng Lưới & Phê Duyệt Liên Kết Nhiều Dòng Họ</h2>
+          <h2 className="admin-account-title">Mạng Lưới & Phê Duyệt Liên Kết Nhiều Dòng Họ</h2>
           <p className="admin-account-subtitle">
             Gửi, tiếp nhận, chấp nhận, từ chối, phê duyệt hoặc hủy liên kết giữa các dòng họ (Nội, Ngoại, Dâu, Rể, Thông gia).
           </p>
@@ -102,7 +102,7 @@ export const AdminFamilyLinksMgmt: React.FC = () => {
 
         <div className="admin-account-controls">
           <button className="admin-btn-primary" onClick={() => setIsSendModalOpen(true)}>
-            ➕ Gửi Yêu Cầu Liên Kết Mới
+            Gửi Yêu Cầu Liên Kết Mới
           </button>
         </div>
       </div>
@@ -121,25 +121,25 @@ export const AdminFamilyLinksMgmt: React.FC = () => {
           className={`filter-btn ${activeTypeTab === 'paternal' ? 'active' : ''}`}
           onClick={() => setActiveTypeTab('paternal')}
         >
-          🔴 Họ Nội
+          Họ Nội
         </button>
         <button
           className={`filter-btn ${activeTypeTab === 'maternal' ? 'active' : ''}`}
           onClick={() => setActiveTypeTab('maternal')}
         >
-          🔵 Họ Ngoại
+          Họ Ngoại
         </button>
         <button
           className={`filter-btn ${activeTypeTab === 'in_law' ? 'active' : ''}`}
           onClick={() => setActiveTypeTab('in_law')}
         >
-          🟣 Dâu & Rể
+          Dâu & Rể
         </button>
         <button
           className={`filter-btn ${activeTypeTab === 'affiliated' ? 'active' : ''}`}
           onClick={() => setActiveTypeTab('affiliated')}
         >
-          🟢 Họ Thông Gia
+          Họ Thông Gia
         </button>
       </div>
 
@@ -197,12 +197,12 @@ export const AdminFamilyLinksMgmt: React.FC = () => {
                     <td>
                       <span className={`admin-links-type-badge ${typeClass}`}>
                         {req.link_type === 'paternal'
-                          ? '🔴 Họ Nội'
+                          ? 'Họ Nội'
                           : req.link_type === 'maternal'
-                          ? '🔵 Họ Ngoại'
+                          ? 'Họ Ngoại'
                           : req.link_type === 'in_law'
-                          ? '🟣 Dâu & Rể'
-                          : '🟢 Thông Gia'}
+                          ? 'Dâu & Rể'
+                          : 'Thông Gia'}
                       </span>
                     </td>
                     <td className="admin-links-notes">{req.notes || '—'}</td>
@@ -217,10 +217,10 @@ export const AdminFamilyLinksMgmt: React.FC = () => {
                       }
                     >
                       {req.status === 'pending'
-                        ? '⏳ Chờ duyệt'
+                        ? 'Chờ duyệt'
                         : req.status === 'approved'
-                        ? '🟢 Đã duyệt'
-                        : '🔴 Từ chối'}
+                        ? 'Đã duyệt'
+                        : 'Từ chối'}
                     </span>
                   </td>
                   <td>
@@ -231,18 +231,18 @@ export const AdminFamilyLinksMgmt: React.FC = () => {
                             className="btn-icon-action unlock"
                             onClick={() => handleReview(req.id, 'approved')}
                           >
-                            ✓ Duyệt
+                            Duyệt
                           </button>
                           <button
                             className="btn-icon-action lock"
                             onClick={() => handleReview(req.id, 'rejected')}
                           >
-                            ✕ Từ chối
+                            Từ chối
                           </button>
                         </>
                       ) : (
                         <button className="btn-icon-action lock" onClick={() => handleUnlink(req.id)}>
-                          ⛓️ Hủy liên kết
+                          Hủy liên kết
                         </button>
                       )}
                     </div>
@@ -260,7 +260,7 @@ export const AdminFamilyLinksMgmt: React.FC = () => {
         <div className="admin-modal-overlay">
           <div className="admin-modal-box">
             <div className="admin-modal-header">
-              <h3>➕ Gửi Yêu Cầu Liên Kết Dòng Họ</h3>
+              <h3>Gửi Yêu Cầu Liên Kết Dòng Họ</h3>
               <button className="admin-modal-close" onClick={() => setIsSendModalOpen(false)}>✕</button>
             </div>
 
@@ -284,10 +284,10 @@ export const AdminFamilyLinksMgmt: React.FC = () => {
                   value={sendLinkType}
                   onChange={(e) => setSendLinkType(e.target.value)}
                 >
-                  <option value="paternal">🔴 Họ Nội (Trực hệ chính)</option>
-                  <option value="maternal">🔵 Họ Ngoại (Bên mẹ / ngoại tộc)</option>
-                  <option value="in_law">🟣 Dâu & Rể (Hôn nhân)</option>
-                  <option value="affiliated">🟢 Họ Thông Gia (Liên kết kết nghĩa)</option>
+                  <option value="paternal">Họ Nội (Trực hệ chính)</option>
+                  <option value="maternal">Họ Ngoại (Bên mẹ / ngoại tộc)</option>
+                  <option value="in_law">Dâu & Rể (Hôn nhân)</option>
+                  <option value="affiliated">Họ Thông Gia (Liên kết kết nghĩa)</option>
                 </select>
               </div>
 

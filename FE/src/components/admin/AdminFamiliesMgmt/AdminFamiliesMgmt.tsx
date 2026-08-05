@@ -118,7 +118,7 @@ export const AdminFamiliesMgmt: React.FC = () => {
       {/* Header */}
       <div className="admin-account-header">
         <div>
-          <h2 className="admin-account-title">🏛️ Quản Lý Danh Sách Dòng Họ & Thủy Tổ</h2>
+          <h2 className="admin-account-title">Quản Lý Danh Sách Dòng Họ & Thủy Tổ</h2>
           <p className="admin-account-subtitle">
             Tạo, sửa, xóa dòng họ, cây gia phả, thủy tổ, quê quán, lịch sử dòng họ và địa chỉ nhà thờ họ.
           </p>
@@ -128,12 +128,12 @@ export const AdminFamiliesMgmt: React.FC = () => {
           <input
             type="text"
             className="admin-search-input"
-            placeholder="🔍 Tìm dòng họ, quê quán, thủy tổ..."
+            placeholder="Tìm dòng họ, quê quán, thủy tổ..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
           <button className="admin-btn-primary" onClick={handleOpenAddModal}>
-            ➕ Thêm Dòng Họ Mới
+            Thêm Dòng Họ Mới
           </button>
         </div>
       </div>
@@ -152,7 +152,7 @@ export const AdminFamiliesMgmt: React.FC = () => {
               <div>
                 <div className="family-card-header">
                   <h3 className="family-name-title">{fam.name}</h3>
-                  <span className="family-founder-badge">🏛️ Dòng Họ Active</span>
+                  <span className="family-founder-badge">Dòng Họ Active</span>
                 </div>
 
                 <div className="family-info-line">
@@ -182,10 +182,10 @@ export const AdminFamiliesMgmt: React.FC = () => {
               </div>
 
               <div className="family-card-footer">
-                <span className="admin-fam-id">ID: <code>{fam.id}</code></span>
+                <span className="admin-fam-id">Mã dòng họ: #{fam.id}</span>
                 <div className="action-btn-row">
-                  <button className="btn-icon-action" onClick={() => handleOpenEditModal(fam)}>✏️ Sửa</button>
-                  <button className="btn-icon-action lock" onClick={() => handleDeleteFamily(fam)}>🗑️ Xóa</button>
+                  <button className="btn-icon-action" onClick={() => handleOpenEditModal(fam)}>Sửa</button>
+                  <button className="btn-icon-action lock" onClick={() => handleDeleteFamily(fam)}>Xóa</button>
                 </div>
               </div>
             </div>
@@ -198,7 +198,7 @@ export const AdminFamiliesMgmt: React.FC = () => {
         <div className="admin-modal-overlay">
           <div className="admin-modal-box admin-modal-box-md">
             <div className="admin-modal-header">
-              <h3>{editingFamily ? '✏️ Chỉnh Sửa Dòng Họ' : '➕ Tạo Dòng Họ Mới'}</h3>
+              <h3>{editingFamily ? 'Chỉnh Sửa Dòng Họ' : 'Tạo Dòng Họ Mới'}</h3>
               <button className="admin-modal-close" onClick={() => setIsModalOpen(false)}>✕</button>
             </div>
 

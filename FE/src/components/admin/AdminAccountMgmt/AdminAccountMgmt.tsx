@@ -105,7 +105,7 @@ export const AdminAccountMgmt: React.FC = () => {
       {/* Header & Controls */}
       <div className="admin-account-header">
         <div>
-          <h2 className="admin-account-title">👤 Quản Lý Tài Khoản & Cấp Quyền Hệ Thống</h2>
+          <h2 className="admin-account-title">Quản Lý Tài Khoản & Cấp Quyền Hệ Thống</h2>
           <p className="admin-account-subtitle">
             Khóa, mở khóa, gán vai trò (Admin, Thành viên, Người xem) và quản lý người dùng.
           </p>
@@ -115,7 +115,7 @@ export const AdminAccountMgmt: React.FC = () => {
           <input
             type="text"
             className="admin-search-input"
-            placeholder="🔍 Tìm theo tên, email, sđt..."
+            placeholder="Tìm theo tên, email, sđt..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -174,10 +174,10 @@ export const AdminAccountMgmt: React.FC = () => {
                       }`}
                     >
                       {acc.primary_role === 'admin'
-                        ? '👑 Admin'
+                        ? 'Admin'
                         : acc.primary_role === 'viewer'
-                        ? '👁️ Người xem'
-                        : '🌿 Thành viên'}
+                        ? 'Người xem'
+                        : 'Thành viên'}
                     </span>
                   </td>
                   <td>
@@ -186,7 +186,7 @@ export const AdminAccountMgmt: React.FC = () => {
                         acc.status === 'locked' ? 'status-badge-locked' : 'status-badge-active'
                       }
                     >
-                      {acc.status === 'locked' ? '🔒 Đã khóa' : '🟢 Hoạt động'}
+                      {acc.status === 'locked' ? 'Đã khóa' : 'Hoạt động'}
                     </span>
                   </td>
                   <td className="admin-acc-date">{acc.created_at || 'Mới đây'}</td>
@@ -197,20 +197,20 @@ export const AdminAccountMgmt: React.FC = () => {
                         onClick={() => handleOpenEditModal(acc)}
                         title="Sửa thông tin & vai trò"
                       >
-                        ✏️ Sửa
+                        Sửa
                       </button>
                       <button
                         className={`btn-icon-action ${acc.status === 'locked' ? 'unlock' : 'lock'}`}
                         onClick={() => handleToggleLock(acc)}
                       >
-                        {acc.status === 'locked' ? '🔓 Mở' : '🔒 Khóa'}
+                        {acc.status === 'locked' ? 'Mở' : 'Khóa'}
                       </button>
                       <button
                         className="btn-icon-action lock"
                         onClick={() => handleDeleteAccount(acc)}
                         title="Xóa tài khoản"
                       >
-                        🗑️ Xóa
+                        Xóa
                       </button>
                     </div>
                   </td>
@@ -226,7 +226,7 @@ export const AdminAccountMgmt: React.FC = () => {
         <div className="admin-modal-overlay">
           <div className="admin-modal-box">
             <div className="admin-modal-header">
-              <h3>✏️ Chỉnh Sửa Tài Khoản & Vai Trò</h3>
+              <h3>Chỉnh Sửa Tài Khoản & Vai Trò</h3>
               <button className="admin-modal-close" onClick={() => setIsEditModalOpen(false)}>✕</button>
             </div>
 
@@ -249,9 +249,9 @@ export const AdminAccountMgmt: React.FC = () => {
                   value={editRole}
                   onChange={(e) => setEditRole(e.target.value)}
                 >
-                  <option value="admin">👑 Admin (Quản trị toàn bộ)</option>
-                  <option value="member">🌿 Thành viên (Xem & đóng góp)</option>
-                  <option value="viewer">👁️ Người xem (Chỉ xem dữ liệu)</option>
+                  <option value="admin">Admin (Quản trị toàn bộ)</option>
+                  <option value="member">Thành viên (Xem & đóng góp)</option>
+                  <option value="viewer">Người xem (Chỉ xem dữ liệu)</option>
                 </select>
               </div>
 
@@ -262,8 +262,8 @@ export const AdminAccountMgmt: React.FC = () => {
                   value={editStatus}
                   onChange={(e) => setEditStatus(e.target.value)}
                 >
-                  <option value="active">🟢 Hoạt động</option>
-                  <option value="locked">🔒 Khóa tài khoản</option>
+                  <option value="active">Hoạt động</option>
+                  <option value="locked">Khóa tài khoản</option>
                 </select>
               </div>
 

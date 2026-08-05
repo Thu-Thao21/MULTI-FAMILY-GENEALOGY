@@ -4,7 +4,7 @@ import LoginPage from '../pages/auth/Login';
 import RegisterPage from '../pages/auth/Register';
 import ForgotPasswordPage from '../pages/auth/ForgotPassword';
 import Dashboard from '../pages/dashboard/Dashboard';
-import { ProtectedRoute } from './RouteGuards';
+import { ProtectedRoute, RoleGuard } from './RouteGuards';
 
 export type AuthView = 'login' | 'register' | 'forgot-password' | 'dashboard';
 
@@ -71,7 +71,9 @@ const AppRoutes: React.FC<AppRoutesProps> = ({
         path="/user/*"
         element={
           <ProtectedRoute>
-            <Dashboard userName={userName} onLogout={handleLogout} />
+            <RoleGuard allowedRoles={['member', 'family_head']}>
+              <Dashboard userName={userName} onLogout={handleLogout} />
+            </RoleGuard>
           </ProtectedRoute>
         }
       />
@@ -79,7 +81,9 @@ const AppRoutes: React.FC<AppRoutesProps> = ({
         path="/admin/*"
         element={
           <ProtectedRoute>
-            <Dashboard userName={userName} onLogout={handleLogout} />
+            <RoleGuard allowedRoles={['admin']}>
+              <Dashboard userName={userName} onLogout={handleLogout} />
+            </RoleGuard>
           </ProtectedRoute>
         }
       />

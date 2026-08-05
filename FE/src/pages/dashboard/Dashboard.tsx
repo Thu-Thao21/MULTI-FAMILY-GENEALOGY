@@ -169,18 +169,28 @@ export const Dashboard: React.FC<DashboardProps> = ({ userName, onLogout }) => {
   };
 
   const renderMainContent = () => {
-    // ===== Admin Management Tabs =====
-    if (activeTab === 'admin-permissions' || activeTab === 'admin-account-mgmt') return <AdminAccountMgmt />;
-    if (activeTab === 'admin-families-mgmt') return <AdminFamiliesMgmt />;
-    if (activeTab === 'admin-members-mgmt') return <AdminMembersMgmt />;
-    if (activeTab === 'admin-family-links') return <AdminFamilyLinksMgmt />;
-    if (activeTab === 'admin-approval' || activeTab === 'admin-approvals') return <AdminApprovalsMgmt />;
-    if (activeTab === 'admin-logs' || activeTab === 'admin-security-logs') return <AdminAuditLogsMgmt />;
-    if (activeTab === 'admin-data-backup') return <AdminDataBackupMgmt />;
+    // ===== Branch for System Admin =====
+    if (primaryRole === 'admin') {
+      if (activeTab === 'admin-permissions' || activeTab === 'admin-account-mgmt') return <AdminAccountMgmt />;
+      if (activeTab === 'admin-families-mgmt') return <AdminFamiliesMgmt />;
+      if (activeTab === 'admin-members-mgmt') return <AdminMembersMgmt />;
+      if (activeTab === 'admin-family-links') return <AdminFamilyLinksMgmt />;
+      if (activeTab === 'admin-approval' || activeTab === 'admin-approvals') return <AdminApprovalsMgmt />;
+      if (activeTab === 'admin-logs' || activeTab === 'admin-security-logs') return <AdminAuditLogsMgmt />;
+      if (activeTab === 'admin-data-backup') return <AdminDataBackupMgmt />;
 
-    // ===== Family Head Management Tabs =====
-    if (activeTab === 'family-management') return <AdminMembersMgmt />;
-    if (activeTab === 'family-branches') return <AdminFamiliesMgmt />;
+      // Default Admin View
+      return (
+        <AdminDashboard
+          userName={displayUserName}
+          onNavigateTab={handleSelectTab}
+        />
+      );
+    }
+
+    // ===== Branch for Member & Family Head =====
+    if (activeTab === 'family-management') return <MemberList onSelectMember={handleSelectMember} />;
+    if (activeTab === 'family-branches') return <MemberList onSelectMember={handleSelectMember} />;
     if (activeTab === 'family-approvals') return <AdminApprovalsMgmt />;
     if (activeTab === 'family-import-export') return <AdminDataBackupMgmt />;
     if (activeTab === 'family-logs') return <AdminAuditLogsMgmt />;
@@ -234,16 +244,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ userName, onLogout }) => {
     if (activeTab === 'net-ngoai') return <FamilyMaternalTab />;
     if (activeTab === 'net-dau-re') return <InLawMarriagesTab />;
     if (activeTab === 'net-thong-gia') return <AffiliatedFamiliesTab />;
-
-    // ===== Default Dashboard =====
-    if (primaryRole === 'admin') {
-      return (
-        <AdminDashboard
-          userName={displayUserName}
-          onNavigateTab={handleSelectTab}
-        />
-      );
-    }
 
     return (
       <MemberDashboard

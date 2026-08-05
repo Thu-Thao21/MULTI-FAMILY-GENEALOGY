@@ -28,7 +28,7 @@ export const AdminAuditLogsMgmt: React.FC = () => {
       {/* Header */}
       <div className="admin-account-header">
         <div>
-          <h2 className="admin-account-title">📜 Nhật Ký Hệ Thống & Audit Logs Bảo Mật</h2>
+          <h2 className="admin-account-title">Nhật Ký Hệ Thống & Audit Logs Bảo Mật</h2>
           <p className="admin-account-subtitle">
             Giám sát toàn bộ lịch sử chỉnh sửa, thao tác đăng nhập, phân quyền và bảo vệ dữ liệu nhạy cảm.
           </p>
@@ -38,7 +38,7 @@ export const AdminAuditLogsMgmt: React.FC = () => {
           <input
             type="text"
             className="admin-search-input"
-            placeholder="🔍 Tìm theo thao tác, tài khoản, bảng..."
+            placeholder="Tìm theo thao tác, tài khoản, bảng..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />

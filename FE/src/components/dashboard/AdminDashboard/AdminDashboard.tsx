@@ -1,5 +1,6 @@
 import React from 'react';
 import './AdminDashboard.css';
+import { RecentActivitiesWidget } from '../RecentActivitiesWidget';
 
 export interface AdminDashboardProps {
   userName: string;
@@ -11,114 +12,171 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   onNavigateTab,
 }) => {
   const services = [
-    { name: 'FastAPI Backend Core (Python 3.13)', status: 'Online 100%', latency: '24ms' },
-    { name: 'PostgreSQL Database Engine', status: 'Online 100%', latency: '12ms' },
-    { name: 'Firebase Auth & Token Verifier', status: 'Online 100%', latency: '45ms' },
-    { name: 'Vite Frontend Proxy & Dev Server', status: 'Active', latency: '4ms' },
+    { name: 'Dịch vụ Hệ thống Xử lý Dữ liệu Lõi', status: 'Hoạt động mượt mà', sub: 'Thời gian phản hồi thời gian thực' },
+    { name: 'Cơ sở Dữ liệu Dòng họ Toàn cục', status: 'Đồng bộ 100%', sub: 'Dữ liệu liên kết an toàn & toàn vẹn' },
+    { name: 'Dịch vụ Xác thực & Bảo mật Tài khoản', status: 'Trực tuyến', sub: 'Mã hóa an toàn đa tầng' },
+    { name: 'Cổng Giao diện Vận hành Nền tảng', status: 'Sẵn sàng', sub: 'Kết nối liên thông các dòng họ' },
+  ];
+
+  const metricCards = [
+    {
+      title: 'Tổng số tài khoản',
+      value: '1 Tài khoản',
+      subtext: 'Tài khoản hệ thống đã đăng ký',
+      tag: 'Hệ thống',
+    },
+    {
+      title: 'Tổng số dòng họ',
+      value: '0 Dòng họ',
+      subtext: 'Họ tộc liên kết trên nền tảng',
+      tag: 'Họ tộc',
+    },
+    {
+      title: 'Yêu cầu cần duyệt',
+      value: '0 Đề xuất',
+      subtext: 'Yêu cầu chỉnh sửa đang chờ duyệt',
+      tag: 'Phê duyệt',
+    },
+    {
+      title: 'Trạng thái hệ thống',
+      value: 'Ổn định 100%',
+      subtext: 'Tất cả dịch vụ vận hành an toàn',
+      tag: 'Bảo mật',
+    },
+  ];
+
+  const mockAdminActivities = [
+    { id: 1, user: 'Hệ thống', action: 'Tự động sao lưu dữ liệu toàn hệ thống thành công', time: '10 phút trước' },
+    { id: 2, user: 'Ban Quản trị', action: 'Đăng nhập vào bảng điều khiển Quản trị viên Toàn cục', time: '5 phút trước' },
+    { id: 3, user: 'Hệ thống', action: 'Đồng bộ hóa dữ liệu các chi nhánh dòng họ thành công', time: '1 giờ trước' },
+    { id: 4, user: 'Hệ thống', action: 'Khởi chạy cổng giao diện quản trị vận hành trực tuyến', time: '2 giờ trước' },
   ];
 
   return (
     <div className="admin-dash-container">
-      {/* Header Banner */}
+      {/* Personalized Welcome Banner for Admin */}
       <div className="admin-header-banner">
         <div>
-          <span className="admin-badge-tag">QUẢN TRỊ HỆ THỐNG • SUPER ADMIN</span>
-          <h1 className="admin-title">Bảng Điều Khiển Quản Trị Hệ Thống</h1>
-          <p className="admin-subtitle">
-            Xin chào <strong>{userName}</strong>. Giám sát toàn bộ nền tảng Gia Phả Việt & Phân quyền bảo mật.
+          <div className="admin-system-tag">BAN QUẢN TRỊ HỆ THỐNG GIA PHẢ TOÀN CỤC</div>
+          <h1 className="admin-greeting">
+            Xin chào {userName}, chúc bạn một ngày làm việc hiệu quả!
+          </h1>
+          <p className="admin-subtext">
+            Bạn đang truy cập với vai trò <strong>Quản Trị Viên Toàn Cục</strong>. Nền tảng đang trực tuyến, sẵn sàng vận hành, hỗ trợ và kết nối các dòng họ trên toàn quốc.
           </p>
         </div>
       </div>
 
-      {/* Platform Stats */}
+      {/* Admin Platform Stats Grid */}
       <div className="admin-stats-grid">
-        <div className="admin-stat-card">
-          <div>
-            <div className="admin-stat-title">TỔNG TÀI KHOẢN</div>
-            <div className="admin-stat-value">1</div>
+        {metricCards.map((card, index) => (
+          <div key={index} className="admin-stat-card">
+            <div className="admin-stat-card-main">
+              <div className="admin-stat-card-header">
+                <span className="admin-stat-card-title">{card.title}</span>
+                <span className="admin-stat-card-tag">{card.tag}</span>
+              </div>
+              <div className="admin-stat-card-value">{card.value}</div>
+            </div>
+            <div className="admin-stat-card-footer">{card.subtext}</div>
           </div>
-          <div className="admin-stat-icon">👤</div>
-        </div>
+        ))}
+      </div>
 
-        <div className="admin-stat-card">
-          <div>
-            <div className="admin-stat-title">HOẠT ĐỘNG HÔM NAY</div>
-            <div className="admin-stat-value blue">1</div>
+      {/* Centerpiece: Admin Operations */}
+      <div className="admin-operations-section">
+        <div className="admin-operations-header">
+          <div className="admin-operations-title-row">
+            <h3 className="admin-operations-title">
+              Trung Tâm Vận Hành & Quản Trị Hệ Thống
+            </h3>
           </div>
-          <div className="admin-stat-icon">⚡</div>
+          <span className="admin-operations-badge">
+            QUẢN TRỊ VIÊN TOÀN CỤC
+          </span>
         </div>
+        <p className="admin-operations-desc">
+          Các lối tắt truy cập nhanh chức năng quản trị cấp cao. Vui lòng thao tác cẩn trọng khi thực hiện cập nhật cấu trúc dữ liệu nền tảng.
+        </p>
 
-        <div className="admin-stat-card">
-          <div>
-            <div className="admin-stat-title">TỔNG SỐ DÒNG HỌ</div>
-            <div className="admin-stat-value">0</div>
-          </div>
-          <div className="admin-stat-icon">🏛️</div>
-        </div>
-
-        <div className="admin-stat-card">
-          <div>
-            <div className="admin-stat-title">CẢNH BÁO BẢO MẬT</div>
-            <div className="admin-stat-value green">0</div>
-          </div>
-          <div className="admin-stat-icon">🛡️</div>
+        <div className="admin-operations-grid">
+          <button
+            onClick={() => onNavigateTab('admin-permissions')}
+            className="admin-operations-btn"
+          >
+            Phân quyền tài khoản
+          </button>
+          <button
+            onClick={() => onNavigateTab('admin-families-mgmt')}
+            className="admin-operations-btn"
+          >
+            Quản lý dòng họ
+          </button>
+          <button
+            onClick={() => onNavigateTab('admin-members-mgmt')}
+            className="admin-operations-btn"
+          >
+            Quản lý thành viên
+          </button>
+          <button
+            onClick={() => onNavigateTab('admin-family-links')}
+            className="admin-operations-btn"
+          >
+            Liên kết dòng họ
+          </button>
+          <button
+            onClick={() => onNavigateTab('admin-approval')}
+            className="admin-operations-btn"
+          >
+            Phê duyệt đề xuất
+          </button>
+          <button
+            onClick={() => onNavigateTab('admin-logs')}
+            className="admin-operations-btn"
+          >
+            Nhật ký hệ thống
+          </button>
+          <button
+            onClick={() => onNavigateTab('admin-data-backup')}
+            className="admin-operations-btn"
+          >
+            Sao lưu & Phục hồi
+          </button>
         </div>
       </div>
 
-      {/* Sections Grid */}
-      <div className="admin-sections-grid">
-        {/* Realtime Service Health */}
-        <div className="admin-card-box">
-          <div className="admin-box-header">
-            <h3>📡 Trạng Thái Dịch Vụ Realtime</h3>
-            <span className="admin-service-stable">Hệ thống ổn định</span>
-          </div>
-
-          {services.map((srv, idx) => (
-            <div key={idx} className="service-status-row">
-              <div>
-                <div className="service-name">{srv.name}</div>
-                <div className="admin-service-latency">Độ trễ: {srv.latency}</div>
-              </div>
-              <span className="status-online">{srv.status}</span>
-            </div>
-          ))}
+      {/* Lower Section: Infrastructure Health & Logs */}
+      <div>
+        <div className="dashboard-section-header">
+          <h2 className="dashboard-section-title">Trạng Thái Vận Hành & Nhật Ký Hoạt Động</h2>
+          <p className="dashboard-section-subtitle">
+            Theo dõi tình trạng vận hành dịch vụ và lịch sử thao tác hệ thống thời gian thực.
+          </p>
         </div>
 
-        {/* Quick Admin Actions */}
-        <div className="admin-card-box">
-          <div className="admin-box-header">
-            <h3>⚡ Lối Tắt Vận Hành Quản Trị</h3>
+        <div className="admin-widgets-grid">
+          {/* Services Health */}
+          <div className="admin-services-health-card">
+            <div className="admin-services-health-header">
+              <h3 className="admin-services-health-title">Tình Trạng Dịch Vụ Nền Tảng</h3>
+              <span className="admin-service-stable-badge">Hệ thống ổn định</span>
+            </div>
+
+            <div className="admin-services-list">
+              {services.map((srv, idx) => (
+                <div key={idx} className="admin-service-row">
+                  <div>
+                    <div className="admin-service-name">{srv.name}</div>
+                    <div className="admin-service-latency">{srv.sub}</div>
+                  </div>
+                  <span className="admin-service-status-online">{srv.status}</span>
+                </div>
+              ))}
+            </div>
           </div>
 
-          <div className="admin-action-btn-grid">
-            <button
-              onClick={() => onNavigateTab('admin-account-mgmt')}
-              className="admin-action-btn"
-            >
-              <div className="admin-action-btn-icon">👤</div>
-              <strong className="admin-action-btn-title">Quản lý Tài khoản</strong>
-              <p className="admin-action-btn-desc">Khóa/Mở tài khoản, cấp quyền</p>
-            </button>
-
-            <button
-              onClick={() => onNavigateTab('admin-families-mgmt')}
-              className="admin-action-btn"
-            >
-              <div className="admin-action-btn-icon">🏛️</div>
-              <strong className="admin-action-btn-title">Quản lý Dòng Họ</strong>
-              <p className="admin-action-btn-desc">Danh sách họ tộc trên nền tảng</p>
-            </button>
-
-            <button
-              onClick={() => onNavigateTab('admin-security-logs')}
-              className="admin-action-btn"
-            >
-              <div className="admin-action-btn-icon">📜</div>
-              <strong className="admin-action-btn-title">Nhật ký Bảo mật</strong>
-              <p className="admin-action-btn-desc">Lịch sử đăng nhập & thao tác</p>
-            </button>
-          </div>
+          {/* Admin Activity Logs widget */}
+          <RecentActivitiesWidget activities={mockAdminActivities} />
         </div>
       </div>
     </div>

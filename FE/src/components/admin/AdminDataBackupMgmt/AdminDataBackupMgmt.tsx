@@ -53,7 +53,7 @@ export const AdminDataBackupMgmt: React.FC = () => {
       {/* Header */}
       <div className="admin-account-header">
         <div>
-          <h2 className="admin-account-title">💾 Xuất Nhập File & Sao Lưu Khôi Phục Hệ Thống</h2>
+          <h2 className="admin-account-title">Xuất Nhập File & Sao Lưu Khôi Phục Hệ Thống</h2>
           <p className="admin-account-subtitle">
             Xuất sơ đồ cây PNG/PDF/In, xuất danh sách Excel, nhập dữ liệu từ Excel, sao lưu và khôi phục toàn bộ CSDL.
           </p>
@@ -67,17 +67,17 @@ export const AdminDataBackupMgmt: React.FC = () => {
         {/* Card 1: Export Tree & Reports */}
         <div className="admin-card-box">
           <div className="admin-box-header">
-            <h3>🖼️ Xuất Sơ Đồ Cây & Báo Cáo In ấn</h3>
+            <h3>Xuất Sơ Đồ Cây & Báo Cáo In ấn</h3>
           </div>
           <p className="admin-backup-desc">
             Xuất hình ảnh sơ đồ gia phả trực hệ (PNG high-res), bản in PDF khổ lớn A0/A1 hoặc in trực tiếp.
           </p>
           <div className="admin-btn-group-wrap">
             <button className="admin-btn-primary" onClick={handleExportTreePDF}>
-              📄 Xuất PDF / In Sơ Đồ
+              Xuất PDF / In Sơ Đồ
             </button>
             <button className="btn-icon-action" onClick={handleExportTreePDF}>
-              🖼️ Xuất Ảnh PNG High-Res
+              Xuất Ảnh PNG High-Res
             </button>
           </div>
         </div>
@@ -85,14 +85,14 @@ export const AdminDataBackupMgmt: React.FC = () => {
         {/* Card 2: Export / Import Excel */}
         <div className="admin-card-box">
           <div className="admin-box-header">
-            <h3>📊 Báo Cáo & Nhập/Xuất File Excel</h3>
+            <h3>Báo Cáo & Nhập/Xuất File Excel</h3>
           </div>
           <p className="admin-backup-desc">
             Xuất danh sách thành viên toàn bộ gia tộc ra file Excel hoặc nhập hàng loạt từ file mẫu Excel.
           </p>
           <form onSubmit={handleImportExcelSubmit} className="admin-form-col">
             <button type="button" className="btn-icon-action admin-btn-export-excel" onClick={handleExportExcel}>
-              📥 Xuất Danh Sách Thành Viên (Excel)
+              Xuất Danh Sách Thành Viên (Excel)
             </button>
             <div className="admin-upload-row">
               <input
@@ -102,7 +102,7 @@ export const AdminDataBackupMgmt: React.FC = () => {
                 onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
               />
               <button type="submit" className="admin-btn-primary admin-btn-nowrap">
-                📤 Import Excel
+                Import Excel
               </button>
             </div>
           </form>
@@ -111,13 +111,13 @@ export const AdminDataBackupMgmt: React.FC = () => {
         {/* Card 3: Full Backup System */}
         <div className="admin-card-box">
           <div className="admin-box-header">
-            <h3>🛡️ Sao Lưu Khôi Phục Toàn Bộ Hệ Thống</h3>
+            <h3>Sao Lưu Khôi Phục Toàn Bộ Hệ Thống</h3>
           </div>
           <p className="admin-backup-desc">
             Tạo bản đóng gói snapshot CSDL PostgresSQL toàn hệ thống để bảo vệ dữ liệu an toàn.
           </p>
           <button className="admin-btn-primary admin-btn-danger" onClick={handleTriggerBackup}>
-            ⚡ Tạo Bản Sao Lưu Ngay (Create Instant Snapshot)
+            Tạo Bản Sao Lưu Ngay (Create Instant Snapshot)
           </button>
         </div>
       </div>
@@ -126,7 +126,7 @@ export const AdminDataBackupMgmt: React.FC = () => {
       <div className="admin-table-card">
         <div className="admin-table-header-box">
           <h3 className="admin-table-title">
-            📜 Lịch Sử Bản Sao Lưu CSDL (Backup Records)
+            Lịch Sử Bản Sao Lưu CSDL (Backup Records)
           </h3>
         </div>
         <table className="admin-table">
@@ -149,10 +149,10 @@ export const AdminDataBackupMgmt: React.FC = () => {
                 <td>
                   <div className="action-btn-row">
                     <button className="btn-icon-action unlock" onClick={() => handleRestore(b.file_name)}>
-                      🔄 Khôi phục CSDL
+                      Khôi phục CSDL
                     </button>
                     <button className="btn-icon-action" onClick={() => alert(`Đang tải file ${b.file_name}...`)}>
-                      💾 Tải về
+                      Tải về
                     </button>
                   </div>
                 </td>
