@@ -1,0 +1,261 @@
+.hall-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.hall-header {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
+}
+
+.hall-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 6px 0;
+}
+
+.hall-subtitle {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0;
+}
+
+.altar-main-card {
+  position: relative;
+  background: linear-gradient(135deg, #1e1b4b, #311b92);
+  color: #ffffff;
+  border-radius: 20px;
+  padding: 36px 24px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(49, 27, 146, 0.3);
+  text-align: center;
+}
+
+.altar-banner-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: radial-gradient(circle at center, rgba(255, 215, 0, 0.1) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.altar-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.altar-title-tag {
+  background: rgba(255, 215, 0, 0.15);
+  border: 1px solid rgba(255, 215, 0, 0.4);
+  color: #fde047;
+  padding: 4px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+}
+
+.altar-heading {
+  font-size: 24px;
+  font-weight: 800;
+  color: #fef08a;
+  margin: 0;
+  letter-spacing: 1px;
+}
+
+.altar-visual-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  margin: 16px 0;
+}
+
+.altar-tablet {
+  background: linear-gradient(180deg, #78350f, #451a03);
+  border: 4px solid #fde047;
+  border-radius: 12px;
+  padding: 24px 36px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tablet-text {
+  font-size: 20px;
+  font-weight: 800;
+  color: #fde047;
+  letter-spacing: 2px;
+}
+
+.tablet-sub {
+  font-size: 13px;
+  color: #fef08a;
+}
+
+.incense-burner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+}
+
+.burner-pot {
+  font-size: 48px;
+}
+
+.incense-count-label {
+  font-size: 13px;
+  color: #e0e7ff;
+}
+
+.altar-actions-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.burn-incense-btn {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #eab308, #ca8a04);
+  color: #0f172a;
+  border: none;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(234, 179, 8, 0.4);
+}
+
+.write-tribute-btn {
+  padding: 12px 24px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #ffffff;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.incense-toast {
+  background: rgba(34, 197, 94, 0.2);
+  border: 1px solid #4ade80;
+  color: #4ade80;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.altar-2d-fallback-note {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.tributes-section {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.03);
+}
+
+.tributes-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 16px 0;
+}
+
+.tributes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.tribute-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tribute-head {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.tribute-date {
+  font-size: 12px;
+  color: #94a3b8;
+  font-weight: 400;
+}
+
+.tribute-target {
+  font-size: 13px;
+  color: #7c3aed;
+}
+
+.tribute-body {
+  font-size: 14px;
+  color: #334155;
+  font-style: italic;
+  margin: 4px 0 0 0;
+}
+
+.tribute-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+}
+
+.tribute-modal-card {
+  background: #ffffff;
+  border-radius: 20px;
+  max-width: 500px;
+  width: 100%;
+  padding: 24px;
+}
+
+.tribute-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.tribute-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.tribute-policy-note {
+  font-size: 12px;
+  color: #64748b;
+  line-height: 1.4;
+}

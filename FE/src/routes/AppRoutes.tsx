@@ -4,6 +4,12 @@ import LoginPage from '../pages/auth/Login';
 import RegisterPage from '../pages/auth/Register';
 import ForgotPasswordPage from '../pages/auth/ForgotPassword';
 import Dashboard from '../pages/dashboard/Dashboard';
+import { PublicHomePage } from '../pages/public/PublicHomePage';
+import { PublicFamilySearchPage } from '../pages/public/PublicFamilySearchPage';
+import { BusinessPlansView } from '../pages/public/BusinessPlansView';
+import { BusinessRegisterWizard } from '../pages/public/BusinessRegisterWizard';
+import { BusinessTrackStatusPage } from '../pages/public/BusinessTrackStatusPage';
+import { InviteActivationPage } from '../pages/public/InviteActivationPage';
 import { ProtectedRoute, RoleGuard } from './RouteGuards';
 
 export type AuthView = 'login' | 'register' | 'forgot-password' | 'dashboard';
@@ -38,6 +44,16 @@ const AppRoutes: React.FC<AppRoutesProps> = ({
 
   return (
     <Routes>
+      {/* Public Guest Routes (FR-GU-01 to FR-GU-10) */}
+      <Route path="/" element={<PublicHomePage />} />
+      <Route path="/public" element={<PublicHomePage />} />
+      <Route path="/public/families" element={<PublicFamilySearchPage />} />
+      <Route path="/public/business-plans" element={<BusinessPlansView />} />
+      <Route path="/public/business-register" element={<BusinessRegisterWizard />} />
+      <Route path="/public/business-register/track" element={<BusinessTrackStatusPage />} />
+      <Route path="/activate" element={<InviteActivationPage />} />
+
+      {/* Authentication Routes */}
       <Route
         path="/login"
         element={
@@ -67,6 +83,8 @@ const AppRoutes: React.FC<AppRoutesProps> = ({
           <ForgotPasswordPage onSwitchToLogin={() => navigate('/login')} />
         }
       />
+
+      {/* Protected User Dashboard Routes */}
       <Route
         path="/user/*"
         element={
@@ -77,6 +95,8 @@ const AppRoutes: React.FC<AppRoutesProps> = ({
           </ProtectedRoute>
         }
       />
+
+      {/* Protected Admin Dashboard Routes */}
       <Route
         path="/admin/*"
         element={
@@ -87,13 +107,15 @@ const AppRoutes: React.FC<AppRoutesProps> = ({
           </ProtectedRoute>
         }
       />
+
+      {/* Fallback 404 Route */}
       <Route
         path="*"
         element={
           isAuthenticated ? (
             <Navigate to={primaryRole === 'admin' ? '/admin' : '/user'} replace />
           ) : (
-            <Navigate to="/login" replace />
+            <Navigate to="/public" replace />
           )
         }
       />

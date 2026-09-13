@@ -1,0 +1,136 @@
+.plans-container {
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+}
+
+.plans-header {
+  text-align: center;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.plans-badge {
+  background: #eff6ff;
+  color: #2563eb;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.plans-title {
+  font-size: 32px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 16px 0 8px 0;
+}
+
+.plans-subtitle {
+  font-size: 16px;
+  color: #64748b;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.plans-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+  align-items: stretch;
+}
+
+.plan-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 24px;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04);
+}
+
+.plan-card.recommended {
+  border: 2px solid #2563eb;
+  box-shadow: 0 10px 30px rgba(37, 99, 235, 0.12);
+}
+
+.plan-recom-badge {
+  position: absolute;
+  top: -14px;
+  right: 24px;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #ffffff;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.plan-name {
+  font-size: 20px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 12px 0;
+}
+
+.plan-limit {
+  font-size: 18px;
+  font-weight: 700;
+  color: #2563eb;
+  margin-bottom: 4px;
+}
+
+.plan-storage {
+  font-size: 14px;
+  color: #64748b;
+}
+
+.plan-divider {
+  height: 1px;
+  background: #f1f5f9;
+  margin: 20px 0;
+}
+
+.plan-features-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 24px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+  font-size: 14px;
+  color: #334155;
+}
+
+.select-plan-btn {
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #0f172a;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.select-plan-btn.primary {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #ffffff;
+  border: none;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
+}
+
+.plans-note-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 20px;
+  font-size: 14px;
+  color: #64748b;
+  text-align: center;
+}

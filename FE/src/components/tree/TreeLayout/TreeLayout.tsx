@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { fetchFamilies } from '../../../services/member.service';
 import { buildErgoTreeFromDB } from '../../../services/tree.service';
 import type { Family, Member } from '../../../types/member';
-import type { ErgoTreeNode, TreeContextMenuState } from '../../../types/tree';
+import type { ErgoTreeNode, TreeContextMenuState, TreeViewMode } from '../../../types/tree';
 import { ErgoTreeCanvas } from '../ErgoTreeCanvas';
 import { TreeContextMenu } from '../TreeContextMenu';
 import { NotificationModal } from '../../common/NotificationModal';
@@ -10,18 +10,26 @@ import '../Tree.css';
 import './TreeLayout.css';
 
 export interface TreeLayoutProps {
+  initialMode?: TreeViewMode;
+  initialFocusId?: string;
+  initialFamilyId?: string;
   onSelectMemberProfile?: (memberId: string) => void;
 }
 
 export const TreeLayout: React.FC<TreeLayoutProps> = ({
+  initialMode = 'vertical',
+  initialFocusId,
+  initialFamilyId,
   onSelectMemberProfile,
 }) => {
   const [families, setFamilies] = useState<Family[]>([]);
-  const [selectedFamilyId, setSelectedFamilyId] = useState<string>('');
+  const [selectedFamilyId, setSelectedFamilyId] = useState<string>(initialFamilyId || '');
   const [allMembers, setAllMembers] = useState<Member[]>([]);
   const [treeNodes, setTreeNodes] = useState<ErgoTreeNode[]>([]);
-  const [focusMemberId, setFocusMemberId] = useState<string | undefined>(undefined);
-  const [treeDirection, setTreeDirection] = useState<'vertical' | 'horizontal'>('vertical');
+  const [focusMemberId, setFocusMemberId] = useState<string | undefined>(initialFocusId);
+  const [treeDirection, setTreeDirection] = useState<'vertical' | 'horizontal'>(
+    initialMode === 'horizontal' ? 'horizontal' : 'vertical'
+  );
   const [zoomScale, setZoomScale] = useState<number>(1);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -37,13 +45,18 @@ export const TreeLayout: React.FC<TreeLayoutProps> = ({
   const [isToastOpen, setIsToastOpen] = useState(false);
 
   useEffect(() => {
+    if (initialMode === 'horizontal') setTreeDirection('horizontal');
+    else if (initialMode === 'vertical') setTreeDirection('vertical');
+  }, [initialMode]);
+
+  useEffect(() => {
     fetchFamilies().then((fams) => {
       setFamilies(fams);
-      if (fams.length > 0) {
+      if (fams.length > 0 && !selectedFamilyId) {
         setSelectedFamilyId(fams[0].id);
       }
     });
-  }, []);
+  }, [selectedFamilyId]);
 
   useEffect(() => {
     setLoading(true);

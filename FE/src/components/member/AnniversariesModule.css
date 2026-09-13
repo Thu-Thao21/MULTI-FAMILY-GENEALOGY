@@ -1,0 +1,181 @@
+.anniv-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.anniv-header {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
+}
+
+.anniv-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 6px 0;
+}
+
+.anniv-subtitle {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0;
+}
+
+.anniv-config-btn {
+  padding: 10px 18px;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  color: #334155;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.anniv-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.anniv-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.03);
+}
+
+.anniv-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.anniv-days-badge {
+  background: #fef3c7;
+  color: #b45309;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.follow-btn {
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.follow-btn.following {
+  background: #eff6ff;
+  border-color: #2563eb;
+  color: #2563eb;
+}
+
+.anniv-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.anniv-relation {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.anniv-date-box {
+  background: #f8fafc;
+  border: 1px solid #f1f5f9;
+  border-radius: 10px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.date-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+}
+
+.date-label { color: #64748b; }
+.date-val { font-weight: 700; color: #0f172a; }
+
+.anniv-location {
+  font-size: 13px;
+  color: #475569;
+  line-height: 1.4;
+}
+
+.anniv-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+}
+
+.anniv-modal-card {
+  background: #ffffff;
+  border-radius: 20px;
+  max-width: 480px;
+  width: 100%;
+  padding: 28px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+}
+
+.anniv-modal-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 6px 0;
+}
+
+.anniv-modal-subtitle {
+  font-size: 13px;
+  color: #64748b;
+  margin: 0 0 16px 0;
+}
+
+.config-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.config-section-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: #334155;
+  margin: 0;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: #1e293b;
+  cursor: pointer;
+}

@@ -1,0 +1,114 @@
+.act-container {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.act-header {
+  text-align: center;
+}
+
+.act-badge {
+  background: #eff6ff;
+  color: #2563eb;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.act-title {
+  font-size: 26px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 14px 0 8px 0;
+}
+
+.act-subtitle {
+  font-size: 15px;
+  color: #64748b;
+  margin: 0;
+}
+
+.act-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 24px;
+  padding: 36px;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04);
+}
+
+.act-card.success {
+  text-align: center;
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+}
+
+.act-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.act-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.act-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.act-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.act-input {
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 1px solid #cbd5e1;
+  font-size: 15px;
+  outline: none;
+  background: #f8fafc;
+}
+
+.act-submit-btn {
+  padding: 14px;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
+  margin-top: 8px;
+}
+
+.bound-person-info {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 12px;
+  padding: 16px;
+  color: #1e40af;
+  font-size: 14px;
+}
+
+.bound-person-info h4 {
+  margin: 0 0 4px 0;
+}
+
+.act-error-alert {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 14px;
+}

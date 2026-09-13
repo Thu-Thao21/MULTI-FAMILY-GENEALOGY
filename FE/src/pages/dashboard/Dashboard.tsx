@@ -4,6 +4,17 @@ import { TopBar } from '../../components/dashboard/TopBar';
 import { Sidebar } from '../../components/dashboard/Sidebar';
 import { MemberList } from '../../components/profile/MemberList';
 import { ProfileLayout } from '../../components/profile/ProfileLayout';
+import { PrivacySettingsTab } from '../../components/profile/PrivacySettingsTab';
+import { RelationshipFinder } from '../../components/member/RelationshipFinder';
+import { MyProposalsModule } from '../../components/member/MyProposalsModule';
+import { AnniversariesModule } from '../../components/member/AnniversariesModule';
+import { ClanEventsModule } from '../../components/member/ClanEventsModule';
+import { ClanFundsModule } from '../../components/member/ClanFundsModule';
+import { ClanDocumentsModule } from '../../components/member/ClanDocumentsModule';
+import { ClanAIAssistantModule } from '../../components/member/ClanAIAssistantModule';
+import { DigitalAncestralHallModule } from '../../components/member/DigitalAncestralHallModule';
+import { NotificationCenterModule } from '../../components/member/NotificationCenterModule';
+import { FirstLoginPasswordModal } from '../../components/auth/FirstLoginPasswordModal';
 import { NotificationModal } from '../../components/common/NotificationModal';
 import { FamilyPaternalTab } from '../../components/network/FamilyPaternalTab';
 import { FamilyMaternalTab } from '../../components/network/FamilyMaternalTab';
@@ -25,32 +36,35 @@ import { ROUTES } from '../../config/routes';
 import type { TreeViewMode } from '../../types/tree';
 import './Dashboard.css';
 
-// ===== Tab ID  URL Route Mapping =====
-// Maps every sidebar/card tab ID to a URL route from routes.ts
+// ===== Tab ID ↔ URL Route Mapping =====
 const TAB_TO_ROUTE: Record<string, string> = {
-  // User / Member tabs
-  'dashboard':            '', // will resolve to /user or /admin root
+  'dashboard':            '',
+  'notifications':        ROUTES.USER.NOTIFICATIONS,
   'tree':                 ROUTES.USER.TREE_HORIZONTAL,
-  'tree-vertical':        ROUTES.USER.TREE_HORIZONTAL,
+  'tree-vertical':        ROUTES.USER.TREE_VERTICAL,
   'tree-horizontal':      ROUTES.USER.TREE_HORIZONTAL,
-  'tree-focus':           ROUTES.USER.TREE_HORIZONTAL,
+  'tree-focus':           ROUTES.USER.TREE_FOCUS,
   'net-noi':              ROUTES.USER.NETWORK_NOI,
   'net-ngoai':            ROUTES.USER.NETWORK_NGOAI,
   'net-dau-re':           ROUTES.USER.NETWORK_DAU_RE,
   'net-thong-gia':        ROUTES.USER.NETWORK_THONG_GIA,
   'member-list':          ROUTES.USER.MEMBERS,
   'member-profile':       ROUTES.USER.MEMBER_PROFILE,
-  // Family Head tabs (from MemberDashboard cards)
-  'family-management':    ROUTES.USER.FAMILY_MANAGEMENT,
-  'family-branches':      ROUTES.USER.FAMILY_BRANCHES,
-  'family-approvals':     ROUTES.USER.FAMILY_APPROVALS,
-  'family-import-export': ROUTES.USER.FAMILY_IMPORT_EXPORT,
-  'family-logs':          ROUTES.USER.FAMILY_LOGS,
-  // Admin tabs (from Sidebar "Quản trị hệ thống")
+  'my-profile':           ROUTES.USER.MY_PROFILE,
+  'my-proposals':         ROUTES.USER.PROPOSALS,
+  'relationship-finder': ROUTES.USER.RELATIONSHIP,
+  'anniversaries':        ROUTES.USER.ANNIVERSARIES,
+  'events':               ROUTES.USER.EVENTS,
+  'funds':                ROUTES.USER.FUNDS,
+  'documents':            ROUTES.USER.DOCUMENTS,
+  'ai-assistant':         ROUTES.USER.AI_ASSISTANT,
+  'ancestral-hall':       ROUTES.USER.ANCESTRAL_HALL,
+  'privacy-settings':     ROUTES.USER.PRIVACY_SETTINGS,
+  'privacy-preview':      ROUTES.USER.PRIVACY_PREVIEW,
+  // Admin tabs
   'admin-permissions':    ROUTES.ADMIN.ACCOUNTS,
   'admin-approval':       ROUTES.ADMIN.APPROVALS,
   'admin-logs':           ROUTES.ADMIN.SECURITY_LOGS,
-  // Admin tabs (from AdminDashboard cards)
   'admin-account-mgmt':   ROUTES.ADMIN.ACCOUNTS,
   'admin-families-mgmt':  ROUTES.ADMIN.FAMILIES,
   'admin-members-mgmt':   ROUTES.ADMIN.MEMBERS,
@@ -60,35 +74,36 @@ const TAB_TO_ROUTE: Record<string, string> = {
   'admin-data-backup':    ROUTES.ADMIN.BACKUP,
 };
 
-// Reverse: URL route → tab ID (longest match first)
 const ROUTE_TO_TAB: Array<[string, string]> = [
-  // Admin routes
-  [ROUTES.ADMIN.ACCOUNTS,      'admin-permissions'],
-  [ROUTES.ADMIN.FAMILIES,      'admin-families-mgmt'],
-  [ROUTES.ADMIN.MEMBERS,       'admin-members-mgmt'],
-  [ROUTES.ADMIN.FAMILY_LINKS,  'admin-family-links'],
-  [ROUTES.ADMIN.APPROVALS,     'admin-approval'],
-  [ROUTES.ADMIN.SECURITY_LOGS, 'admin-logs'],
-  [ROUTES.ADMIN.BACKUP,        'admin-data-backup'],
-  // User Family Head routes
-  [ROUTES.USER.FAMILY_BRANCHES,      'family-branches'],
-  [ROUTES.USER.FAMILY_APPROVALS,     'family-approvals'],
-  [ROUTES.USER.FAMILY_IMPORT_EXPORT, 'family-import-export'],
-  [ROUTES.USER.FAMILY_LOGS,          'family-logs'],
-  [ROUTES.USER.FAMILY_MANAGEMENT,    'family-management'],
-  // User Tree routes
-  [ROUTES.USER.TREE,            'tree'],
-  [ROUTES.USER.TREE_VERTICAL,   'tree'],
-  [ROUTES.USER.TREE_HORIZONTAL, 'tree'],
-  [ROUTES.USER.TREE_FOCUS,      'tree'],
-  // User Network routes
-  [ROUTES.USER.NETWORK_NOI,      'net-noi'],
-  [ROUTES.USER.NETWORK_NGOAI,    'net-ngoai'],
-  [ROUTES.USER.NETWORK_DAU_RE,   'net-dau-re'],
-  [ROUTES.USER.NETWORK_THONG_GIA,'net-thong-gia'],
-  // User Members
-  [ROUTES.USER.MEMBER_PROFILE, 'member-profile'],
-  [ROUTES.USER.MEMBERS,        'member-list'],
+  [ROUTES.ADMIN.ACCOUNTS,          'admin-permissions'],
+  [ROUTES.ADMIN.FAMILIES,          'admin-families-mgmt'],
+  [ROUTES.ADMIN.MEMBERS,           'admin-members-mgmt'],
+  [ROUTES.ADMIN.FAMILY_LINKS,      'admin-family-links'],
+  [ROUTES.ADMIN.APPROVALS,         'admin-approval'],
+  [ROUTES.ADMIN.SECURITY_LOGS,     'admin-logs'],
+  [ROUTES.ADMIN.BACKUP,            'admin-data-backup'],
+  [ROUTES.USER.NOTIFICATIONS,      'notifications'],
+  [ROUTES.USER.TREE_VERTICAL,      'tree'],
+  [ROUTES.USER.TREE_HORIZONTAL,    'tree'],
+  [ROUTES.USER.TREE_FOCUS,         'tree'],
+  [ROUTES.USER.TREE,               'tree'],
+  [ROUTES.USER.NETWORK_NOI,        'net-noi'],
+  [ROUTES.USER.NETWORK_NGOAI,      'net-ngoai'],
+  [ROUTES.USER.NETWORK_DAU_RE,     'net-dau-re'],
+  [ROUTES.USER.NETWORK_THONG_GIA,  'net-thong-gia'],
+  [ROUTES.USER.MY_PROFILE,         'my-profile'],
+  [ROUTES.USER.MEMBER_PROFILE,     'member-profile'],
+  [ROUTES.USER.MEMBERS,            'member-list'],
+  [ROUTES.USER.RELATIONSHIP,       'relationship-finder'],
+  [ROUTES.USER.PROPOSALS,          'my-proposals'],
+  [ROUTES.USER.ANNIVERSARIES,      'anniversaries'],
+  [ROUTES.USER.EVENTS,             'events'],
+  [ROUTES.USER.FUNDS,              'funds'],
+  [ROUTES.USER.DOCUMENTS,          'documents'],
+  [ROUTES.USER.AI_ASSISTANT,       'ai-assistant'],
+  [ROUTES.USER.ANCESTRAL_HALL,     'ancestral-hall'],
+  [ROUTES.USER.PRIVACY_SETTINGS,   'privacy-settings'],
+  [ROUTES.USER.PRIVACY_PREVIEW,    'privacy-preview'],
 ];
 
 export interface DashboardProps {
@@ -105,15 +120,21 @@ export const Dashboard: React.FC<DashboardProps> = ({ userName, onLogout }) => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
   const [isProcessingToastOpen, setIsProcessingToastOpen] = useState(false);
-  const [toastIcon, setToastIcon] = useState('');
+  const [showFirstLoginModal, setShowFirstLoginModal] = useState(false);
 
   const displayUserName = account?.display_name || account?.username || firebaseUser?.displayName || userName || 'Người dùng';
   const primaryRole = account?.primary_role || 'member';
   const userRole = primaryRole === 'admin' ? 'Admin' : 'Thành viên';
-
   const basePath = primaryRole === 'admin' ? ROUTES.ADMIN.ROOT : ROUTES.USER.ROOT;
 
-  // ===== Sync URL → activeTab on mount & URL change =====
+  // Mandatory first password change check (FR-ME-02)
+  useEffect(() => {
+    if (account && (account as any).must_change_password) {
+      setShowFirstLoginModal(true);
+    }
+  }, [account]);
+
+  // Sync URL → activeTab
   useEffect(() => {
     const path = location.pathname;
     for (const [route, tabId] of ROUTE_TO_TAB) {
@@ -122,43 +143,23 @@ export const Dashboard: React.FC<DashboardProps> = ({ userName, onLogout }) => {
         return;
       }
     }
-    // No match → show dashboard
     setActiveTab('dashboard');
   }, [location.pathname]);
 
-  // ===== Navigate to URL when tab is selected =====
+  // Navigate tab
   const handleSelectTab = useCallback((tabId: string) => {
-    // Set active tab immediately
     setActiveTab(tabId);
 
-    // Navigate to URL if route exists
+    // Clear selectedMemberId overlay when switching to non-profile tabs
+    if (tabId !== 'member-profile' && tabId !== 'my-profile') {
+      setSelectedMemberId(null);
+    }
+
     const route = TAB_TO_ROUTE[tabId];
     if (route) {
       navigate(route, { replace: false });
     } else if (tabId === 'dashboard') {
       navigate(basePath, { replace: false });
-    }
-
-    // Handle special behaviors
-    if (tabId === 'member-list') {
-      setSelectedMemberId(null);
-    } else if (tabId === 'member-profile') {
-      // keep selectedMemberId
-    } else if (tabId === 'member-add') {
-      setToastIcon('');
-      setIsProcessingToastOpen(true);
-    } else if (tabId === 'finder-auto' || tabId === 'finder-path') {
-      setToastIcon('');
-      setIsProcessingToastOpen(true);
-    } else if (tabId === 'export-pdf' || tabId === 'export-excel') {
-      setToastIcon('');
-      setIsProcessingToastOpen(true);
-    } else if (tabId === 'import-data') {
-      setToastIcon('');
-      setIsProcessingToastOpen(true);
-    } else if (tabId === 'admin-role-requests') {
-      setToastIcon('');
-      setIsProcessingToastOpen(true);
     }
   }, [navigate, basePath]);
 
@@ -179,7 +180,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ userName, onLogout }) => {
       if (activeTab === 'admin-logs' || activeTab === 'admin-security-logs') return <AdminAuditLogsMgmt />;
       if (activeTab === 'admin-data-backup') return <AdminDataBackupMgmt />;
 
-      // Default Admin View
       return (
         <AdminDashboard
           userName={displayUserName}
@@ -188,14 +188,25 @@ export const Dashboard: React.FC<DashboardProps> = ({ userName, onLogout }) => {
       );
     }
 
-    // ===== Branch for Member & Family Head =====
-    if (activeTab === 'family-management') return <MemberList onSelectMember={handleSelectMember} />;
-    if (activeTab === 'family-branches') return <MemberList onSelectMember={handleSelectMember} />;
-    if (activeTab === 'family-approvals') return <AdminApprovalsMgmt />;
-    if (activeTab === 'family-import-export') return <AdminDataBackupMgmt />;
-    if (activeTab === 'family-logs') return <AdminAuditLogsMgmt />;
+    // ===== Branch for Member (38 FRs) =====
+    if (activeTab === 'notifications') return <NotificationCenterModule />;
+    if (activeTab === 'relationship-finder') return <RelationshipFinder />;
+    if (activeTab === 'my-proposals') return <MyProposalsModule />;
+    if (activeTab === 'anniversaries') return <AnniversariesModule />;
+    if (activeTab === 'events') return <ClanEventsModule />;
+    if (activeTab === 'funds') return <ClanFundsModule />;
+    if (activeTab === 'documents') return <ClanDocumentsModule />;
+    if (activeTab === 'ai-assistant') return <ClanAIAssistantModule />;
+    if (activeTab === 'ancestral-hall') return <DigitalAncestralHallModule />;
+    if (activeTab === 'privacy-settings' || activeTab === 'privacy-preview') return <PrivacySettingsTab />;
 
-    // ===== Module: Cây gia phả =====
+    // Network tabs
+    if (activeTab === 'net-noi') return <FamilyPaternalTab />;
+    if (activeTab === 'net-ngoai') return <FamilyMaternalTab />;
+    if (activeTab === 'net-dau-re') return <InLawMarriagesTab />;
+    if (activeTab === 'net-thong-gia') return <AffiliatedFamiliesTab />;
+
+    // Tree Layout
     if (activeTab.startsWith('tree')) {
       const mode: TreeViewMode =
         activeTab === 'tree-horizontal'
@@ -215,21 +226,23 @@ export const Dashboard: React.FC<DashboardProps> = ({ userName, onLogout }) => {
       );
     }
 
-    // ===== Module: Hồ sơ & Thành viên =====
-    if (activeTab === 'member-list' && !selectedMemberId) {
-      return <MemberList onSelectMember={handleSelectMember} />;
-    }
-    if (activeTab === 'member-profile' || selectedMemberId) {
-      if (!selectedMemberId) {
-        return (
-          <div className="dashboard-empty-select-prompt">
-            Vui lòng chọn một thành viên từ danh sách để xem hồ sơ chi tiết.
-          </div>
-        );
-      }
+    // Profile & Member List
+    if (activeTab === 'my-profile') {
       return (
         <ProfileLayout
-          memberId={selectedMemberId}
+          memberId={(account as any)?.person_id || selectedMemberId || 'mem_001'}
+          onBack={() => {
+            setActiveTab('dashboard');
+            navigate(ROUTES.USER.ROOT, { replace: false });
+          }}
+        />
+      );
+    }
+
+    if (activeTab === 'member-profile') {
+      return (
+        <ProfileLayout
+          memberId={selectedMemberId || 'mem_001'}
           onBack={() => {
             setSelectedMemberId(null);
             setActiveTab('member-list');
@@ -239,12 +252,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ userName, onLogout }) => {
       );
     }
 
-    // ===== Module: Mạng lưới Liên họ =====
-    if (activeTab === 'net-noi') return <FamilyPaternalTab />;
-    if (activeTab === 'net-ngoai') return <FamilyMaternalTab />;
-    if (activeTab === 'net-dau-re') return <InLawMarriagesTab />;
-    if (activeTab === 'net-thong-gia') return <AffiliatedFamiliesTab />;
+    if (activeTab === 'member-list') {
+      return <MemberList onSelectMember={handleSelectMember} />;
+    }
 
+    // Default Member Dashboard
     return (
       <MemberDashboard
         userName={displayUserName}
@@ -262,6 +274,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ userName, onLogout }) => {
         onLogout={onLogout}
         isSidebarCollapsed={isSidebarCollapsed}
         onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+        onNavigateTab={handleSelectTab}
       />
 
       <div className="dashboard-body-row">
@@ -283,7 +296,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ userName, onLogout }) => {
 
       <footer className="dashboard-footer">
         <div className="dashboard-footer-inner">
-          <strong className="dashboard-footer-brand">MULTI-FAMILY GENEALOGY SYSTEM</strong>  2026 •
+          <strong className="dashboard-footer-brand">MULTI-FAMILY GENEALOGY SYSTEM</strong> © 2026 •
           Số hóa & Gắn kết các dòng họ Việt Nam.
         </div>
       </footer>
@@ -291,7 +304,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ userName, onLogout }) => {
       <NotificationModal
         isOpen={isProcessingToastOpen}
         onClose={() => setIsProcessingToastOpen(false)}
-        icon={toastIcon}
+      />
+
+      {/* Mandatory First-Time Password Modal (FR-ME-02) */}
+      <FirstLoginPasswordModal
+        isOpen={showFirstLoginModal}
+        onSuccess={() => setShowFirstLoginModal(false)}
+        onCancel={onLogout}
       />
     </div>
   );
