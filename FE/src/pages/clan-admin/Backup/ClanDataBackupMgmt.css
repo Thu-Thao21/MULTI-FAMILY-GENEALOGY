@@ -1,0 +1,86 @@
+.clan-backup-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  animation: profileFadeIn 0.3s ease-out;
+}
+
+.clan-grid-action-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 20px;
+}
+
+.clan-backup-desc {
+  font-size: 13.5px;
+  color: #64748b;
+  margin: 0 0 16px;
+  line-height: 1.5;
+}
+
+.clan-btn-group-wrap {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.clan-form-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.clan-btn-export-excel {
+  background: #f0fdf4;
+  color: #16a34a;
+  border-color: #bbf7d0;
+}
+
+.clan-upload-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.clan-input-file {
+  font-size: 12px;
+}
+
+.clan-btn-nowrap {
+  white-space: nowrap;
+}
+
+.clan-btn-danger {
+  background: #dc2626;
+}
+
+.clan-table-header-box {
+  padding: 16px 24px;
+  border-bottom: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+
+.clan-table-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.clan-backup-filename {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.clan-backup-filesize {
+  background: #f1f5f9;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.clan-backup-time {
+  font-size: 13px;
+  color: #64748b;
+}

@@ -1,0 +1,87 @@
+.clan-settings-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  animation: profileFadeIn 0.3s ease-out;
+}
+
+.clan-settings-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.clan-settings-col {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.privacy-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.privacy-option input[type="radio"] {
+  margin-top: 4px;
+}
+
+.privacy-option label {
+  cursor: pointer;
+}
+
+.danger-zone {
+  border: 1px solid #fecaca;
+  background: #fffafa;
+}
+
+.danger-zone .clan-card-header {
+  border-bottom: 1px solid #fecaca;
+}
+
+.delegates-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.delegate-item {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 16px;
+  background: #f8fafc;
+}
+
+.delegate-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.badge-role {
+  background: #e0e7ff;
+  color: #4338ca;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.delegate-perms {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.perm-tag {
+  background: #fff;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+}
+
+.mt-2 { margin-top: 8px; }

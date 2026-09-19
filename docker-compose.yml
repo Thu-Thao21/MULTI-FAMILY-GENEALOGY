@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./FE
+      dockerfile: Dockerfile
+    container_name: mfg_frontend
+    ports:
+      - "8080:80" # Truy cập ở http://localhost:8080
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+    networks:
+      - mfg_network
+
+  # Mẫu cho Backend sau này (nếu có)
+  # backend:
+  #   build:
+  #     context: ./BE
+  #     dockerfile: Dockerfile
+  #   container_name: mfg_backend
+  #   ports:
+  #     - "3000:3000"
+  #   restart: unless-stopped
+  #   env_file:
+  #     - ./BE/.env
+  #   networks:
+  #     - mfg_network
+
+  # Mẫu cho Database (PostgreSQL/MySQL) sau này (nếu có)
+  # db:
+  #   image: postgres:15-alpine
+  #   container_name: mfg_database
+  #   environment:
+  #     POSTGRES_USER: root
+  #     POSTGRES_PASSWORD: rootpassword
+  #     POSTGRES_DB: mfg_db
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - pgdata:/var/lib/postgresql/data
+  #   networks:
+  #     - mfg_network
+
+networks:
+  mfg_network:
+    driver: bridge
+
+volumes:
+  pgdata:
