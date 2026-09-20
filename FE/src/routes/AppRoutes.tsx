@@ -44,7 +44,7 @@ const AppRoutes: React.FC<AppRoutesProps> = ({
 
   return (
     <Routes>
-      {/* Public Guest Routes (FR-GU-01 to FR-GU-10) */}
+      {/* Public Guest Routes */}
       <Route path="/" element={<PublicHomePage />} />
       <Route path="/public" element={<PublicHomePage />} />
       <Route path="/public/families" element={<PublicFamilySearchPage />} />

@@ -28,7 +28,7 @@ export const PublicFamilySearchPage: React.FC = () => {
     <PublicLayout>
       <div className="pub-search-container">
         <div className="pub-search-header">
-          <h1 className="pub-search-title">Tra Cứu Dòng Họ Công Khai (FR-GU-03)</h1>
+          <h1 className="pub-search-title">Tra Cứu Dòng Họ Công Khai</h1>
           <p className="pub-search-subtitle">
             Tìm kiếm thông tin tổng quan các dòng họ Việt Nam công khai theo tên, mã dòng họ hoặc quê gốc.
           </p>
@@ -81,20 +81,20 @@ export const PublicFamilySearchPage: React.FC = () => {
                   className="view-public-profile-btn"
                   onClick={() => setSelectedPublicFamily(f)}
                 >
-                  Xem hồ sơ công khai (FR-GU-04) ➔
+                  Xem hồ sơ công khai ➔
                 </button>
               </div>
             ))}
           </div>
         )}
 
-        {/* Modal View Public Family Profile (FR-GU-04) */}
+        {/* Modal View Public Family Profile */}
         {selectedPublicFamily && (
           <div className="pub-profile-modal-overlay">
             <div className="pub-profile-modal-card">
               <div className="pub-profile-header">
                 <div>
-                  <span className="public-only-badge">🔒 CHỈ DỮ LIỆU PUBLIC (FR-GU-04/GU-10)</span>
+                  <span className="public-only-badge">🔒 CHỈ DỮ LIỆU CÔNG KHAI</span>
                   <h2 className="pub-profile-title">{selectedPublicFamily.name}</h2>
                   <span className="pub-profile-code">Mã định danh: {selectedPublicFamily.code || selectedPublicFamily.id}</span>
                 </div>
@@ -117,7 +117,7 @@ export const PublicFamilySearchPage: React.FC = () => {
                 </div>
 
                 <div className="privacy-strict-warning">
-                  🔒 <strong>Lưu ý bảo mật (FR-GU-09/GU-10):</strong> Khách vãng lai chỉ được xem tên, quê gốc và giới thiệu công khai. Các thông tin cây chi tiết, số điện thoại, địa chỉ cụ thể và tài chính dòng họ được ẩn tuyệt đối.
+                  🔒 <strong>Lưu ý bảo mật:</strong> Khách vãng lai chỉ được xem tên, quê gốc và giới thiệu công khai. Các thông tin cây chi tiết, số điện thoại, địa chỉ cụ thể và tài chính dòng họ được ẩn tuyệt đối.
                 </div>
               </div>
             </div>

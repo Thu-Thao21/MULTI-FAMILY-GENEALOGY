@@ -67,7 +67,7 @@ export const BusinessRegisterWizard: React.FC = () => {
       <div className="wiz-container">
         <div className="wiz-header">
           <span className="wiz-badge">QUY TRÌNH DÀNH CHO KHÁCH / ĐẠI DIỆN DÒNG HỌ</span>
-          <h1 className="wiz-title">Đăng Ký Khởi Tạo Dòng Họ Business (FR-GU-05, GU-06)</h1>
+          <h1 className="wiz-title">Đăng Ký Khởi Tạo Dòng Họ Business</h1>
           <p className="wiz-subtitle">
             Luồng đăng ký 4 bước để yêu cầu thiết lập tài khoản quản trị dòng họ mới.
           </p>
@@ -123,7 +123,7 @@ export const BusinessRegisterWizard: React.FC = () => {
                 className="pub-btn-primary"
                 onClick={() => navigate(`${ROUTES.PUBLIC.BUSINESS_TRACK}?code=${trackingCode}`)}
               >
-                Mở Màn Hình Theo Dõi Trạng Thái (FR-GU-07) ➔
+                Mở Màn Hình Theo Dõi Trạng Thái ➔
               </button>
             </div>
           </div>
@@ -132,7 +132,7 @@ export const BusinessRegisterWizard: React.FC = () => {
             {/* STEP 1: Representative Info */}
             {step === 1 && (
               <form onSubmit={handleNextStep1} className="wiz-step-form">
-                <h3 className="step-title">Bước 1: Thông tin đại diện dòng họ (FR-GU-05)</h3>
+                <h3 className="step-title">Bước 1: Thông tin đại diện dòng họ</h3>
 
                 <div className="form-field">
                   <label className="field-label">Họ và tên người đại diện *</label>
@@ -194,7 +194,7 @@ export const BusinessRegisterWizard: React.FC = () => {
             {/* STEP 2: Family Info */}
             {step === 2 && (
               <form onSubmit={handleNextStep2} className="wiz-step-form">
-                <h3 className="step-title">Bước 2: Thông tin chi tiết dòng họ (FR-GU-05)</h3>
+                <h3 className="step-title">Bước 2: Thông tin chi tiết dòng họ</h3>
 
                 <div className="form-field">
                   <label className="field-label">Tên dòng họ đăng ký *</label>
@@ -256,7 +256,7 @@ export const BusinessRegisterWizard: React.FC = () => {
             {/* STEP 3: Select Package Tier */}
             {step === 3 && (
               <div className="wiz-step-form">
-                <h3 className="step-title">Bước 3: Chọn gói dịch vụ Business (FR-GU-06)</h3>
+                <h3 className="step-title">Bước 3: Chọn gói dịch vụ Business</h3>
 
                 <div className="tier-select-grid">
                   <div

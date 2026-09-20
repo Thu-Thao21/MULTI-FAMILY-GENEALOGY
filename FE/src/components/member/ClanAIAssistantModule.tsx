@@ -82,7 +82,7 @@ export const ClanAIAssistantModule: React.FC = () => {
         <div>
           <h2 className="ai-title">Trợ Lý AI Gia Phả & Thống Kê Gợi Ý</h2>
           <p className="ai-subtitle">
-            Hỏi đáp thông minh về lịch sử dòng họ, tra cứu dữ liệu tộc họ và xem gợi ý tự động (FR-ME-31, ME-32).
+            Hỏi đáp thông minh về lịch sử dòng họ, tra cứu dữ liệu tộc họ và xem gợi ý tự động.
           </p>
         </div>
       </div>
@@ -144,9 +144,9 @@ export const ClanAIAssistantModule: React.FC = () => {
           </form>
         </div>
 
-        {/* Right Column: AI Stats & Suggestions (FR-ME-32) */}
+        {/* Right Column: AI Stats & Suggestions */}
         <div className="ai-stats-card">
-          <h3 className="ai-side-title">📊 Gợi Ý & Thống Kê AI (FR-ME-32)</h3>
+          <h3 className="ai-side-title">📊 Gợi Ý & Thống Kê AI</h3>
 
           <div className="suggestions-box">
             <span className="suggestions-label">Câu hỏi gợi ý thường gặp:</span>

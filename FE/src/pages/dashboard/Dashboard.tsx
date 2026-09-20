@@ -127,7 +127,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ userName, onLogout }) => {
   const userRole = primaryRole === 'admin' ? 'Admin' : 'Thành viên';
   const basePath = primaryRole === 'admin' ? ROUTES.ADMIN.ROOT : ROUTES.USER.ROOT;
 
-  // Mandatory first password change check (FR-ME-02)
+  // Mandatory first password change check
   useEffect(() => {
     if (account && (account as any).must_change_password) {
       setShowFirstLoginModal(true);
@@ -306,7 +306,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ userName, onLogout }) => {
         onClose={() => setIsProcessingToastOpen(false)}
       />
 
-      {/* Mandatory First-Time Password Modal (FR-ME-02) */}
+      {/* Mandatory First-Time Password Modal */}
       <FirstLoginPasswordModal
         isOpen={showFirstLoginModal}
         onSuccess={() => setShowFirstLoginModal(false)}

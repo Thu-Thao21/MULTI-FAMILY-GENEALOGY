@@ -102,11 +102,11 @@ export const ClanFundsModule: React.FC = () => {
       <div className="funds-header">
         <h2 className="funds-title">Quỹ Dòng Họ & Lịch Sử Đóng Góp</h2>
         <p className="funds-subtitle">
-          Minh bạch thu chi tài chính gia tộc và quản lý lịch sử đóng góp cá nhân (FR-ME-27, ME-28).
+          Minh bạch thu chi tài chính gia tộc và quản lý lịch sử đóng góp cá nhân.
         </p>
       </div>
 
-      {/* Fund Summaries (FR-ME-27) */}
+      {/* Fund Summaries */}
       <div className="funds-overview-grid">
         {funds.map((f) => (
           <div key={f.id} className="fund-summary-card">
@@ -124,11 +124,11 @@ export const ClanFundsModule: React.FC = () => {
         ))}
       </div>
 
-      {/* My Contributions (FR-ME-28) */}
+      {/* My Contributions */}
       <div className="my-contrib-section">
         <div className="my-contrib-header">
           <div>
-            <h3 className="my-contrib-title">Lịch Sử Đóng Góp Cá Nhân (FR-ME-28)</h3>
+            <h3 className="my-contrib-title">Lịch Sử Đóng Góp Cá Nhân</h3>
             <span className="my-total-badge">
               Tổng số tiền đã đóng góp (Đã xác nhận): <strong>{formatVND(totalMyAmount)}</strong>
             </span>

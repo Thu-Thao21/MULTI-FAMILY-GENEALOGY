@@ -71,7 +71,7 @@ export const BusinessPlansView: React.FC = () => {
       <div className="plans-container">
         <div className="plans-header">
           <span className="plans-badge">DÀNH CHO ĐẠI DIỆN DÒNG HỌ / TRƯỞNG TỘC</span>
-          <h1 className="plans-title">Bảng Gói Dịch Vụ Dòng Họ Business (FR-GU-02)</h1>
+          <h1 className="plans-title">Bảng Gói Dịch Vụ Dòng Họ Business</h1>
           <p className="plans-subtitle">
             Lựa chọn gói dịch vụ phù hợp với quy mô thành viên và nhu cầu số hóa của dòng họ bạn.
           </p>
@@ -84,7 +84,7 @@ export const BusinessPlansView: React.FC = () => {
 
               <h3 className="plan-name">{t.name}</h3>
               <div className="plan-limit">{t.memberLimit}</div>
-              <div className="plan-storage">💾 {t.storage}</div>
+              <div className="plan-storage">{t.storage}</div>
 
               <div className="plan-divider" />
 
@@ -105,7 +105,7 @@ export const BusinessPlansView: React.FC = () => {
         </div>
 
         <div className="plans-note-card">
-          ℹ️ Thông tin về bảng giá và giới hạn được tải động từ cấu hình hệ thống. Mọi thủ tục đăng ký Business sẽ được Quản trị viên thẩm định trước khi cấp quyền Owner.
+          Thông tin về bảng giá và giới hạn được tải động từ cấu hình hệ thống. Mọi thủ tục đăng ký Business sẽ được Quản trị viên thẩm định trước khi cấp quyền Owner.
         </div>
       </div>
     </PublicLayout>

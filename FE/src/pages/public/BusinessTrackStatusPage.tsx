@@ -67,7 +67,7 @@ export const BusinessTrackStatusPage: React.FC = () => {
       <div className="track-container">
         <div className="track-header">
           <span className="track-badge">TRA CỨU TRẠNG THÁI YÊU CẦU</span>
-          <h1 className="track-title">Theo Dõi Đăng Ký Dòng Họ Business (FR-GU-07)</h1>
+          <h1 className="track-title">Theo Dõi Đăng Ký Dòng Họ Business</h1>
           <p className="track-subtitle">
             Nhập mã theo dõi yêu cầu (VD: BIZ-20260912-1234) hoặc email đại diện để kiểm tra tiến độ xét duyệt.
           </p>
@@ -88,7 +88,7 @@ export const BusinessTrackStatusPage: React.FC = () => {
               required
             />
             <button type="submit" className="track-btn">
-              🔍 Tra Cứu Ngay
+              Tra Cứu Ngay
             </button>
           </form>
         </div>

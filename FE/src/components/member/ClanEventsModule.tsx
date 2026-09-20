@@ -77,7 +77,7 @@ export const ClanEventsModule: React.FC = () => {
       <div className="events-header">
         <h2 className="events-title">Sự Kiện Dòng Họ & Album Hoạt Động</h2>
         <p className="events-subtitle">
-          Xem thông tin giỗ tổ, họp họ, tảo mộ, tuyên dương khuyến học và đăng ký tham gia (FR-ME-24 đến ME-26).
+          Xem thông tin giỗ tổ, họp họ, tảo mộ, tuyên dương khuyến học và đăng ký tham gia.
         </p>
       </div>
 
@@ -126,7 +126,7 @@ export const ClanEventsModule: React.FC = () => {
         ))}
       </div>
 
-      {/* Album Modal (FR-ME-26) */}
+      {/* Album Modal */}
       {selectedAlbumEvent && (
         <div className="album-modal-overlay">
           <div className="album-modal-card">

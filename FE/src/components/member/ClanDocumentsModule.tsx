@@ -59,7 +59,7 @@ export const ClanDocumentsModule: React.FC = () => {
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [selectedPreviewDoc, setSelectedPreviewDoc] = useState<DocumentItem | null>(null);
 
-  // Upload modal state (FR-ME-30)
+  // Upload modal state
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [uploadTitle, setUploadTitle] = useState('');
   const [uploadCategory, setUploadCategory] = useState('van_ban');
@@ -127,7 +127,7 @@ export const ClanDocumentsModule: React.FC = () => {
         <div>
           <h2 className="docs-title">Kho Tư Liệu Lịch Sử & Văn Bản Gia Tộc</h2>
           <p className="docs-subtitle">
-            Lưu trữ, tra cứu gia phả cổ, sắc phong, văn bản, hình ảnh, video truyền thống dòng họ (FR-ME-29, ME-30).
+            Lưu trữ, tra cứu gia phả cổ, sắc phong, văn bản, hình ảnh, video truyền thống dòng họ.
           </p>
         </div>
         <button className="upload-doc-btn" onClick={() => setShowUploadModal(true)}>
@@ -214,12 +214,12 @@ export const ClanDocumentsModule: React.FC = () => {
         </div>
       )}
 
-      {/* Upload Proposal Modal (FR-ME-30) */}
+      {/* Upload Proposal Modal */}
       {showUploadModal && (
         <div className="upload-modal-overlay">
           <div className="upload-modal-card">
             <div className="upload-modal-header">
-              <h3>Đề Xuất Đóng Góp Tư Liệu Mới (FR-ME-30)</h3>
+              <h3>Đề Xuất Đóng Góp Tư Liệu Mới</h3>
               <button className="modal-close-btn" onClick={() => setShowUploadModal(false)}>✕</button>
             </div>
 

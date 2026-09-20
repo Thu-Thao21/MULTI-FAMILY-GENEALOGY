@@ -31,7 +31,7 @@ export const DigitalAncestralHallModule: React.FC = () => {
     },
   ]);
 
-  // Modal write tribute (FR-ME-35)
+  // Modal write tribute
   const [showTributeModal, setShowTributeModal] = useState(false);
   const [targetAncestor, setTargetAncestor] = useState('Cụ Khởi Tổ Nguyễn Văn A (Đời 1)');
   const [tributeContent, setTributeContent] = useState('');
@@ -71,12 +71,12 @@ export const DigitalAncestralHallModule: React.FC = () => {
         <div>
           <h2 className="hall-title">Không Gian Phòng Thờ Số Gia Tộc</h2>
           <p className="hall-subtitle">
-            Trang trọng kính bái tổ tiên, thắp hương tưởng niệm trực tuyến và ghi nhận lời tri ân (FR-ME-33 đến ME-35).
+            Trang trọng kính bái tổ tiên, thắp hương tưởng niệm trực tuyến và ghi nhận lời tri ân.
           </p>
         </div>
       </div>
 
-      {/* Main Altar Banner View (FR-ME-33, ME-34) */}
+      {/* Main Altar Banner View */}
       <div className="altar-main-card">
         <div className="altar-banner-overlay" />
         <div className="altar-content">
@@ -103,11 +103,11 @@ export const DigitalAncestralHallModule: React.FC = () => {
               onClick={handleBurnIncense}
               disabled={isBurning}
             >
-              {isBurning ? '🕯️ Đang dâng hương...' : '🕯️ Thắp Hương Tưởng Niệm (FR-ME-34)'}
+              {isBurning ? '🕯️ Đang dâng hương...' : '🕯️ Thắp Hương Tưởng Niệm'}
             </button>
 
             <button className="write-tribute-btn" onClick={() => setShowTributeModal(true)}>
-              ✍️ Viết Lời Tưởng Niệm (FR-ME-35)
+              ✍️ Viết Lời Tưởng Niệm
             </button>
           </div>
 
@@ -123,7 +123,7 @@ export const DigitalAncestralHallModule: React.FC = () => {
         </div>
       </div>
 
-      {/* Tributes List (FR-ME-35) */}
+      {/* Tributes List */}
       <div className="tributes-section">
         <h3 className="tributes-title">📜 Lời Tưởng Niệm Từ Thành Viên Gia Tộc ({tributes.length})</h3>
 
@@ -141,7 +141,7 @@ export const DigitalAncestralHallModule: React.FC = () => {
         </div>
       </div>
 
-      {/* Write Tribute Modal (FR-ME-35) */}
+      {/* Write Tribute Modal */}
       {showTributeModal && (
         <div className="tribute-modal-overlay">
           <div className="tribute-modal-card">

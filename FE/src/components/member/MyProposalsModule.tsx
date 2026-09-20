@@ -99,7 +99,7 @@ export const MyProposalsModule: React.FC = () => {
         <div>
           <h2 className="proposals-title">Đề Xuất Chỉnh Sửa & Theo Dõi Phê Duyệt</h2>
           <p className="proposals-subtitle">
-            Gửi yêu cầu điều chỉnh thông tin cá nhân hoặc quan hệ gia đình tới Quản trị viên dòng họ (FR-ME-17 đến ME-19).
+            Gửi yêu cầu điều chỉnh thông tin cá nhân hoặc quan hệ gia đình tới Quản trị viên dòng họ.
           </p>
         </div>
         <button className="create-proposal-btn" onClick={() => setShowCreateModal(true)}>
@@ -203,8 +203,8 @@ export const MyProposalsModule: React.FC = () => {
                   value={proposalType}
                   onChange={(e) => setProposalType(e.target.value as any)}
                 >
-                  <option value="profile">Đề xuất sửa thông tin hồ sơ (FR-ME-17)</option>
-                  <option value="relationship">Đề xuất thêm / sửa quan hệ (FR-ME-18)</option>
+                  <option value="profile">Đề xuất sửa thông tin hồ sơ</option>
+                  <option value="relationship">Đề xuất thêm / sửa quan hệ</option>
                 </select>
               </div>
 

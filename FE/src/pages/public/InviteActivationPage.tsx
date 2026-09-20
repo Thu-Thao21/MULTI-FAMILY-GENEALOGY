@@ -75,7 +75,7 @@ export const InviteActivationPage: React.FC = () => {
       <div className="act-container">
         <div className="act-header">
           <span className="act-badge">KÍCH HOẠT TÀI KHOẢN GIA THÀNH VIÊN</span>
-          <h1 className="act-title">Kích Hoạt Mã / Link Lời Mời (FR-GU-08)</h1>
+          <h1 className="act-title">Kích Hoạt Mã / Link Lời Mời</h1>
           <p className="act-subtitle">
             Nhập mã kích hoạt được Trưởng tộc / Hội đồng gia tộc cấp để xác minh hồ sơ và thiết lập mật khẩu cá nhân.
           </p>

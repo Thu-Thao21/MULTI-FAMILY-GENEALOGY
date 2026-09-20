@@ -81,7 +81,7 @@ export const NotificationCenterModule: React.FC = () => {
         <div>
           <h2 className="notif-center-title">Trung Tâm Thông Báo Cá Nhân</h2>
           <p className="notif-center-subtitle">
-            Cập nhật thông báo ngày giỗ, sự kiện, đề xuất, liên họ và cài đặt kênh nhận (FR-ME-36).
+            Cập nhật thông báo ngày giỗ, sự kiện, đề xuất, liên họ và cài đặt kênh nhận.
           </p>
         </div>
         <button className="mark-all-read-btn" onClick={markAllAsRead}>

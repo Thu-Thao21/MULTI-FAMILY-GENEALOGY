@@ -72,7 +72,7 @@ export const AnniversariesModule: React.FC = () => {
         <div>
           <h2 className="anniv-title">Lịch Ngày Giỗ & Tưởng Niệm Gia Tộc</h2>
           <p className="anniv-subtitle">
-            Theo dõi danh sách ngày giỗ Âm/Dương lịch và cấu hình nhận thông báo nhắc nhở tự động (FR-ME-22, ME-23).
+            Theo dõi danh sách ngày giỗ Âm/Dương lịch và cấu hình nhận thông báo nhắc nhở tự động.
           </p>
         </div>
         <button className="anniv-config-btn" onClick={() => setShowConfigModal(true)}>
@@ -121,7 +121,7 @@ export const AnniversariesModule: React.FC = () => {
       {showConfigModal && (
         <div className="anniv-modal-overlay">
           <div className="anniv-modal-card">
-            <h3 className="anniv-modal-title">Cấu hình Nhắc Lịch Giỗ (FR-ME-23)</h3>
+            <h3 className="anniv-modal-title">Cấu hình Nhắc Lịch Giỗ</h3>
             <p className="anniv-modal-subtitle">Lựa chọn thời điểm và phương thức nhận thông báo cá nhân hóa.</p>
 
             <div className="config-group">

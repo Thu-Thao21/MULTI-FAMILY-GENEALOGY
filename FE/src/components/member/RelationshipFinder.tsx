@@ -128,7 +128,7 @@ export const RelationshipFinder: React.FC = () => {
       <div className="rel-finder-header">
         <h2 className="rel-finder-title">Tra Cứu Quan Hệ & Cách Xưng Hô Dòng Họ</h2>
         <p className="rel-finder-subtitle">
-          Xác định chuỗi đường đi kết nối gia phả giữa 2 thành viên và gợi ý danh xưng chuẩn phong tục Việt Nam (FR-ME-13 đến ME-16).
+          Xác định chuỗi đường đi kết nối gia phả giữa 2 thành viên và gợi ý danh xưng chuẩn phong tục Việt Nam.
         </p>
 
         <div className="rel-finder-tabs">

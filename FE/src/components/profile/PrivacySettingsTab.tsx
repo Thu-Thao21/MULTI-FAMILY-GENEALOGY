@@ -47,7 +47,7 @@ export const PrivacySettingsTab: React.FC<PrivacySettingsTabProps> = () => {
       <div className="privacy-header-card">
         <h2 className="privacy-title">Cài Đặt Quyền Riêng Tư Cá Nhân</h2>
         <p className="privacy-subtitle">
-          Quản lý mức độ chia sẻ thông tin cá nhân của bạn trên hệ thống gia phả theo chính sách của dòng họ (FR-ME-07, ME-37).
+          Quản lý mức độ chia sẻ thông tin cá nhân của bạn trên hệ thống gia phả theo chính sách của dòng họ.
         </p>
       </div>
 
@@ -152,10 +152,10 @@ export const PrivacySettingsTab: React.FC<PrivacySettingsTabProps> = () => {
           </button>
         </form>
 
-        {/* Right Column: Preview Simulation (FR-ME-38) */}
+        {/* Right Column: Preview Simulation */}
         <div className="privacy-preview-card">
           <div className="privacy-preview-header">
-            <h3 className="privacy-card-title">Xem Trước Góc Nhìn (FR-ME-38)</h3>
+            <h3 className="privacy-card-title">Xem Trước Góc Nhìn</h3>
             <p className="privacy-preview-subtitle">
               Mô phỏng dữ liệu hồ sơ hiển thị dưới góc nhìn của các đối tượng khác nhau mà không đổi role/session thật.
             </p>
