@@ -170,7 +170,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ userName, onLogout }) => {
   const displayUserName = account?.display_name || account?.username || firebaseUser?.displayName || userName || 'Người dùng';
   const primaryRole = account?.primary_role || 'member';
   const isFamilyManager = account?.roles?.some((role) => role.role === 'manager' && role.status === 'active') && !account?.roles?.some((role) => role.role === 'family_head' && role.status === 'active');
-  const userRole = primaryRole === 'admin' ? 'Admin' : primaryRole === 'family_head' ? (isFamilyManager ? 'Family Admin' : 'Chủ dòng họ') : 'Thành viên';
+  const userRole = primaryRole === 'admin' ? 'Admin' : primaryRole === 'family_head' ? 'Chủ dòng họ' : isFamilyManager ? 'Family Admin' : 'Thành viên';
   const basePath = primaryRole === 'admin' ? ROUTES.ADMIN.ROOT : ROUTES.USER.ROOT;
 
   // Mandatory first password change check
@@ -250,20 +250,23 @@ export const Dashboard: React.FC<DashboardProps> = ({ userName, onLogout }) => {
     }
 
     // ===== Branch for Member (38 FRs) =====
+    const isFamilyHead = primaryRole === 'family_head';
+    const canManageFamily = isFamilyHead || isFamilyManager;
+
     if (activeTab === 'notifications') return <NotificationCenterModule />;
-    if (activeTab === 'relationship-finder') return primaryRole === 'family_head' ? <FamilyAdminModule view="search" /> : <RelationshipFinder />;
+    if (activeTab === 'relationship-finder') return canManageFamily ? <FamilyAdminModule view="search" /> : <RelationshipFinder />;
     if (activeTab === 'my-proposals') return <MyProposalsModule />;
     if (activeTab === 'anniversaries') return <AnniversariesModule />;
-    if (activeTab === 'events') return <ClanEventsModule canManage={primaryRole === 'family_head'} />;
-    if (activeTab === 'funds') return <ClanFundsModule canManage={primaryRole === 'family_head'} />;
-    if (activeTab === 'documents') return <ClanDocumentsModule canManage={primaryRole === 'family_head'} />;
+    if (activeTab === 'events') return <ClanEventsModule canManage={canManageFamily} />;
+    if (activeTab === 'funds') return <ClanFundsModule canManage={canManageFamily} />;
+    if (activeTab === 'documents') return <ClanDocumentsModule canManage={canManageFamily} />;
     if (activeTab === 'ai-assistant') return <ClanAIAssistantModule />;
     if (activeTab === 'ai-consent') return <AIConsentModule />;
     if (activeTab === 'ancestral-hall') return <DigitalAncestralHallModule onOpenLibrary={(ancestorId) => { setSelectedAncestorId(ancestorId); handleSelectTab('ancestral-library'); }} />;
     if (activeTab === 'ancestral-library') return <AncestralLibraryModule initialAncestorId={selectedAncestorId} onOpenWorship={(ancestorId) => { setSelectedAncestorId(ancestorId); handleSelectTab('ancestral-hall'); }} />;
     if (activeTab === 'privacy-settings' || activeTab === 'privacy-preview') return <PrivacySettingsTab />;
-    if (activeTab.startsWith('family-') && primaryRole !== 'family_head') {
-      return <section className="dashboard-permission-page"><div className="dashboard-permission-icon">🔒</div><span>QUYỀN TRUY CẬP DỮ LIỆU</span><h1>Chức năng dành cho Chủ dòng họ</h1><p>Tài khoản Thành viên có thể xem dữ liệu được chia sẻ nhưng không thể mở khu vực quản lý, phê duyệt hoặc xuất nhập dữ liệu.</p><button type="button" onClick={() => handleSelectTab('dashboard')}>Quay lại Trang chủ</button></section>;
+    if (activeTab.startsWith('family-') && !canManageFamily) {
+      return <section className="dashboard-permission-page"><div className="dashboard-permission-icon">🔒</div><span>QUYỀN TRUY CẬP DỮ LIỆU</span><h1>Chức năng dành cho Quản trị viên dòng họ</h1><p>Tài khoản Thành viên có thể xem dữ liệu được chia sẻ nhưng không thể mở khu vực quản lý, phê duyệt hoặc xuất nhập dữ liệu.</p><button type="button" onClick={() => handleSelectTab('dashboard')}>Quay lại Trang chủ</button></section>;
     }
     const familyViews: Record<string, FamilyAdminView> = {
       'family-members': 'members', 'family-relations': 'relations', 'family-tree': 'tree',
@@ -289,7 +292,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ userName, onLogout }) => {
 
     // Tree Layout
     if (activeTab.startsWith('tree')) {
-      if (primaryRole === 'family_head') return <FamilyAdminModule view="tree" onNavigate={() => handleSelectTab('family-relations')} />;
+      if (canManageFamily) return <FamilyAdminModule view="tree" onNavigate={() => handleSelectTab('family-relations')} />;
       const mode: TreeViewMode =
         activeTab === 'tree-horizontal'
           ? 'horizontal'
@@ -338,15 +341,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ userName, onLogout }) => {
       return <MemberList onSelectMember={handleSelectMember} />;
     }
 
-    if (primaryRole === 'family_head') {
-      const tabs: Record<FamilyAdminView, string> = {
-        overview: 'dashboard', members: 'family-members', relations: 'family-relations',
-        tree: 'family-tree', search: 'family-search', branches: 'family-branches',
-        approvals: 'family-approvals', accounts: 'family-accounts', links: 'family-links',
-        exchange: 'family-import-export', audit: 'family-logs',
-      };
-      return <FamilyAdminModule view="overview" onNavigate={(view) => handleSelectTab(tabs[view])} />;
-    }
+
 
     // Default Member Dashboard
     return (

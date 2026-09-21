@@ -77,35 +77,15 @@ export interface FamilyAdminState {
   audit: { id: string; at: string; action: string }[];
 }
 
-const STORAGE_KEY = 'mfgms.familyAdmin.frontend.v1';
+const STORAGE_KEY = 'mfgms.familyAdmin.frontend.v2';
 
 const initialState: FamilyAdminState = {
   familyName: 'Dòng họ Võ',
-  branches: [
-    { id: 'branch-main', name: 'Chi Trưởng', founderId: 'person-1', description: 'Chi trực hệ chính' },
-    { id: 'branch-two', name: 'Chi Hai', founderId: 'person-3', description: 'Chi thứ hai' },
-  ],
-  persons: [
-    { id: 'person-1', fullName: 'Võ Văn Minh', gender: 'male', birthDate: '1952-04-18', deathDate: '', branchId: 'branch-main', generation: 4, phone: '0903152876', email: 'minh.vo@example.com', bio: 'Trưởng tộc', hidden: false, visibility: 'family' },
-    { id: 'person-2', fullName: 'Võ Thị Thanh', gender: 'female', birthDate: '1958-09-02', deathDate: '', branchId: 'branch-main', generation: 4, phone: '', email: '', bio: '', hidden: false, visibility: 'family' },
-    { id: 'person-3', fullName: 'Võ Văn Thành', gender: 'male', birthDate: '1978-01-24', deathDate: '', branchId: 'branch-two', generation: 5, phone: '', email: 'thanh.vo@example.com', bio: '', hidden: false, visibility: 'family' },
-    { id: 'person-4', fullName: 'Nguyễn Thị Lan', gender: 'female', birthDate: '1981-07-12', deathDate: '', branchId: 'branch-two', generation: 5, phone: '', email: '', bio: '', hidden: false, visibility: 'family' },
-    { id: 'person-5', fullName: 'Võ Minh Khang', gender: 'male', birthDate: '2004-11-08', deathDate: '', branchId: 'branch-two', generation: 6, phone: '', email: '', bio: '', hidden: false, visibility: 'family' },
-  ],
-  relations: [
-    { id: 'relation-1', type: 'father', fromId: 'person-1', toId: 'person-3', since: '' },
-    { id: 'relation-2', type: 'spouse', fromId: 'person-3', toId: 'person-4', since: '2002-01-01' },
-    { id: 'relation-3', type: 'father', fromId: 'person-3', toId: 'person-5', since: '' },
-    { id: 'relation-4', type: 'mother', fromId: 'person-4', toId: 'person-5', since: '' },
-  ],
-  accounts: [
-    { id: 'account-1', personId: 'person-1', username: 'vovanminh', email: 'minh.vo@example.com', role: 'owner', status: 'active' },
-    { id: 'account-2', personId: 'person-3', username: 'vovanthanh', email: 'thanh.vo@example.com', role: 'member', status: 'active' },
-  ],
-  proposals: [
-    { id: 'proposal-1', type: 'profile', personId: 'person-3', proposer: 'Võ Văn Thành', summary: 'Bổ sung tiểu sử', field: 'bio', proposedValue: 'Sinh sống và làm việc tại Hà Nội.', status: 'pending' },
-    { id: 'proposal-2', type: 'relationship', personId: 'person-5', proposer: 'Võ Minh Khang', summary: 'Bổ sung quan hệ cha nuôi–con', relation: { type: 'adoptive_parent', fromId: 'person-1', toId: 'person-5', since: '' }, status: 'pending' },
-  ],
+  branches: [],
+  persons: [],
+  relations: [],
+  accounts: [],
+  proposals: [],
   linkRequests: [],
   audit: [],
 };

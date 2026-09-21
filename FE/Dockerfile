@@ -13,6 +13,7 @@ RUN npm ci && npm run build
 FROM nginx:stable-alpine
 COPY --from=build /app/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
+RUN rm -f /docker-entrypoint.d/10-listen-on-ipv6-by-default.sh
 
 # default nginx config listens on 80
 EXPOSE 80

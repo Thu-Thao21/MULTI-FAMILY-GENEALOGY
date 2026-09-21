@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '../../../config/routes';
+import circularEmblemLogo from '../../../assets/logo/logo_circular_emblem.png';
 import './TopBar.css';
 
 export interface TopBarProps {
@@ -103,7 +104,7 @@ export const TopBar: React.FC<TopBarProps> = ({
         </button>
 
         <div className="topbar-brand-box" onClick={() => navigate(userRole === 'Admin' ? ROUTES.ADMIN.ROOT : ROUTES.USER.ROOT)} style={{ cursor: 'pointer' }}>
-          <div className="topbar-logo-icon"></div>
+          <img src={circularEmblemLogo} alt="Gia Phả Việt Logo" className="topbar-logo-icon" />
           <div>
             <div className="topbar-system-tag">HỆ THỐNG GIA PHẢ LIÊN HỌ</div>
             <div className="topbar-brand-title">Gia Phả Việt</div>

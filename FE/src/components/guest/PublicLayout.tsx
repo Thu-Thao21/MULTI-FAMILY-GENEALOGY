@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ROUTES } from '../../config/routes';
-import smallAppLogo from '../../assets/logo/logo_small_app.png';
+import circularEmblemLogo from '../../assets/logo/logo_circular_emblem.png';
 import './PublicLayout.css';
 
 interface PublicLayoutProps {
@@ -22,7 +22,7 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
       <header className="public-header">
         <div className="public-header-inner">
           <div className="public-brand-logo" onClick={() => navigate(ROUTES.PUBLIC.ROOT)}>
-            <img src={smallAppLogo} alt="Gia Phả Việt Logo" className="public-logo-img" />
+            <img src={circularEmblemLogo} alt="Gia Phả Việt Logo" className="public-logo-img" />
             <div>
               <div className="public-system-sub">HỆ THỐNG GIA PHẢ LIÊN HỌ</div>
               <div className="public-brand-name">Gia Phả Việt</div>

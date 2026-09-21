@@ -46,14 +46,9 @@
 .topbar-logo-icon {
   width: 42px;
   height: 42px;
-  border-radius: 14px;
-  background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #ffffff;
-  font-size: 22px;
-  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.25);
+  border-radius: 10px;
+  object-fit: cover;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
 }
 
 .topbar-system-tag {
