@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, useLocation, useNavigate, Navigate } from 'react-router-dom';
-import TopBar from './TopBar/TopBar';
-import Sidebar from './Sidebar/Sidebar';
+import { TopBar } from '../../dashboard/TopBar/TopBar';
+import Sidebar from '../../dashboard/Sidebar/Sidebar';
 import '../../../pages/dashboard/Dashboard.css';
 
 // Import ảnh nền
@@ -116,6 +116,7 @@ export const ClanAdminLayout: React.FC = () => {
           onSelectTab={handleSelectTab}
           isCollapsed={isSidebarCollapsed}
           userRole="Admin"
+          variant="clan"
         />
 
         <main

@@ -1,0 +1,229 @@
+/* ===== Shared Network Styles (Module 3) ===== */
+
+.network-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  animation: networkFadeIn 0.3s ease-out;
+}
+
+@keyframes networkFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.network-loading-prompt {
+  padding: 40px;
+  text-align: center;
+  color: #64748b;
+}
+
+.network-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
+}
+
+.network-card-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 16px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.network-card-subtitle {
+  font-size: 13.5px;
+  color: #64748b;
+  margin: 0 0 20px;
+  line-height: 1.5;
+}
+
+.network-family-history-text {
+  font-size: 13px;
+  color: #475569;
+  margin: 8px 0 12px;
+  line-height: 1.5;
+}
+
+.network-family-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+.network-family-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 20px;
+  transition: all 0.2s ease;
+  cursor: default;
+}
+
+.network-family-card:hover {
+  border-color: #93c5fd;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.08);
+  transform: translateY(-2px);
+}
+
+.network-family-name {
+  font-size: 17px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 6px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.network-family-founder {
+  font-size: 13px;
+  color: #64748b;
+  margin: 0 0 12px;
+}
+
+.network-family-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.network-meta-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: #eff6ff;
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.network-meta-chip.green {
+  background: #f0fdf4;
+  color: #166534;
+}
+
+.network-meta-chip.amber {
+  background: #fffbeb;
+  color: #92400e;
+}
+
+.network-meta-chip.purple {
+  background: #faf5ff;
+  color: #7c3aed;
+}
+
+.network-marriage-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.network-marriage-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  background: #f8fafc;
+  border: 1px solid #f1f5f9;
+  border-radius: 14px;
+  transition: all 0.2s ease;
+}
+
+.network-marriage-row:hover {
+  border-color: #fbbf24;
+  box-shadow: 0 4px 14px rgba(251, 191, 36, 0.08);
+}
+
+.network-marriage-person {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 120px;
+}
+
+.network-marriage-avatar-icon {
+  font-size: 28px;
+  margin-bottom: 4px;
+}
+
+.network-marriage-name {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #0f172a;
+  text-align: center;
+}
+
+.network-marriage-family {
+  font-size: 12px;
+  color: #64748b;
+  text-align: center;
+}
+
+.network-marriage-center-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+.network-marriage-heart {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.network-marriage-date {
+  font-size: 12px;
+  color: #94a3b8;
+  margin-top: 4px;
+}
+
+.network-marriage-notes {
+  font-size: 11.5px;
+  color: #64748b;
+  text-align: center;
+  margin-top: 4px;
+  max-width: 250px;
+}
+
+.network-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+/* Overview Stats */
+.network-stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 14px;
+}
+
+.network-stat-card {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  border-radius: 14px;
+  padding: 18px 20px;
+  color: #ffffff;
+  text-align: center;
+}
+
+.network-stat-number {
+  font-size: 28px;
+  font-weight: 900;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.network-stat-label {
+  font-size: 12px;
+  color: #94a3b8;
+  margin-top: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}

@@ -1,0 +1,251 @@
+.member-dash-head-section {
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  border: 1px solid #bfdbfe;
+  border-radius: 16px;
+  padding: 20px 24px;
+  margin-bottom: 24px;
+}
+
+.member-dash-head-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.member-dash-head-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.member-dash-head-icon {
+  font-size: 1.5rem;
+}
+
+.member-dash-head-title {
+  margin: 0;
+  color: #1e40af;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.member-dash-head-badge {
+  background: #2563eb;
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+.member-dash-head-desc {
+  margin: 0 0 16px;
+  font-size: 0.88rem;
+  color: #1e3a8a;
+  line-height: 1.5;
+}
+
+.member-dash-head-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.member-dash-head-btn {
+  padding: 10px 14px;
+  background: #ffffff;
+  border: 1px solid #93c5fd;
+  border-radius: 10px;
+  color: #1d4ed8;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  text-align: left;
+}
+
+/* Member Chart Styles */
+.member-dash-head-section {
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  border: 1px solid #bfdbfe;
+  border-radius: 16px;
+  padding: 20px 24px;
+  margin-bottom: 24px;
+}
+
+.member-dash-head-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.member-dash-head-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.member-dash-head-icon {
+  font-size: 1.5rem;
+}
+
+.member-dash-head-title {
+  margin: 0;
+  color: #1e40af;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.member-dash-head-badge {
+  background: #2563eb;
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+.member-dash-head-desc {
+  margin: 0 0 16px;
+  font-size: 0.88rem;
+  color: #1e3a8a;
+  line-height: 1.5;
+}
+
+.member-dash-head-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.member-dash-head-btn {
+  padding: 10px 14px;
+  background: #ffffff;
+  border: 1px solid #93c5fd;
+  border-radius: 10px;
+  color: #1d4ed8;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  text-align: left;
+}
+
+/* Member Chart Styles */
+.member-chart-container {
+  background: #ffffff;
+  border-radius: 20px;
+  border: 1px solid #e0f2fe;
+  box-shadow: 0 4px 20px rgba(14, 165, 233, 0.05);
+  padding: 24px 28px;
+  margin-top: 24px;
+}
+
+.member-chart-header {
+  margin-bottom: 20px;
+}
+
+.member-chart-title {
+  margin: 0 0 8px;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.member-chart-subtitle {
+  margin: 0;
+  font-size: 0.88rem;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+.member-chart-split-layout {
+  display: flex;
+  gap: 32px;
+}
+
+.member-chart-body {
+  flex: 1;
+}
+
+.member-chart-stats {
+  width: 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  justify-content: space-around;
+}
+
+.member-chart-stat-card {
+  background: #f8fafc;
+  border-radius: 16px;
+  padding: 16px 20px;
+  border: 1px solid #e2e8f0;
+}
+
+.stat-card-title {
+  margin: 0 0 6px 0;
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.stat-card-value {
+  margin: 0 0 8px 0;
+  font-size: 28px;
+  font-weight: 800;
+  color: #0284c7;
+}
+
+.stat-card-trend {
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #64748b;
+}
+
+@media (max-width: 1024px) {
+  .member-chart-split-layout {
+    flex-direction: column;
+  }
+  .member-chart-stats {
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  .member-chart-stat-card {
+    flex: 1;
+    min-width: 150px;
+  }
+}
+
+.member-chart-container {
+  background: #ffffff;
+  border-radius: 20px;
+  border: 1px solid #e0f2fe;
+  box-shadow: 0 4px 20px rgba(14, 165, 233, 0.05);
+  padding: 24px 28px;
+  margin-top: 24px;
+}
+
+.member-chart-header {
+  margin-bottom: 20px;
+}
+
+.member-chart-title {
+  margin: 0 0 8px;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.member-chart-subtitle {
+  margin: 0;
+  font-size: 0.88rem;
+  color: #64748b;
+  line-height: 1.5;
+}

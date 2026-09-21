@@ -1,5 +1,5 @@
 import React from 'react';
-import familyTreeImage from '../../../assets/cay.png';
+import familyTreeImage from '../../../assets/cay3.png';
 import './AuthLanding.css';
 
 export interface AuthLandingProps {

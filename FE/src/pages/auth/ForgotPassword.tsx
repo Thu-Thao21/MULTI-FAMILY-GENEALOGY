@@ -1,3 +1,4 @@
+
 import React from 'react';
 import ForgotPasswordForm from '../../components/auth/ForgotPasswordForm';
 import AuthLanding from '../../components/auth/AuthLanding';
