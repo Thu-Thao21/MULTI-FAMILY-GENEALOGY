@@ -1,36 +1,71 @@
-from fastapi import APIRouter, HTTPException, status
+from typing import List, Optional
+from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
-from typing import List
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.db.postgres import get_db
+from app.models.postgres import Admin, Member
 
 router = APIRouter(prefix="/users", tags=["users"])
 
-# Example Pydantic model — extend as needed
-class UserIn(BaseModel):
-    first_name: str
-    last_name: str
-    email: str
 
-class UserOut(UserIn):
+class UserOut(BaseModel):
     id: str
+    username: Optional[str] = None
+    full_name: str
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    role: str
+    status: str
 
-# Placeholder in-memory store for quick testing — replace with MongoDB calls
-_fake_users = []
+    class Config:
+        from_attributes = True
 
-@router.post("/", response_model=UserOut, status_code=status.HTTP_201_CREATED)
-async def create_user(user: UserIn):
-    new = user.dict()
-    new_id = str(len(_fake_users) + 1)
-    new_doc = {"id": new_id, **new}
-    _fake_users.append(new_doc)
-    return new_doc
 
 @router.get("/", response_model=List[UserOut])
-async def list_users():
-    return _fake_users
+async def list_users(role: Optional[str] = None, db: AsyncSession = Depends(get_db)):
+    """Lấy danh sách tất cả tài khoản từ 2 bảng (admins, members)."""
+    results: List[UserOut] = []
 
-@router.get("/{user_id}", response_model=UserOut)
-async def get_user(user_id: str):
-    for u in _fake_users:
-        if u["id"] == user_id:
-            return u
-    raise HTTPException(status_code=404, detail="User not found")
+    if not role or role == "admin":
+        res = await db.execute(select(Admin))
+        for item in res.scalars().all():
+            results.append(
+                UserOut(
+                    id=item.id,
+                    username=item.username,
+                    full_name=item.full_name,
+                    email=item.email,
+                    phone=item.phone,
+                    role="admin",
+                    status=item.status,
+                )
+            )
+
+    if not role or role == "member":
+        res = await db.execute(select(Member))
+        for item in res.scalars().all():
+            if item.username:
+                results.append(
+                    UserOut(
+                        id=item.id,
+                        username=item.username,
+                        full_name=item.full_name,
+                        email=item.email,
+                        phone=item.phone,
+                        role="member",
+                        status=item.status,
+                    )
+                )
+
+    return results
+
+
+@router.get("/admins")
+async def list_admins(db: AsyncSession = Depends(get_db)):
+    """Lấy danh sách tài khoản từ bảng admins."""
+    result = await db.execute(select(Admin))
+    admins = result.scalars().all()
+    return admins
+

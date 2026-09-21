@@ -1,0 +1,31 @@
+/* StatusTab Styles */
+.status-tab-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.status-alive-card {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+}
+
+.status-deceased-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #334155;
+}
+
+.status-bold-value {
+  font-weight: 800;
+}
+
+.status-lunar-date {
+  color: #dc2626;
+  font-weight: 800;
+}
+
+.status-full-width {
+  grid-column: 1 / -1;
+}

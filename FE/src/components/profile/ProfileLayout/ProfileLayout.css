@@ -1,0 +1,36 @@
+.profile-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #334155;
+  font-weight: 600;
+  font-size: 13.5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 16px;
+}
+
+.profile-back-btn:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.profile-loading-box {
+  padding: 60px;
+  text-align: center;
+  color: #64748b;
+}
+
+.profile-not-found-box {
+  padding: 60px;
+  text-align: center;
+}
+
+.profile-not-found-text {
+  color: #ef4444;
+  font-weight: 700;
+}

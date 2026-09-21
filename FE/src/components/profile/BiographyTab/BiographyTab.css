@@ -1,0 +1,63 @@
+/* BiographyTab Styles */
+.biography-tab-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.biography-text {
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: #334155;
+  margin: 0;
+}
+
+.biography-location {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.profile-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: relative;
+  padding-left: 20px;
+  border-left: 2px solid #e2e8f0;
+}
+
+.profile-timeline-item {
+  position: relative;
+  padding-bottom: 12px;
+}
+
+.profile-timeline-item::before {
+  content: '';
+  position: absolute;
+  left: -26px;
+  top: 4px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #2563eb;
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 0 2px #bfdbfe;
+}
+
+.profile-timeline-year {
+  font-size: 12px;
+  font-weight: 700;
+  color: #2563eb;
+}
+
+.profile-timeline-title {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 2px 0 4px;
+}
+
+.profile-timeline-desc {
+  font-size: 13px;
+  color: #64748b;
+}

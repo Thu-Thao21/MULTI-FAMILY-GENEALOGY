@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <!-- Rounded Square Container with Cream Texture Fill -->
+  <rect width="120" height="120" rx="28" fill="#f2eee5" stroke="#e3ded2" stroke-width="2.5"/>
+  
+  <g fill="none" stroke="#1a3048" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Base Twisted Roots -->
+    <path d="M 35 94 C 44 88, 54 90, 60 90 C 66 90, 76 88, 85 94" stroke-width="2.8"/>
+    <path d="M 40 95 C 48 91, 56 92, 60 92 C 64 92, 72 91, 80 95" stroke-width="2.2"/>
+    
+    <!-- Intertwined Trunk S-Curves -->
+    <path d="M 42 92 Q 56 82 54 68 Q 52 56 60 46" stroke-width="2.8"/>
+    <path d="M 78 92 Q 64 82 66 68 Q 68 56 60 46" stroke-width="2.8"/>
+    <path d="M 50 93 Q 63 81 58 70 Q 55 58 60 46" stroke-width="2.2"/>
+    <path d="M 70 93 Q 57 81 62 70 Q 65 58 60 46" stroke-width="2.2"/>
+
+    <!-- Bottom Solid Teardrop Leaves -->
+    <path d="M 36 68 C 30 64, 28 72, 38 72 Z" fill="#1a3048" stroke="none"/>
+    <path d="M 46 64 C 42 58, 38 66, 47 67 Z" fill="#1a3048" stroke="none"/>
+    <path d="M 84 68 C 90 64, 92 72, 82 72 Z" fill="#1a3048" stroke="none"/>
+    <path d="M 74 64 C 78 58, 82 66, 73 67 Z" fill="#1a3048" stroke-width="1"/>
+
+    <!-- Main Canopy Branches forming Human Figures -->
+    <!-- Center Top Figure -->
+    <path d="M 60 46 C 53 36, 48 24, 60 16 C 72 24, 67 36, 60 46 Z" stroke-width="2.5"/>
+    <circle cx="60" cy="13" r="3.2" fill="#1a3048" stroke="none"/>
+
+    <!-- Mid-Left Figure -->
+    <path d="M 56 48 C 44 38, 34 26, 46 18 C 56 26, 52 38, 58 46" stroke-width="2.5"/>
+    <circle cx="45" cy="16" r="3.2" fill="#1a3048" stroke="none"/>
+
+    <!-- Far-Left Figure -->
+    <path d="M 52 52 C 34 44, 22 34, 30 24 C 42 26, 44 38, 54 48" stroke-width="2.5"/>
+    <circle cx="30" cy="22" r="3.2" fill="#1a3048" stroke="none"/>
+
+    <!-- Outer-Left Lower Branch -->
+    <path d="M 48 58 C 30 52, 18 44, 22 36 C 32 34, 38 46, 44 54" stroke-width="2.5"/>
+    <circle cx="21" cy="34" r="3" fill="#1a3048" stroke="none"/>
+
+    <!-- Mid-Right Figure -->
+    <path d="M 64 48 C 76 38, 86 26, 74 18 C 64 26, 68 38, 62 46" stroke-width="2.5"/>
+    <circle cx="75" cy="16" r="3.2" fill="#1a3048" stroke="none"/>
+
+    <!-- Far-Right Figure -->
+    <path d="M 68 52 C 86 44, 98 34, 90 24 C 78 26, 76 38, 66 48" stroke-width="2.5"/>
+    <circle cx="90" cy="22" r="3.2" fill="#1a3048" stroke="none"/>
+
+    <!-- Outer-Right Lower Branch -->
+    <path d="M 72 58 C 90 52, 102 44, 98 36 C 88 34, 82 46, 76 54" stroke-width="2.5"/>
+    <circle cx="99" cy="34" r="3" fill="#1a3048" stroke="none"/>
+
+    <!-- Inner Canopy Interlocking Arches & People Dots -->
+    <path d="M 42 42 C 50 32, 70 32, 78 42" stroke-width="2.2"/>
+    <path d="M 32 52 C 46 38, 74 38, 88 52" stroke-width="2.2"/>
+    
+    <!-- Inner Head Dots -->
+    <circle cx="44" cy="50" r="3" fill="#1a3048" stroke="none"/>
+    <circle cx="76" cy="50" r="3" fill="#1a3048" stroke="none"/>
+  </g>
+</svg>

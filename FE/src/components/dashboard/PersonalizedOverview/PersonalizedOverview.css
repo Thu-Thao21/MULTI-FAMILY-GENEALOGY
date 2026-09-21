@@ -1,0 +1,99 @@
+.personalized-overview-wrapper {
+  margin-bottom: 32px;
+}
+
+.personalized-overview-banner {
+  border-radius: 24px;
+  background: linear-gradient(135deg, #1e40af 0%, #2563eb 60%, #3b82f6 100%);
+  color: #ffffff;
+  padding: 32px 36px;
+  box-shadow: 0 12px 32px rgba(37, 99, 235, 0.15);
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.personalized-overview-system-tag {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background-color: rgba(255, 255, 255, 0.18);
+  padding: 4px 12px;
+  border-radius: 999px;
+  margin-bottom: 10px;
+}
+
+.personalized-overview-greeting {
+  font-size: 2.1rem;
+  font-weight: 800;
+  margin: 0 0 8px;
+  line-height: 1.2;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.personalized-overview-subtext {
+  margin: 0;
+  font-size: 14px;
+  opacity: 0.9;
+  max-width: 620px;
+  line-height: 1.5;
+}
+
+.personalized-overview-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 18px;
+}
+
+.personalized-overview-card {
+  background-color: #ffffff;
+  border-radius: 20px;
+  padding: 20px 22px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.03);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.personalized-overview-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.personalized-overview-card-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.personalized-overview-card-tag {
+  font-size: 11px;
+  font-weight: 700;
+  color: #2563eb;
+  background-color: #eff6ff;
+  padding: 3px 9px;
+  border-radius: 999px;
+}
+
+.personalized-overview-card-value {
+  font-size: 20px;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.2;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.personalized-overview-card-footer {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid #f1f5f9;
+  font-size: 12px;
+  color: #94a3b8;
+  font-weight: 500;
+}

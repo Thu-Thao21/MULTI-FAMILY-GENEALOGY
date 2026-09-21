@@ -1,0 +1,37 @@
+/* NetworkOverview specific styles */
+.network-overview-banner {
+  background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 60%, #1e293b 100%);
+  border-radius: 20px;
+  padding: 32px;
+  color: #ffffff;
+  position: relative;
+  overflow: hidden;
+}
+
+.network-overview-banner::before {
+  content: '';
+  position: absolute;
+  top: -40%;
+  right: -15%;
+  width: 350px;
+  height: 350px;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.network-overview-title {
+  font-size: 24px;
+  font-weight: 800;
+  margin: 0 0 6px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.network-overview-desc {
+  margin: 0 0 24px;
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+.network-stat-card.interactive {
+  cursor: pointer;
+}
