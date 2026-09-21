@@ -178,7 +178,7 @@ export const ClanFundsModule: React.FC = () => {
                     <td style={{ fontWeight: 700, color: '#2563eb' }}>{formatVND(c.amount)}</td>
                     <td>
                       <span className={`contrib-status-pill ${c.status}`}>
-                        {c.status === 'confirmed' ? '✓ Đã xác nhận' : '⏳ Đang chờ duyệt'}
+                        {c.status === 'confirmed' ? 'Đã xác nhận' : 'Đang chờ duyệt'}
                       </span>
                     </td>
                   </tr>

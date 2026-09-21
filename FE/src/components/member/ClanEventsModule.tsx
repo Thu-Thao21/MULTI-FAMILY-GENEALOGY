@@ -26,7 +26,7 @@ export const ClanEventsModule: React.FC = () => {
       description: 'Họp đại biểu dòng họ tổng kết hoạt động 5 năm, bầu Hội đồng gia tộc khóa mới.',
       registered: true,
       participantCount: 142,
-      albumPhotos: ['📷 Ảnh đại hội 2021', '📷 Sơ đồ tổ chức', '📷 Trao kỷ niệm chương'],
+      albumPhotos: ['Ảnh đại hội 2021', 'Sơ đồ tổ chức', 'Trao kỷ niệm chương'],
     },
     {
       id: 'event-002',
@@ -38,7 +38,7 @@ export const ClanEventsModule: React.FC = () => {
       description: 'Tuyên dương khen thưởng các con cháu đạt giải quốc gia, đỗ đại học năm học 2025-2026.',
       registered: false,
       participantCount: 68,
-      albumPhotos: ['📷 Lễ trao giải năm ngoái', '📷 Danh sách khen thưởng'],
+      albumPhotos: ['Lễ trao giải năm ngoái', 'Danh sách khen thưởng'],
     },
     {
       id: 'event-003',
@@ -50,7 +50,7 @@ export const ClanEventsModule: React.FC = () => {
       description: 'Hoạt động thường niên dọn dẹp thắp hương các phần mộ tổ tiên nhân dịp đầu xuân.',
       registered: true,
       participantCount: 95,
-      albumPhotos: ['📷 Album lễ tảo mộ 2025'],
+      albumPhotos: ['Album lễ tảo mộ 2025'],
     },
   ]);
 
@@ -86,11 +86,11 @@ export const ClanEventsModule: React.FC = () => {
           <div key={ev.id} className="event-card">
             <div className="event-card-head">
               <span className={`event-type-pill ${ev.type}`}>
-                {ev.type === 'meeting' && '🏛️ Họp dòng họ'}
-                {ev.type === 'scholarship' && '🎓 Khuyến học'}
-                {ev.type === 'ceremony' && '🕯️ Lễ nghi / Tảo mộ'}
+                {ev.type === 'meeting' && 'Họp dòng họ'}
+                {ev.type === 'scholarship' && 'Khuyến học'}
+                {ev.type === 'ceremony' && 'Lễ nghi / Tảo mộ'}
               </span>
-              <span className="participant-count">👥 {ev.participantCount} Đã đăng ký</span>
+              <span className="participant-count">{ev.participantCount} Đã đăng ký</span>
             </div>
 
             <h3 className="event-item-title">{ev.title}</h3>
@@ -98,10 +98,10 @@ export const ClanEventsModule: React.FC = () => {
 
             <div className="event-details">
               <div className="detail-row">
-                <span>📅 <strong>Thời gian:</strong> {ev.date} ({ev.time})</span>
+                <span><strong>Thời gian:</strong> {ev.date} ({ev.time})</span>
               </div>
               <div className="detail-row">
-                <span>📍 <strong>Địa điểm:</strong> {ev.location}</span>
+                <span><strong>Địa điểm:</strong> {ev.location}</span>
               </div>
             </div>
 
@@ -110,7 +110,7 @@ export const ClanEventsModule: React.FC = () => {
                 className={`register-event-btn ${ev.registered ? 'registered' : ''}`}
                 onClick={() => toggleRegister(ev.id)}
               >
-                {ev.registered ? '✓ Đã đăng ký (Nhấp để hủy)' : '+ Đăng ký tham gia'}
+                {ev.registered ? 'Đã đăng ký (Nhấp để hủy)' : 'Đăng ký tham gia'}
               </button>
 
               {ev.albumPhotos && ev.albumPhotos.length > 0 && (
@@ -118,7 +118,7 @@ export const ClanEventsModule: React.FC = () => {
                   className="album-view-btn"
                   onClick={() => setSelectedAlbumEvent(ev)}
                 >
-                  🖼️ Xem Album ({ev.albumPhotos.length})
+                  Xem Album ({ev.albumPhotos.length})
                 </button>
               )}
             </div>

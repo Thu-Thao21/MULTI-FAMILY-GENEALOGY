@@ -131,7 +131,7 @@ export const ClanDocumentsModule: React.FC = () => {
           </p>
         </div>
         <button className="upload-doc-btn" onClick={() => setShowUploadModal(true)}>
-          📤 Đề xuất tư liệu mới
+          Đề xuất tư liệu mới
         </button>
       </div>
 
@@ -151,11 +151,11 @@ export const ClanDocumentsModule: React.FC = () => {
           onChange={(e) => setCategoryFilter(e.target.value)}
         >
           <option value="all">-- Tất cả danh mục --</option>
-          <option value="gia_pha_co">📜 Gia phả cổ</option>
-          <option value="sac_phong">🏛️ Sắc phong</option>
-          <option value="hinh_anh">🖼️ Hình ảnh tư liệu</option>
-          <option value="video">🎥 Video thước phim</option>
-          <option value="van_ban">📄 Văn bản / Nghị quyết</option>
+          <option value="gia_pha_co">Gia phả cổ</option>
+          <option value="sac_phong">Sắc phong</option>
+          <option value="hinh_anh">Hình ảnh tư liệu</option>
+          <option value="video">Video thước phim</option>
+          <option value="van_ban">Văn bản / Nghị quyết</option>
         </select>
       </div>
 
@@ -168,10 +168,10 @@ export const ClanDocumentsModule: React.FC = () => {
             <div key={doc.id} className="doc-card">
               <div className="doc-card-head">
                 <span className="doc-category-badge">
-                  {doc.category === 'gia_pha_co' && '📜 Gia phả cổ'}
-                  {doc.category === 'sac_phong' && '🏛️ Sắc phong'}
-                  {doc.category === 'video' && '🎥 Video'}
-                  {doc.category === 'van_ban' && '📄 Văn bản'}
+                  {doc.category === 'gia_pha_co' && 'Gia phả cổ'}
+                  {doc.category === 'sac_phong' && 'Sắc phong'}
+                  {doc.category === 'video' && 'Video'}
+                  {doc.category === 'van_ban' && 'Văn bản'}
                 </span>
                 <span className="doc-year-badge">Năm {doc.year}</span>
               </div>
@@ -180,13 +180,13 @@ export const ClanDocumentsModule: React.FC = () => {
               <p className="doc-desc">{doc.description}</p>
 
               <div className="doc-meta">
-                <div>👤 <strong>Liên quan:</strong> {doc.relatedMember}</div>
-                <div>📁 <strong>Định dạng:</strong> {doc.fileType.toUpperCase()} ({doc.fileSize})</div>
+                <div><strong>Liên quan:</strong> {doc.relatedMember}</div>
+                <div><strong>Định dạng:</strong> {doc.fileType.toUpperCase()} ({doc.fileSize})</div>
               </div>
 
               <div className="doc-actions">
                 <button className="preview-doc-btn" onClick={() => setSelectedPreviewDoc(doc)}>
-                  👁️ Xem trước
+                  Xem trước
                 </button>
               </div>
             </div>
@@ -204,7 +204,7 @@ export const ClanDocumentsModule: React.FC = () => {
             </div>
             <div className="preview-modal-body">
               <div className="preview-placeholder">
-                📄 [Đang xem nội dung xem trước bản điện tử của {selectedPreviewDoc.title}]
+                [Đang xem nội dung xem trước bản điện tử của {selectedPreviewDoc.title}]
               </div>
               <p style={{ marginTop: '16px', fontSize: '14px', color: '#64748b' }}>
                 {selectedPreviewDoc.description}

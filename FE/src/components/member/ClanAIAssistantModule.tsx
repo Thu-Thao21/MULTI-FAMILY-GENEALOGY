@@ -93,7 +93,7 @@ export const ClanAIAssistantModule: React.FC = () => {
           <div className="chat-messages-box">
             {messages.map((m) => (
               <div key={m.id} className={`chat-message-item ${m.sender}`}>
-                <div className="chat-avatar">{m.sender === 'ai' ? '🤖' : '👤'}</div>
+                <div className="chat-avatar">{m.sender === 'ai' ? 'AI' : 'Tôi'}</div>
                 <div className="chat-bubble">
                   <div className="chat-text">{m.text}</div>
 
@@ -102,7 +102,7 @@ export const ClanAIAssistantModule: React.FC = () => {
                       <span className="citation-label">Trích dẫn nguồn liên quan:</span>
                       {m.citations.map((c, idx) => (
                         <div key={idx} className="citation-item">
-                          📌 <strong>{c.title}</strong> — {c.source}
+                          <strong>{c.title}</strong> — {c.source}
                         </div>
                       ))}
                     </div>
@@ -115,7 +115,7 @@ export const ClanAIAssistantModule: React.FC = () => {
 
             {isThinking && (
               <div className="chat-message-item ai">
-                <div className="chat-avatar">🤖</div>
+                <div className="chat-avatar">AI</div>
                 <div className="chat-bubble thinking">
                   <span className="dot-pulse">AI đang suy ngẫm và truy xuất dữ liệu gia phả...</span>
                 </div>
@@ -139,14 +139,14 @@ export const ClanAIAssistantModule: React.FC = () => {
               disabled={isThinking}
             />
             <button type="submit" className="chat-send-btn" disabled={isThinking}>
-              Gửi ➔
+              Gửi
             </button>
           </form>
         </div>
 
         {/* Right Column: AI Stats & Suggestions */}
         <div className="ai-stats-card">
-          <h3 className="ai-side-title">📊 Gợi Ý & Thống Kê AI</h3>
+          <h3 className="ai-side-title">Gợi Ý & Thống Kê AI</h3>
 
           <div className="suggestions-box">
             <span className="suggestions-label">Câu hỏi gợi ý thường gặp:</span>
@@ -158,7 +158,7 @@ export const ClanAIAssistantModule: React.FC = () => {
                   className="suggestion-pill"
                   onClick={() => handleSend(sug)}
                 >
-                  💡 {sug}
+                  {sug}
                 </button>
               ))}
             </div>
@@ -174,7 +174,7 @@ export const ClanAIAssistantModule: React.FC = () => {
           </div>
 
           <div className="ai-package-note">
-            ℹ️ Tính năng AI Assistant sử dụng trong phạm vi dữ liệu Public & Family theo gói Business hiện hành.
+            Tính năng AI Assistant sử dụng trong phạm vi dữ liệu Public & Family theo gói Business hiện hành.
           </div>
         </div>
       </div>

@@ -60,7 +60,6 @@ const TAB_TO_ROUTE: Record<string, string> = {
   'ai-assistant':         ROUTES.USER.AI_ASSISTANT,
   'ancestral-hall':       ROUTES.USER.ANCESTRAL_HALL,
   'privacy-settings':     ROUTES.USER.PRIVACY_SETTINGS,
-  'privacy-preview':      ROUTES.USER.PRIVACY_PREVIEW,
   // Admin tabs
   'admin-permissions':    ROUTES.ADMIN.ACCOUNTS,
   'admin-approval':       ROUTES.ADMIN.APPROVALS,
@@ -103,7 +102,6 @@ const ROUTE_TO_TAB: Array<[string, string]> = [
   [ROUTES.USER.AI_ASSISTANT,       'ai-assistant'],
   [ROUTES.USER.ANCESTRAL_HALL,     'ancestral-hall'],
   [ROUTES.USER.PRIVACY_SETTINGS,   'privacy-settings'],
-  [ROUTES.USER.PRIVACY_PREVIEW,    'privacy-preview'],
 ];
 
 export interface DashboardProps {
@@ -198,7 +196,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ userName, onLogout }) => {
     if (activeTab === 'documents') return <ClanDocumentsModule />;
     if (activeTab === 'ai-assistant') return <ClanAIAssistantModule />;
     if (activeTab === 'ancestral-hall') return <DigitalAncestralHallModule />;
-    if (activeTab === 'privacy-settings' || activeTab === 'privacy-preview') return <PrivacySettingsTab />;
+    if (activeTab === 'privacy-settings') return <PrivacySettingsTab />;
 
     // Network tabs
     if (activeTab === 'net-noi') return <FamilyPaternalTab />;

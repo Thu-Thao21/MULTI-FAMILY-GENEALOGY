@@ -76,7 +76,7 @@ export const AnniversariesModule: React.FC = () => {
           </p>
         </div>
         <button className="anniv-config-btn" onClick={() => setShowConfigModal(true)}>
-          ⚙️ Cấu hình nhận nhắc giỗ
+          Cài đặt nhắc giỗ
         </button>
       </div>
 
@@ -91,7 +91,7 @@ export const AnniversariesModule: React.FC = () => {
                 className={`follow-btn ${item.isFollowing ? 'following' : ''}`}
                 onClick={() => toggleFollow(item.id)}
               >
-                {item.isFollowing ? '★ Đang theo dõi' : '☆ Theo dõi'}
+                {item.isFollowing ? 'Đang theo dõi' : 'Theo dõi'}
               </button>
             </div>
 
@@ -106,13 +106,13 @@ export const AnniversariesModule: React.FC = () => {
                 <span className="date-val">{item.lunarDate}</span>
               </div>
               <div className="date-item solar">
-                <span className="date-label">Dương lịch dự kiến:</span>
+                <span className="date-label">Dương lịch:</span>
                 <span className="date-val">{item.solarDate}</span>
               </div>
             </div>
 
             <div className="anniv-location">
-              📍 <strong>Địa điểm cúng giỗ:</strong> {item.location}
+              <strong>Địa điểm cúng giỗ:</strong> {item.location}
             </div>
           </div>
         ))}

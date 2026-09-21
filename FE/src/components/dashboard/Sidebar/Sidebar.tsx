@@ -139,7 +139,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
       ),
       items: [
         { id: 'privacy-settings', label: 'Quyền riêng tư' },
-        { id: 'privacy-preview', label: 'Xem trước góc nhìn' },
       ],
     },
   ];

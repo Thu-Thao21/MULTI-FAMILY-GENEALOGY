@@ -119,19 +119,19 @@ export const MyProposalsModule: React.FC = () => {
           className={`filter-tab ${activeStatusTab === 'pending' ? 'active' : ''}`}
           onClick={() => setActiveStatusTab('pending')}
         >
-          ⏳ Chờ duyệt ({proposals.filter((p) => p.status === 'pending').length})
+          Chờ duyệt ({proposals.filter((p) => p.status === 'pending').length})
         </button>
         <button
           className={`filter-tab ${activeStatusTab === 'approved' ? 'active' : ''}`}
           onClick={() => setActiveStatusTab('approved')}
         >
-          ✓ Đã duyệt ({proposals.filter((p) => p.status === 'approved').length})
+          Đã duyệt ({proposals.filter((p) => p.status === 'approved').length})
         </button>
         <button
           className={`filter-tab ${activeStatusTab === 'rejected' ? 'active' : ''}`}
           onClick={() => setActiveStatusTab('rejected')}
         >
-          ✕ Từ chối ({proposals.filter((p) => p.status === 'rejected').length})
+          Từ chối ({proposals.filter((p) => p.status === 'rejected').length})
         </button>
       </div>
 
@@ -145,9 +145,9 @@ export const MyProposalsModule: React.FC = () => {
               <div className="proposal-card-head">
                 <div className="proposal-badge-group">
                   <span className={`status-badge ${item.status}`}>
-                    {item.status === 'pending' && '⏳ Chờ duyệt'}
-                    {item.status === 'approved' && '✓ Đã duyệt'}
-                    {item.status === 'rejected' && '✕ Từ chối'}
+                    {item.status === 'pending' && 'Chờ duyệt'}
+                    {item.status === 'approved' && 'Đã duyệt'}
+                    {item.status === 'rejected' && 'Từ chối'}
                   </span>
                   <span className="type-badge">
                     {item.type === 'profile' ? 'Hồ sơ cá nhân' : 'Quan hệ gia đình'}

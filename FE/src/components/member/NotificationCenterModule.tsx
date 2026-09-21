@@ -85,7 +85,7 @@ export const NotificationCenterModule: React.FC = () => {
           </p>
         </div>
         <button className="mark-all-read-btn" onClick={markAllAsRead}>
-          ✓ Đánh dấu tất cả đã đọc
+          Đánh dấu tất cả đã đọc
         </button>
       </div>
 
@@ -114,10 +114,10 @@ export const NotificationCenterModule: React.FC = () => {
               onChange={(e) => setActiveCategory(e.target.value)}
             >
               <option value="all">-- Tất cả loại thông báo --</option>
-              <option value="anniversary">🗓️ Ngày giỗ</option>
-              <option value="event">🎉 Sự kiện</option>
-              <option value="proposal">📝 Đề xuất</option>
-              <option value="network">🔗 Mạng lưới liên họ</option>
+              <option value="anniversary">Ngày giỗ</option>
+              <option value="event">Sự kiện</option>
+              <option value="proposal">Đề xuất</option>
+              <option value="network">Mạng lưới liên họ</option>
             </select>
           </div>
 
@@ -133,10 +133,10 @@ export const NotificationCenterModule: React.FC = () => {
                 >
                   <div className="notif-item-head">
                     <span className={`notif-cat-badge ${item.category}`}>
-                      {item.category === 'anniversary' && '🗓️ Ngày giỗ'}
-                      {item.category === 'event' && '🎉 Sự kiện'}
-                      {item.category === 'proposal' && '📝 Đề xuất'}
-                      {item.category === 'network' && '🔗 Liên họ'}
+                      {item.category === 'anniversary' && 'Ngày giỗ'}
+                      {item.category === 'event' && 'Sự kiện'}
+                      {item.category === 'proposal' && 'Đề xuất'}
+                      {item.category === 'network' && 'Liên họ'}
                     </span>
                     <span className="notif-time">{item.createdAt}</span>
                   </div>
@@ -153,7 +153,7 @@ export const NotificationCenterModule: React.FC = () => {
 
         {/* Right Column: Settings Preferences */}
         <div className="notif-config-card">
-          <h3 className="config-card-title">⚙️ Cài Đặt Loại Thông Báo</h3>
+          <h3 className="config-card-title">Cài Đặt Thông Báo</h3>
           <p className="config-card-subtitle">Bật / Tắt nhận thông báo theo từng danh mục.</p>
 
           <div className="config-checkboxes-list">

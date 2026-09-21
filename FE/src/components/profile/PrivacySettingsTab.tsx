@@ -53,14 +53,14 @@ export const PrivacySettingsTab: React.FC<PrivacySettingsTabProps> = () => {
 
       {savedSuccess && (
         <div className="privacy-success-toast">
-          ✓ Đã lưu cài đặt quyền riêng tư thành công!
+          Đã lưu cài đặt quyền riêng tư thành công!
         </div>
       )}
 
       <div className="privacy-grid">
         {/* Left Column: Controls */}
         <form className="privacy-form-card" onSubmit={handleSave}>
-          <h3 className="privacy-card-title">Cấu hình riêng tư cấp trường</h3>
+          <h3 className="privacy-card-title">Cấu hình riêng tư</h3>
 
           <div className="privacy-field-row">
             <div className="privacy-field-info">
@@ -167,28 +167,28 @@ export const PrivacySettingsTab: React.FC<PrivacySettingsTabProps> = () => {
               className={`privacy-role-tab ${activePreviewRole === 'GUEST' ? 'active' : ''}`}
               onClick={() => setActivePreviewRole('GUEST')}
             >
-              🌐 Khách vãng lai
+              Khách vãng lai
             </button>
             <button
               type="button"
               className={`privacy-role-tab ${activePreviewRole === 'MEMBER' ? 'active' : ''}`}
               onClick={() => setActivePreviewRole('MEMBER')}
             >
-              👥 Thành viên cùng họ
+              Thành viên cùng họ
             </button>
             <button
               type="button"
               className={`privacy-role-tab ${activePreviewRole === 'AFFILIATED' ? 'active' : ''}`}
               onClick={() => setActivePreviewRole('AFFILIATED')}
             >
-              🔗 Họ liên kết
+              Họ liên kết
             </button>
             <button
               type="button"
               className={`privacy-role-tab ${activePreviewRole === 'ADMIN' ? 'active' : ''}`}
               onClick={() => setActivePreviewRole('ADMIN')}
             >
-              🛡️ Quản trị dòng họ
+              Quản trị dòng họ
             </button>
           </div>
 
@@ -205,35 +205,35 @@ export const PrivacySettingsTab: React.FC<PrivacySettingsTabProps> = () => {
               <div className="preview-field-item">
                 <span className="preview-label">Email:</span>
                 <span className="preview-value">
-                  {isVisibleInPreview(emailVisibility) ? sampleMemberData.email : '🔒 [Đã ẩn do riêng tư]'}
+                  {isVisibleInPreview(emailVisibility) ? sampleMemberData.email : '[Đã ẩn do riêng tư]'}
                 </span>
               </div>
 
               <div className="preview-field-item">
                 <span className="preview-label">Số điện thoại:</span>
                 <span className="preview-value">
-                  {isVisibleInPreview(phoneVisibility) ? sampleMemberData.phone : '🔒 [Đã ẩn do riêng tư]'}
+                  {isVisibleInPreview(phoneVisibility) ? sampleMemberData.phone : '[Đã ẩn do riêng tư]'}
                 </span>
               </div>
 
               <div className="preview-field-item">
                 <span className="preview-label">Địa chỉ:</span>
                 <span className="preview-value">
-                  {isVisibleInPreview(addressVisibility) ? sampleMemberData.address : '🔒 [Đã ẩn do riêng tư]'}
+                  {isVisibleInPreview(addressVisibility) ? sampleMemberData.address : '[Đã ẩn do riêng tư]'}
                 </span>
               </div>
 
               <div className="preview-field-item">
                 <span className="preview-label">Nghề nghiệp:</span>
                 <span className="preview-value">
-                  {isVisibleInPreview(occupationVisibility) ? sampleMemberData.occupation : '🔒 [Đã ẩn do riêng tư]'}
+                  {isVisibleInPreview(occupationVisibility) ? sampleMemberData.occupation : '[Đã ẩn do riêng tư]'}
                 </span>
               </div>
 
               <div className="preview-field-item">
                 <span className="preview-label">Ngày sinh:</span>
                 <span className="preview-value">
-                  {isVisibleInPreview(birthdateVisibility) ? sampleMemberData.birthDate : '🔒 [Đã ẩn do riêng tư]'}
+                  {isVisibleInPreview(birthdateVisibility) ? sampleMemberData.birthDate : '[Đã ẩn do riêng tư]'}
                 </span>
               </div>
             </div>
