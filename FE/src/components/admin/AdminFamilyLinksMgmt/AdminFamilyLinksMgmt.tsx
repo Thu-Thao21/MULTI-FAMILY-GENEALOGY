@@ -12,22 +12,26 @@ export interface LinkRequestItem {
   created_at: string;
 }
 
+const MOCK_LINK_REQUESTS: LinkRequestItem[] = [
+  { id: 'LH-260914', requester_family: 'Họ Nguyễn · Chi Hà Nội', target_family: 'Họ Trần · Nam Định', link_type: 'affiliated', status: 'pending', notes: 'Đề nghị xác nhận quan hệ thông gia qua hôn lễ năm 1998.', created_at: '2026-09-14' },
+  { id: 'LH-260910', requester_family: 'Họ Phạm · Hải Dương', target_family: 'Họ Nguyễn · Chi Hải Dương', link_type: 'maternal', status: 'approved', notes: 'Liên kết bên ngoại của bà Nguyễn Thị Lan, đời thứ 4.', created_at: '2026-09-10' },
+  { id: 'LH-260905', requester_family: 'Họ Nguyễn · Chi Ba', target_family: 'Họ Lê · Quảng Trị', link_type: 'in_law', status: 'pending', notes: 'Bổ sung nhánh Dâu & Rể theo gia phả năm 2024.', created_at: '2026-09-05' },
+  { id: 'LH-260828', requester_family: 'Họ Vũ · Thái Bình', target_family: 'Họ Nguyễn · Chi Trưởng', link_type: 'paternal', status: 'rejected', notes: 'Cần bổ sung chứng cứ liên kết trực hệ.', created_at: '2026-08-28' },
+];
+
 export const AdminFamilyLinksMgmt: React.FC = () => {
-  const [requests, setRequests] = useState<LinkRequestItem[]>([]);
+  const [requests, setRequests] = useState<LinkRequestItem[]>(() => MOCK_LINK_REQUESTS.map((item) => ({ ...item })));
   const [loading, setLoading] = useState<boolean>(true);
 
   const fetchLinkRequests = async () => {
     setLoading(true);
     try {
       const res = await apiClient.get<LinkRequestItem[]>('/networks/link-requests');
-      if (Array.isArray(res.data)) {
+      if (Array.isArray(res.data) && res.data.length > 0) {
         setRequests(res.data);
-      } else {
-        setRequests([]);
       }
-    } catch (err) {
-      console.warn('Fetch link requests failed:', err);
-      setRequests([]);
+    } catch {
+      // Keep the local demo dataset when the optional endpoint is unavailable.
     } finally {
       setLoading(false);
     }
@@ -39,6 +43,8 @@ export const AdminFamilyLinksMgmt: React.FC = () => {
 
   const [activeTypeTab, setActiveTypeTab] = useState<string>('');
   const [statusFilter, setStatusFilter] = useState<string>('pending');
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [selectedRequest, setSelectedRequest] = useState<LinkRequestItem | null>(null);
   const [isSendModalOpen, setIsSendModalOpen] = useState<boolean>(false);
   const [sendTargetFamily, setSendTargetFamily] = useState<string>('');
   const [sendLinkType, setSendLinkType] = useState<string>('maternal');
@@ -86,7 +92,8 @@ export const AdminFamilyLinksMgmt: React.FC = () => {
   const filteredRequests = requests.filter((r) => {
     const matchType = activeTypeTab ? r.link_type === activeTypeTab : true;
     const matchStatus = statusFilter ? r.status === statusFilter : true;
-    return matchType && matchStatus;
+    const text = `${r.id} ${r.requester_family} ${r.target_family} ${r.notes || ''}`.toLowerCase();
+    return matchType && matchStatus && text.includes(searchTerm.trim().toLowerCase());
   });
 
   return (
@@ -145,6 +152,7 @@ export const AdminFamilyLinksMgmt: React.FC = () => {
 
       {/* Filter Status */}
       <div className="admin-links-filter-row">
+        <input className="admin-search-input admin-links-search" value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} placeholder="Tìm dòng họ hoặc mã yêu cầu..." aria-label="Tìm liên kết dòng họ" />
         <span className="admin-links-filter-label">Trạng thái yêu cầu:</span>
         <button
           className={`filter-btn ${statusFilter === 'pending' ? 'active' : ''}`}
@@ -225,6 +233,7 @@ export const AdminFamilyLinksMgmt: React.FC = () => {
                   </td>
                   <td>
                     <div className="action-btn-row">
+                      <button className="btn-icon-action" onClick={() => setSelectedRequest(req)}>Chi tiết</button>
                       {req.status === 'pending' ? (
                         <>
                           <button
@@ -256,6 +265,16 @@ export const AdminFamilyLinksMgmt: React.FC = () => {
       </div>
 
       {/* Send Link Modal */}
+      {selectedRequest && (
+        <div className="admin-modal-overlay" onMouseDown={(event) => { if (event.target === event.currentTarget) setSelectedRequest(null); }}>
+          <div className="admin-modal-box">
+            <div className="admin-modal-header"><h3>Chi Tiết Liên Kết {selectedRequest.id}</h3><button className="admin-modal-close" onClick={() => setSelectedRequest(null)}>✕</button></div>
+            <div className="admin-link-detail-grid"><div><span>Dòng họ gửi</span><strong>{selectedRequest.requester_family}</strong></div><div><span>Dòng họ nhận</span><strong>{selectedRequest.target_family}</strong></div><div><span>Loại kết nối</span><strong>{selectedRequest.link_type}</strong></div><div><span>Ngày gửi</span><strong>{selectedRequest.created_at}</strong></div><div className="wide"><span>Thông tin quan hệ</span><p>{selectedRequest.notes || 'Không có ghi chú.'}</p></div></div>
+            <div className="admin-modal-footer"><button className="btn-icon-action" onClick={() => setSelectedRequest(null)}>Đóng</button>{selectedRequest.status === 'pending' && <><button className="btn-icon-action lock" onClick={() => { handleReview(selectedRequest.id,'rejected'); setSelectedRequest(null); }}>Từ chối</button><button className="admin-btn-primary" onClick={() => { handleReview(selectedRequest.id,'approved'); setSelectedRequest(null); }}>Phê duyệt</button></>}</div>
+          </div>
+        </div>
+      )}
+
       {isSendModalOpen && (
         <div className="admin-modal-overlay">
           <div className="admin-modal-box">

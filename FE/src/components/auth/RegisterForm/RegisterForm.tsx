@@ -1,13 +1,17 @@
 import React, { useState } from 'react';
 import { loginWithGoogle, loginWithFacebook, registerWithEmailPassword } from '../../../services/auth.service';
+import { useAuth } from '../../../hooks/useAuth';
+import PasswordInput from '../PasswordInput/PasswordInput';
+import type { AccountProfile } from '../../../context/AuthContext';
 import './RegisterForm.css';
 
 export interface RegisterFormProps {
   onSwitchToLogin: () => void;
-  onSuccess: () => void;
+  onSuccess: (profile?: AccountProfile) => void;
 }
 
 export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin, onSuccess }) => {
+  const { login, refreshAccount } = useAuth();
   const [formData, setFormData] = useState({
     username: '',
     emailOrPhone: '',
@@ -21,8 +25,11 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin, onS
   const handleGoogleLogin = async () => {
     setError('');
     try {
-      await loginWithGoogle();
-      onSuccess();
+      const profile = await loginWithGoogle();
+      if (profile.id) {
+        localStorage.removeItem('auth_token');
+        onSuccess(await refreshAccount() || profile);
+      }
     } catch (err: any) {
       setError(err.message || 'Đăng nhập Google thất bại.');
     }
@@ -31,8 +38,11 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin, onS
   const handleFacebookLogin = async () => {
     setError('');
     try {
-      await loginWithFacebook();
-      onSuccess();
+      const profile = await loginWithFacebook();
+      if (profile.id) {
+        localStorage.removeItem('auth_token');
+        onSuccess(await refreshAccount() || profile);
+      }
     } catch (err: any) {
       setError(err.message || 'Đăng nhập Facebook thất bại.');
     }
@@ -55,9 +65,12 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin, onS
         password: formData.password,
         confirmPassword: formData.confirmPassword,
         displayName: formData.displayName,
-        role: 'member',
       });
-      onSuccess();
+      const profile = await login({
+        emailOrPhone: formData.username,
+        password: formData.password,
+      });
+      onSuccess(profile);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Đăng ký thất bại.');
     } finally {
@@ -119,12 +132,12 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin, onS
 
         <div className="register-form-group">
           <label className="register-form-label">Mật khẩu</label>
-          <input
-            type="password"
+          <PasswordInput
             name="password"
             value={formData.password}
             onChange={handleChange}
             placeholder="Ít nhất 6 ký tự"
+            autoComplete="new-password"
             required
             className="register-form-input"
           />
@@ -132,12 +145,12 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin, onS
 
         <div className="register-form-group">
           <label className="register-form-label">Xác nhận mật khẩu</label>
-          <input
-            type="password"
+          <PasswordInput
             name="confirmPassword"
             value={formData.confirmPassword}
             onChange={handleChange}
             placeholder="Nhập lại mật khẩu"
+            autoComplete="new-password"
             required
             className="register-form-input"
           />

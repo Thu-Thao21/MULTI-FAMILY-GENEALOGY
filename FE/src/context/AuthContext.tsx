@@ -30,7 +30,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   loading: boolean;
   primaryRole: string;
-  login: (payload: { emailOrPhone: string; password: string; role?: string }) => Promise<AccountProfile>;
+  login: (payload: { emailOrPhone: string; password: string }) => Promise<AccountProfile>;
   refreshAccount: () => Promise<AccountProfile | null>;
   logout: () => Promise<void>;
 }
@@ -48,6 +48,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setAccount(response.data);
       return response.data;
     } catch (error) {
+      // Old role-encoded tokens are no longer accepted. Drop a rejected local
+      // session before trying the current Firebase identity, if one exists.
+      const status = (error as { response?: { status?: number } })?.response?.status;
+      if (localStorage.getItem('auth_token') && (status === 401 || status === 403)) {
+        localStorage.removeItem('auth_token');
+        if (!auth.currentUser) {
+          setAccount(null);
+          return null;
+        }
+      }
       console.warn('Failed to fetch account profile from /auth/me, trying bootstrap...', error);
       try {
         const bsResponse = await apiClient.post<AccountProfile>('/auth/bootstrap');
@@ -61,12 +71,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const login = async (payload: { emailOrPhone: string; password: string; role?: string }): Promise<AccountProfile> => {
+  const login = async (payload: { emailOrPhone: string; password: string }): Promise<AccountProfile> => {
     const { loginWithEmailPassword } = await import('../services/auth.service');
     const profile = await loginWithEmailPassword({
       email: payload.emailOrPhone,
       password: payload.password,
-      role: payload.role,
     });
     setAccount(profile);
     return profile;
@@ -90,8 +99,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setFirebaseUser(user);
-      if (user) {
-        localStorage.removeItem('auth_token');
+      if (user && !localStorage.getItem('auth_token')) {
         await fetchAccount();
       } else if (!localStorage.getItem('auth_token')) {
         setAccount(null);

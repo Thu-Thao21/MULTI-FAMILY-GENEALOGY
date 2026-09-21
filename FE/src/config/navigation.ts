@@ -19,7 +19,7 @@ export const memberNavigation: NavGroup[] = [
     groupLabel: 'TỔNG QUAN',
     items: [
       { id: 'dashboard', label: 'Trang chủ', route: ROUTES.USER.DASHBOARD },
-      { id: 'notifications', label: 'Thông báo cá nhân', route: ROUTES.USER.NOTIFICATIONS },
+      { id: 'notifications', label: 'Thông báo & Cài đặt', route: ROUTES.USER.NOTIFICATIONS },
     ],
   },
   {
@@ -59,6 +59,7 @@ export const memberNavigation: NavGroup[] = [
       { id: 'events', label: 'Sự kiện dòng họ', route: ROUTES.USER.EVENTS },
       { id: 'funds', label: 'Quỹ & Đóng góp', route: ROUTES.USER.FUNDS },
       { id: 'ancestral-hall', label: 'Phòng thờ số', route: ROUTES.USER.ANCESTRAL_HALL },
+      { id: 'ancestral-library', label: 'Thư viện Tổ tiên 3D/360°', route: ROUTES.USER.ANCESTRAL_LIBRARY },
     ],
   },
   {
@@ -66,6 +67,7 @@ export const memberNavigation: NavGroup[] = [
     items: [
       { id: 'documents', label: 'Tư liệu lịch sử', route: ROUTES.USER.DOCUMENTS },
       { id: 'ai-assistant', label: 'Trợ lý AI dòng họ', route: ROUTES.USER.AI_ASSISTANT },
+      { id: 'ai-consent', label: 'Đồng ý sử dụng AI', route: ROUTES.USER.AI_CONSENT },
     ],
   },
   {
@@ -81,28 +83,21 @@ export const memberNavigation: NavGroup[] = [
 // 3. ADMIN NAVIGATION (QUẢN TRỊ VIÊN HỆ THỐNG)
 export const adminNavigation: NavGroup[] = [
   {
-    groupLabel: 'QUẢN TRỊ HỆ THỐNG',
+    groupLabel: 'QUẢN LÝ GIA PHẢ',
     items: [
-      { id: 'dashboard', label: 'Dashboard Admin', route: ROUTES.ADMIN.DASHBOARD },
-      { id: 'admin-account-mgmt', label: 'Quản Lý Tài Khoản & Phân Quyền', route: ROUTES.ADMIN.ACCOUNTS },
-      { id: 'admin-families-mgmt', label: 'Quản Lý Danh Sách Dòng Họ', route: ROUTES.ADMIN.FAMILIES },
-    ],
-  },
-  {
-    groupLabel: 'AN NINH & BẢO MẬT',
-    items: [
-      { id: 'admin-moderation', label: 'Kiểm Duyệt & Tranh Chấp', route: ROUTES.ADMIN.ROOT + '/moderation' },
-      { id: 'admin-security-logs', label: 'Nhật Ký Bảo Mật & Hệ Thống', route: ROUTES.ADMIN.SECURITY_LOGS },
-      { id: 'admin-service-health', label: 'Trạng Thái Dịch Vụ API/DB', route: ROUTES.ADMIN.ROOT + '/health' },
-    ],
-  },
-  {
-    groupLabel: 'LIÊN KẾT & MỞ RỘNG (MỚI)',
-    items: [
-      { id: 'admin-members-mgmt', label: 'Hồ Sơ Thành Viên Gia Tộc', route: ROUTES.ADMIN.MEMBERS },
-      { id: 'admin-family-links', label: 'Yêu Cầu & Phê Duyệt Liên Họ', route: ROUTES.ADMIN.FAMILY_LINKS },
-      { id: 'admin-approvals', label: 'Trung Tâm Phê Duyệt Đề Xuất', route: ROUTES.ADMIN.APPROVALS },
-      { id: 'admin-data-backup', label: 'Xuất Nhập & Sao Lưu Dữ Liệu', route: ROUTES.ADMIN.BACKUP },
+      { id: 'dashboard', label: 'Dashboard', route: ROUTES.ADMIN.DASHBOARD },
+      { id: 'admin-tree', label: 'Cây Gia Phả', route: ROUTES.ADMIN.TREE },
+      { id: 'admin-members-mgmt', label: 'Quản lý Nhân Khẩu', route: ROUTES.ADMIN.MEMBERS },
+      { id: 'admin-family-links', label: 'Quản lý Quan Hệ', route: ROUTES.ADMIN.FAMILY_LINKS },
+      { id: 'admin-families-mgmt', label: 'Quản lý Chi Nhánh', route: ROUTES.ADMIN.FAMILIES },
+      { id: 'admin-approvals', label: 'Phê duyệt', route: ROUTES.ADMIN.APPROVALS },
+      { id: 'admin-account-mgmt', label: 'Quản lý Tài Khoản', route: ROUTES.ADMIN.ACCOUNTS },
+      { id: 'admin-roles', label: 'Vai trò & Phân quyền', route: ROUTES.ADMIN.ROLES },
+      { id: 'admin-packages', label: 'Gói dịch vụ', route: ROUTES.ADMIN.PACKAGES },
+      { id: 'admin-payments', label: 'Thanh toán', route: ROUTES.ADMIN.PAYMENTS },
+      { id: 'admin-moderation', label: 'Kiểm duyệt', route: ROUTES.ADMIN.MODERATION },
+      { id: 'admin-logs', label: 'Nhật ký hệ thống', route: ROUTES.ADMIN.SECURITY_LOGS },
+      { id: 'admin-data-backup', label: 'Sao lưu & Khôi phục', route: ROUTES.ADMIN.BACKUP },
     ],
   },
 ];
@@ -115,4 +110,3 @@ export function getNavigationForRole(role: string): NavGroup[] {
 
   return memberNavigation;
 }
-

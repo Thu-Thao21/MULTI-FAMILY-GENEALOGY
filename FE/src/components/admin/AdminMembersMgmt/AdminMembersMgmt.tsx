@@ -1,471 +1,293 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import apiClient from '../../../api/axios';
 import './AdminMembersMgmt.css';
+
+type MemberGender = 'male' | 'female' | 'other';
+type MemberStatus = 'active' | 'hidden';
 
 export interface MemberItem {
   id: string;
   full_name: string;
   other_name?: string;
-  gender: 'male' | 'female' | string;
+  gender: MemberGender | string;
   birth_date?: string;
-  death_date?: string;
-  lunar_death_date?: string;
   is_alive: boolean;
-  burial_place?: string;
   branch?: string;
-  sub_branch?: string;
   generation: number;
-  role: string;
-  status: string;
-  occupation?: string;
-  education?: string;
-  bio?: string;
+  relationship?: string;
+  status: MemberStatus | string;
   avatar_url?: string;
   phone?: string;
   email?: string;
-  address?: string;
-  skills?: string;
-  contributions?: string;
+  has_account?: boolean;
 }
 
-export const AdminMembersMgmt: React.FC = () => {
-  const [members, setMembers] = useState<MemberItem[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [searchTerm, setSearchTerm] = useState<string>('');
-  const [statusFilter, setStatusFilter] = useState<string>('');
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [activeModalTab, setActiveModalTab] = useState<'basic' | 'bio' | 'contact' | 'skills'>('basic');
-  const [editingMember, setEditingMember] = useState<MemberItem | null>(null);
-  const [formData, setFormData] = useState<Partial<MemberItem>>({});
-  const [msg, setMsg] = useState<string>('');
+type MemberFormData = Omit<MemberItem, 'id'>;
+type ModalMode = 'add' | 'edit' | 'detail' | null;
 
-  const fetchMembers = async () => {
-    setLoading(true);
-    try {
-      const res = await apiClient.get<any>('/members');
-      const dataList = Array.isArray(res.data) ? res.data : res.data?.items || [];
-      setMembers(dataList);
-    } catch (err) {
-      console.warn('Fetch members failed:', err);
-      setMembers([]);
-    } finally {
-      setLoading(false);
-    }
+const DEMO_MEMBERS: MemberItem[] = [
+  { id: 'mem-001', full_name: 'Võ Văn Minh', other_name: 'Ông Minh', gender: 'male', birth_date: '1952-04-18', is_alive: true, branch: 'Chi Trưởng', generation: 4, relationship: 'Trưởng tộc', status: 'active', phone: '090 315 2876', email: 'minh.vo@giaphaviet.vn', has_account: true },
+  { id: 'mem-002', full_name: 'Võ Thị Thanh', gender: 'female', birth_date: '1958-09-02', is_alive: true, branch: 'Chi Trưởng', generation: 4, relationship: 'Em gái', status: 'active', phone: '091 228 6451', has_account: true },
+  { id: 'mem-003', full_name: 'Võ Văn Thành', other_name: 'Võ Thành', gender: 'male', birth_date: '1978-01-24', is_alive: true, branch: 'Chi Hai', generation: 5, relationship: 'Con trai', status: 'active', phone: '098 410 6682', email: 'thanh.vo@giaphaviet.vn', has_account: true },
+  { id: 'mem-004', full_name: 'Nguyễn Thị Lan', gender: 'female', birth_date: '1981-07-12', is_alive: true, branch: 'Chi Hai', generation: 5, relationship: 'Con dâu', status: 'hidden', phone: '093 747 1209', has_account: false },
+  { id: 'mem-005', full_name: 'Võ Minh Khang', gender: 'male', birth_date: '2004-11-08', is_alive: true, branch: 'Chi Hai', generation: 6, relationship: 'Cháu nội', status: 'active', email: 'khang.vo@giaphaviet.vn', has_account: true },
+];
+
+const EMPTY_FORM: MemberFormData = {
+  full_name: '', other_name: '', gender: 'male', birth_date: '', is_alive: true,
+  branch: 'Chi Trưởng', generation: 1, relationship: '', status: 'active',
+  phone: '', email: '', has_account: false,
+};
+
+const Icon = ({ name, size = 18 }: { name: string; size?: number }) => {
+  const paths: Record<string, React.ReactNode> = {
+    search: <><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></>,
+    plus: <><path d="M12 5v14" /><path d="M5 12h14" /></>,
+    eye: <><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" /><circle cx="12" cy="12" r="2.5" /></>,
+    edit: <><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z" /></>,
+    hide: <><path d="m3 3 18 18" /><path d="M10.6 10.6A2 2 0 0 0 13.4 13.4" /><path d="M9.9 4.2A10.8 10.8 0 0 1 12 4c6 0 9.5 8 9.5 8a17 17 0 0 1-2.2 3.3" /><path d="M6.6 6.6C4 8.4 2.5 12 2.5 12S6 20 12 20c1.4 0 2.7-.4 3.8-1" /></>,
+    restore: <><path d="M3 12a9 9 0 1 0 3-6.7L3 8" /><path d="M3 3v5h5" /></>,
+    key: <><circle cx="8" cy="15" r="4" /><path d="m11 12 8-8" /><path d="m16 7 2 2" /><path d="m14 9 2 2" /></>,
+    close: <><path d="M18 6 6 18" /><path d="m6 6 12 12" /></>,
+    users: <><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.9" /><path d="M16 3.1a4 4 0 0 1 0 7.8" /></>,
+    chevron: <path d="m9 18 6-6-6-6" />,
   };
+  return <svg aria-hidden="true" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">{paths[name]}</svg>;
+};
 
+const normalizeMember = (raw: any): MemberItem => ({
+  id: String(raw.id), full_name: raw.full_name ?? raw.fullName ?? 'Chưa cập nhật',
+  other_name: raw.other_name ?? raw.otherName, gender: raw.gender ?? 'other',
+  birth_date: raw.birth_date ?? raw.birthDate, is_alive: raw.is_alive ?? raw.isAlive ?? true,
+  branch: raw.branch ?? 'Chưa phân chi', generation: Number(raw.generation ?? 1),
+  relationship: raw.relationship ?? raw.relation ?? 'Thành viên',
+  status: raw.status === 'hidden' ? 'hidden' : 'active', avatar_url: raw.avatar_url ?? raw.avatarUrl,
+  phone: raw.phone ?? raw.contact?.phone, email: raw.email ?? raw.contact?.email,
+  has_account: Boolean(raw.has_account ?? raw.hasAccount ?? raw.user_id ?? raw.userId),
+});
+
+const formatDate = (date?: string) => date
+  ? new Intl.DateTimeFormat('vi-VN').format(new Date(`${date}T00:00:00`))
+  : 'Chưa cập nhật';
+
+const getAge = (date?: string) => {
+  if (!date) return null;
+  const birth = new Date(`${date}T00:00:00`);
+  const today = new Date();
+  let age = today.getFullYear() - birth.getFullYear();
+  if (today < new Date(today.getFullYear(), birth.getMonth(), birth.getDate())) age -= 1;
+  return age;
+};
+
+export const AdminMembersMgmt: React.FC = () => {
+  const [members, setMembers] = useState<MemberItem[]>(() => DEMO_MEMBERS.map((item) => ({ ...item })));
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'all' | MemberStatus>('all');
+  const [modalMode, setModalMode] = useState<ModalMode>(null);
+  const [selectedMember, setSelectedMember] = useState<MemberItem | null>(null);
+  const [formData, setFormData] = useState<MemberFormData>(EMPTY_FORM);
+  const [toast, setToast] = useState('');
+
+  // Backend hook: replace the preview rows once GET /members returns real data.
   useEffect(() => {
+    let mounted = true;
+    const fetchMembers = async () => {
+      try {
+        const response = await apiClient.get<any>('/members');
+        const list = Array.isArray(response.data) ? response.data : response.data?.items;
+        if (mounted && Array.isArray(list) && list.length > 0) setMembers(list.map(normalizeMember));
+      } catch {
+        // Keep the local demo members when the optional endpoint is unavailable.
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
     fetchMembers();
+    return () => { mounted = false; };
   }, []);
 
-  const handleOpenAddModal = () => {
-    setEditingMember(null);
-    setFormData({
-      full_name: '',
-      gender: 'male',
-      is_alive: true,
-      generation: 1,
-      branch: 'Chi Trưởng',
-      role: 'member',
-      status: 'active',
+  useEffect(() => {
+    if (!modalMode) return;
+    const closeOnEscape = (event: KeyboardEvent) => { if (event.key === 'Escape') setModalMode(null); };
+    document.addEventListener('keydown', closeOnEscape);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', closeOnEscape);
+      document.body.style.overflow = '';
+    };
+  }, [modalMode]);
+
+  const filteredMembers = useMemo(() => {
+    const query = searchTerm.trim().toLocaleLowerCase('vi');
+    return members.filter((member) => {
+      const haystack = [member.full_name, member.other_name, member.branch, member.relationship, member.phone, member.email].filter(Boolean).join(' ').toLocaleLowerCase('vi');
+      return (!query || haystack.includes(query)) && (statusFilter === 'all' || member.status === statusFilter);
     });
-    setActiveModalTab('basic');
-    setIsModalOpen(true);
+  }, [members, searchTerm, statusFilter]);
+
+  const activeCount = members.filter((member) => member.status === 'active').length;
+  const accountCount = members.filter((member) => member.has_account).length;
+  const showToast = (message: string) => {
+    setToast(message);
+    window.setTimeout(() => setToast(''), 3200);
   };
 
-  const handleOpenEditModal = (mem: MemberItem) => {
-    setEditingMember(mem);
-    setFormData({ ...mem });
-    setActiveModalTab('basic');
-    setIsModalOpen(true);
+  const openAddModal = () => {
+    setSelectedMember(null);
+    setFormData({ ...EMPTY_FORM });
+    setModalMode('add');
   };
 
-  const handleDeleteMember = (mem: MemberItem) => {
-    if (window.confirm(`Bạn có chắc chắn muốn xóa hồ sơ thành viên "${mem.full_name}"?`)) {
-      setMembers((prev) => prev.filter((m) => m.id !== mem.id));
-      setMsg(`Đã xóa hồ sơ thành viên thành công.`);
-      setTimeout(() => setMsg(''), 3000);
-    }
+  const openEditModal = (member: MemberItem) => {
+    setSelectedMember(member);
+    setFormData({
+      full_name: member.full_name, other_name: member.other_name ?? '', gender: member.gender,
+      birth_date: member.birth_date ?? '', is_alive: member.is_alive, branch: member.branch ?? '',
+      generation: member.generation, relationship: member.relationship ?? '', status: member.status,
+      avatar_url: member.avatar_url, phone: member.phone ?? '', email: member.email ?? '',
+      has_account: member.has_account ?? false,
+    });
+    setModalMode('edit');
   };
 
-  const handleSaveMember = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.full_name) return;
-
-    if (editingMember) {
-      setMembers((prev) =>
-        prev.map((m) => (m.id === editingMember.id ? ({ ...m, ...formData } as MemberItem) : m))
-      );
-      setMsg(`Cập nhật hồ sơ "${formData.full_name}" thành công!`);
+  const saveMember = (event: React.FormEvent) => {
+    event.preventDefault();
+    const cleanedName = formData.full_name.trim();
+    if (!cleanedName) return;
+    if (modalMode === 'edit' && selectedMember) {
+      // Backend hook: PATCH /members/:id with formData here.
+      setMembers((current) => current.map((member) => member.id === selectedMember.id ? { ...member, ...formData, full_name: cleanedName } : member));
+      showToast(`Đã cập nhật thông tin của ${cleanedName}.`);
     } else {
-      const newMem: MemberItem = {
-        id: `mem_${Date.now()}`,
-        full_name: formData.full_name,
-        gender: formData.gender || 'male',
-        is_alive: formData.is_alive ?? true,
-        generation: formData.generation || 1,
-        branch: formData.branch || 'Chi Trưởng',
-        role: formData.role || 'member',
-        status: 'active',
-        ...formData,
-      };
-      setMembers((prev) => [newMem, ...prev]);
-      setMsg(`Thêm mới thành viên "${formData.full_name}" thành công!`);
+      // Backend hook: POST /members and use the id returned by the API.
+      setMembers((current) => [{ ...formData, id: `member-${Date.now()}`, full_name: cleanedName }, ...current]);
+      showToast(`Đã thêm ${cleanedName} vào gia phả.`);
     }
-
-    setIsModalOpen(false);
-    setTimeout(() => setMsg(''), 3000);
+    setModalMode(null);
   };
 
-  const filteredMembers = members.filter((m) => {
-    const matchSearch =
-      m.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (m.occupation || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (m.branch || '').toLowerCase().includes(searchTerm.toLowerCase());
-    const matchStatus =
-      statusFilter === 'alive'
-        ? m.is_alive
-        : statusFilter === 'deceased'
-        ? !m.is_alive
-        : true;
-    return matchSearch && matchStatus;
-  });
+  const toggleVisibility = (member: MemberItem) => {
+    const nextStatus: MemberStatus = member.status === 'hidden' ? 'active' : 'hidden';
+    // Backend hook: PATCH /members/:id/visibility with nextStatus here.
+    setMembers((current) => current.map((item) => item.id === member.id ? { ...item, status: nextStatus } : item));
+    showToast(`${member.full_name} đã được ${nextStatus === 'hidden' ? 'ẩn khỏi danh sách công khai' : 'khôi phục'}.`);
+  };
+
+  const resetPassword = (member: MemberItem) => {
+    if (!member.has_account) {
+      showToast(`${member.full_name} chưa có tài khoản để đặt lại mật khẩu.`);
+      return;
+    }
+    // Backend hook: POST /users/:memberId/reset-password and display delivery status.
+    showToast(`Đã gửi hướng dẫn đặt lại mật khẩu cho ${member.full_name}.`);
+  };
 
   return (
-    <div className="admin-members-container">
-      {/* Header Controls */}
-      <div className="admin-account-header">
-        <div>
-          <h2 className="admin-account-title">Quản Lý Hồ Sơ & Thành Viên Toàn Gia Tộc</h2>
-          <p className="admin-account-subtitle">
-            Thêm, sửa, xóa hồ sơ thành viên, trạng thái an táng, tiểu sử, học vấn, thành tựu, liên hệ và năng lực đóng góp.
-          </p>
-        </div>
+    <section className="family-members-page" aria-labelledby="family-members-title">
+      <div className="family-members-breadcrumb" aria-label="Đường dẫn"><span>Quản lý gia phả</span><Icon name="chevron" size={14} /><strong>Nhân khẩu</strong></div>
 
-        <div className="admin-account-controls">
-          <input
-            type="text"
-            className="admin-search-input"
-            placeholder="Tìm tên, nghề nghiệp, chi nhánh..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          <select
-            className="admin-select-filter"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-          >
-            <option value="">Tất cả trạng thái</option>
-            <option value="alive">Còn sống</option>
-            <option value="deceased">Đã mất</option>
-          </select>
-          <button className="admin-btn-primary" onClick={handleOpenAddModal}>
-            Thêm Thành Viên Mới
-          </button>
+      <header className="family-members-hero">
+        <div>
+          <span className="family-members-eyebrow"><Icon name="users" size={15} /> Family Admin</span>
+          <h1 id="family-members-title">Quản lý Nhân khẩu</h1>
+          <p>Quản lý hồ sơ, quan hệ và tài khoản của các thành viên trong dòng họ.</p>
         </div>
+        <button type="button" className="family-primary-button" onClick={openAddModal}><Icon name="plus" size={19} />Thêm thành viên</button>
+      </header>
+
+      <div className="family-members-stats" aria-label="Thống kê nhân khẩu">
+        <div><span>Tổng thành viên</span><strong>{members.length}</strong></div>
+        <div><span>Đang hiển thị</span><strong>{activeCount}</strong></div>
+        <div><span>Có tài khoản</span><strong>{accountCount}</strong></div>
       </div>
 
-      {msg && <div className="admin-msg-box">{msg}</div>}
+      <div className="family-members-panel">
+        <div className="family-members-toolbar">
+          <label className="family-search-field">
+            <span className="sr-only">Tìm kiếm thành viên</span><Icon name="search" size={19} />
+            <input type="search" value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} placeholder="Tìm theo họ tên, chi nhánh, quan hệ..." />
+          </label>
+          <div className="family-status-filter" role="group" aria-label="Lọc trạng thái">
+            {([['all', 'Tất cả'], ['active', 'Đang hiển thị'], ['hidden', 'Đã ẩn']] as const).map(([value, label]) => (
+              <button key={value} type="button" className={statusFilter === value ? 'active' : ''} aria-pressed={statusFilter === value} onClick={() => setStatusFilter(value)}>{label}</button>
+            ))}
+          </div>
+        </div>
 
-      {/* Table Directory */}
-      <div className="admin-table-card">
-        {loading ? (
-          <p className="admin-table-loading">Đang tải danh sách thành viên...</p>
-        ) : filteredMembers.length === 0 ? (
-          <p className="admin-table-empty">Không có thành viên nào phù hợp.</p>
-        ) : (
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th>Họ & Tên Thành Viên</th>
-                <th>Giới tính / Đời thứ</th>
-                <th>Chi / Nhánh</th>
-                <th>Trạng thái & Nơi An Táng</th>
-                <th>Nghề nghiệp / Học vấn</th>
-                <th>Thao tác</th>
-              </tr>
-            </thead>
+        <div className="family-table-heading">
+          <div><h2>Danh sách thành viên</h2><p>{filteredMembers.length} kết quả phù hợp</p></div>
+          <span className="family-live-dot"><i /> Dữ liệu gia phả</span>
+        </div>
+
+        <div className="family-table-wrap">
+          <table className="family-members-table">
+            <thead><tr><th>Thành viên</th><th>Ngày sinh</th><th>Đời / Chi</th><th>Quan hệ</th><th>Trạng thái</th><th className="family-actions-heading">Thao tác</th></tr></thead>
             <tbody>
-              {filteredMembers.map((m) => (
-                <tr key={m.id}>
-                  <td>
-                    <div className="admin-mem-name">{m.full_name}</div>
-                    {m.other_name && <div className="admin-mem-othername">{m.other_name}</div>}
-                  </td>
-                  <td>
-                    <div>{m.gender === 'male' ? 'Nam' : 'Nữ'}</div>
-                    <div className="admin-mem-generation">Đời thứ {m.generation}</div>
-                  </td>
-                  <td>
-                    <span className="admin-mem-branch">
-                      {m.branch || 'Chính tộc'}
-                    </span>
-                  </td>
-                  <td>
-                    <span className={m.is_alive ? 'status-badge-active status-badge-alive' : 'status-badge-locked status-badge-deceased'}>
-                      {m.is_alive ? 'Còn sống' : 'Đã mất'}
-                    </span>
-                    {!m.is_alive && m.burial_place && (
-                      <div className="admin-mem-burial">Mộ phần: {m.burial_place}</div>
-                    )}
-                  </td>
-                  <td>
-                    <div>{m.occupation || '—'}</div>
-                    <div className="admin-mem-edu">{m.education || ''}</div>
-                  </td>
-                  <td>
-                    <div className="action-btn-row">
-                      <button className="btn-icon-action" onClick={() => handleOpenEditModal(m)}>Chỉnh sửa</button>
-                      <button className="btn-icon-action lock" onClick={() => handleDeleteMember(m)}>Xóa</button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+              {loading && members.length === 0 ? (
+                <tr><td colSpan={6} className="family-table-message">Đang tải danh sách thành viên...</td></tr>
+              ) : filteredMembers.length === 0 ? (
+                <tr><td colSpan={6} className="family-table-message">Không tìm thấy thành viên phù hợp.</td></tr>
+              ) : filteredMembers.map((member) => {
+                const age = getAge(member.birth_date);
+                const initials = member.full_name.split(' ').slice(-2).map((word) => word[0]).join('').toUpperCase();
+                return (
+                  <tr key={member.id} className={member.status === 'hidden' ? 'is-hidden' : ''}>
+                    <td data-label="Thành viên"><div className="family-member-cell"><div className={`family-member-avatar gender-${member.gender}`}>{member.avatar_url ? <img src={member.avatar_url} alt="" /> : initials}</div><div><strong>{member.full_name}</strong><span>{member.other_name || member.email || 'Chưa liên kết email'}</span></div></div></td>
+                    <td data-label="Ngày sinh"><strong className="family-table-primary">{formatDate(member.birth_date)}</strong><span className="family-table-secondary">{age === null ? 'Chưa rõ tuổi' : `${age} tuổi`}</span></td>
+                    <td data-label="Đời / Chi"><strong className="family-table-primary">Đời thứ {member.generation}</strong><span className="family-branch-badge">{member.branch || 'Chưa phân chi'}</span></td>
+                    <td data-label="Quan hệ"><span className="family-relation-text">{member.relationship || 'Thành viên'}</span></td>
+                    <td data-label="Trạng thái"><span className={`family-status-badge ${member.status}`}><i />{member.status === 'hidden' ? 'Đã ẩn' : 'Hiển thị'}</span><span className={`family-account-state ${member.has_account ? 'linked' : ''}`}>{member.has_account ? 'Có tài khoản' : 'Chưa có tài khoản'}</span></td>
+                    <td data-label="Thao tác"><div className="family-row-actions">
+                      <button type="button" onClick={() => { setSelectedMember(member); setModalMode('detail'); }} aria-label={`Xem chi tiết ${member.full_name}`} data-tooltip="Xem chi tiết"><Icon name="eye" /></button>
+                      <button type="button" onClick={() => openEditModal(member)} aria-label={`Sửa ${member.full_name}`} data-tooltip="Sửa"><Icon name="edit" /></button>
+                      <button type="button" className={member.status === 'hidden' ? 'restore' : 'danger'} onClick={() => toggleVisibility(member)} aria-label={`${member.status === 'hidden' ? 'Khôi phục' : 'Ẩn'} ${member.full_name}`} data-tooltip={member.status === 'hidden' ? 'Khôi phục' : 'Ẩn'}><Icon name={member.status === 'hidden' ? 'restore' : 'hide'} /></button>
+                      <button type="button" className="key" onClick={() => resetPassword(member)} aria-label={`Reset mật khẩu ${member.full_name}`} data-tooltip="Reset mật khẩu"><Icon name="key" /></button>
+                    </div></td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
-        )}
+        </div>
       </div>
 
-      {/* Full Modal with Tabs */}
-      {isModalOpen && (
-        <div className="admin-modal-overlay">
-          <div className="admin-modal-box admin-modal-box-lg">
-            <div className="admin-modal-header">
-              <h3>{editingMember ? 'Chỉnh Sửa Hồ Sơ Thành Viên' : 'Thêm Thành Viên Mới'}</h3>
-              <button className="admin-modal-close" onClick={() => setIsModalOpen(false)}>✕</button>
-            </div>
+      {toast && <div className="family-members-toast" role="status"><span>✓</span>{toast}</div>}
 
-            {/* Modal Tabs Navigation */}
-            <div className="admin-modal-tabs-container">
-              <button
-                className={`filter-btn ${activeModalTab === 'basic' ? 'active' : ''}`}
-                onClick={() => setActiveModalTab('basic')}
-              >
-                1. Thông tin cơ bản
-              </button>
-              <button
-                className={`filter-btn ${activeModalTab === 'bio' ? 'active' : ''}`}
-                onClick={() => setActiveModalTab('bio')}
-              >
-                2. Tiểu sử & Sự nghiệp
-              </button>
-              <button
-                className={`filter-btn ${activeModalTab === 'contact' ? 'active' : ''}`}
-                onClick={() => setActiveModalTab('contact')}
-              >
-                3. Liên hệ
-              </button>
-              <button
-                className={`filter-btn ${activeModalTab === 'skills' ? 'active' : ''}`}
-                onClick={() => setActiveModalTab('skills')}
-              >
-                4. Năng lực & Đóng góp
-              </button>
-            </div>
-
-            <form onSubmit={handleSaveMember}>
-              {activeModalTab === 'basic' && (
-                <>
-                  <div className="admin-form-grid-2">
-                    <div className="form-group-admin">
-                      <label className="form-label-admin">Họ & Tên *</label>
-                      <input
-                        type="text"
-                        className="form-input-admin"
-                        value={formData.full_name || ''}
-                        onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                        required
-                      />
-                    </div>
-                    <div className="form-group-admin">
-                      <label className="form-label-admin">Tên thường gọi / Tên tự</label>
-                      <input
-                        type="text"
-                        className="form-input-admin"
-                        value={formData.other_name || ''}
-                        onChange={(e) => setFormData({ ...formData, other_name: e.target.value })}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="admin-form-grid-3">
-                    <div className="form-group-admin">
-                      <label className="form-label-admin">Giới tính</label>
-                      <select
-                        className="form-input-admin"
-                        value={formData.gender || 'male'}
-                        onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
-                      >
-                        <option value="male"> Nam</option>
-                        <option value="female"> Nữ</option>
-                      </select>
-                    </div>
-
-                    <div className="form-group-admin">
-                      <label className="form-label-admin">Thế hệ / Đời thứ</label>
-                      <input
-                        type="number"
-                        className="form-input-admin"
-                        value={formData.generation || 1}
-                        onChange={(e) => setFormData({ ...formData, generation: parseInt(e.target.value) || 1 })}
-                      />
-                    </div>
-
-                    <div className="form-group-admin">
-                      <label className="form-label-admin">Trạng thái còn sống</label>
-                      <select
-                        className="form-input-admin"
-                        value={formData.is_alive ? 'true' : 'false'}
-                        onChange={(e) => setFormData({ ...formData, is_alive: e.target.value === 'true' })}
-                      >
-                        <option value="true"> Còn sống</option>
-                        <option value="false"> Đã mất</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="admin-form-grid-2">
-                    <div className="form-group-admin">
-                      <label className="form-label-admin">Ngày sinh (Dương lịch)</label>
-                      <input
-                        type="date"
-                        className="form-input-admin"
-                        value={formData.birth_date || ''}
-                        onChange={(e) => setFormData({ ...formData, birth_date: e.target.value })}
-                      />
-                    </div>
-
-                    {!formData.is_alive && (
-                      <div className="form-group-admin">
-                        <label className="form-label-admin">Ngày mất (Dương lịch)</label>
-                        <input
-                          type="date"
-                          className="form-input-admin"
-                          value={formData.death_date || ''}
-                          onChange={(e) => setFormData({ ...formData, death_date: e.target.value })}
-                        />
-                      </div>
-                    )}
-                  </div>
-
-                  {!formData.is_alive && (
-                    <div className="form-group-admin">
-                      <label className="form-label-admin">Nơi an táng / Mộ phần</label>
-                      <input
-                        type="text"
-                        className="form-input-admin"
-                        value={formData.burial_place || ''}
-                        onChange={(e) => setFormData({ ...formData, burial_place: e.target.value })}
-                        placeholder="Ví dụ: Khu nghĩa trang dòng họ, Thường Tín"
-                      />
-                    </div>
-                  )}
-                </>
-              )}
-
-              {activeModalTab === 'bio' && (
-                <>
-                  <div className="form-group-admin">
-                    <label className="form-label-admin">Nghề nghiệp hiện tại / Cựu nghề nghiệp</label>
-                    <input
-                      type="text"
-                      className="form-input-admin"
-                      value={formData.occupation || ''}
-                      onChange={(e) => setFormData({ ...formData, occupation: e.target.value })}
-                    />
-                  </div>
-
-                  <div className="form-group-admin">
-                    <label className="form-label-admin">Trình độ học vấn & Bằng cấp</label>
-                    <input
-                      type="text"
-                      className="form-input-admin"
-                      value={formData.education || ''}
-                      onChange={(e) => setFormData({ ...formData, education: e.target.value })}
-                    />
-                  </div>
-
-                  <div className="form-group-admin">
-                    <label className="form-label-admin">Tiểu sử & Cột mốc sự nghiệp</label>
-                    <textarea
-                      className="form-input-admin"
-                      rows={4}
-                      value={formData.bio || ''}
-                      onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-                    />
-                  </div>
-                </>
-              )}
-
-              {activeModalTab === 'contact' && (
-                <>
-                  <div className="admin-form-grid-2">
-                    <div className="form-group-admin">
-                      <label className="form-label-admin">Số điện thoại</label>
-                      <input
-                        type="text"
-                        className="form-input-admin"
-                        value={formData.phone || ''}
-                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      />
-                    </div>
-                    <div className="form-group-admin">
-                      <label className="form-label-admin">Địa chỉ Email</label>
-                      <input
-                        type="email"
-                        className="form-input-admin"
-                        value={formData.email || ''}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="form-group-admin">
-                    <label className="form-label-admin">Địa chỉ nơi ở hiện tại</label>
-                    <input
-                      type="text"
-                      className="form-input-admin"
-                      value={formData.address || ''}
-                      onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                    />
-                  </div>
-                </>
-              )}
-
-              {activeModalTab === 'skills' && (
-                <>
-                  <div className="form-group-admin">
-                    <label className="form-label-admin">Kỹ năng & Năng lực đặc biệt</label>
-                    <input
-                      type="text"
-                      className="form-input-admin"
-                      value={formData.skills || ''}
-                      onChange={(e) => setFormData({ ...formData, skills: e.target.value })}
-                      placeholder="Ví dụ: Quản trị, Luật pháp, Công nghệ thông tin, Y tế..."
-                    />
-                  </div>
-
-                  <div className="form-group-admin">
-                    <label className="form-label-admin">Khả năng đóng góp cho dòng họ</label>
-                    <textarea
-                      className="form-input-admin"
-                      rows={3}
-                      value={formData.contributions || ''}
-                      onChange={(e) => setFormData({ ...formData, contributions: e.target.value })}
-                      placeholder="Nhập ghi chú đóng góp quỹ họ, trùng tu từ đường..."
-                    />
-                  </div>
-                </>
-              )}
-
-              <div className="admin-modal-footer">
-                <button type="button" className="btn-icon-action" onClick={() => setIsModalOpen(false)}>Hủy</button>
-                <button type="submit" className="admin-btn-primary">Lưu hồ sơ thành viên</button>
+      {(modalMode === 'add' || modalMode === 'edit') && (
+        <div className="family-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setModalMode(null); }}>
+          <div className="family-modal" role="dialog" aria-modal="true" aria-labelledby="member-form-title">
+            <div className="family-modal-header"><div><span>{modalMode === 'edit' ? 'Cập nhật hồ sơ' : 'Thành viên mới'}</span><h2 id="member-form-title">{modalMode === 'edit' ? 'Chỉnh sửa thành viên' : 'Thêm mới thành viên'}</h2></div><button type="button" onClick={() => setModalMode(null)} aria-label="Đóng"><Icon name="close" /></button></div>
+            <form onSubmit={saveMember} className="family-member-form">
+              <div className="family-form-grid">
+                <label className="family-field family-field-wide"><span>Họ và tên <b>*</b></span><input autoFocus required value={formData.full_name} onChange={(event) => setFormData({ ...formData, full_name: event.target.value })} placeholder="Ví dụ: Võ Văn An" /></label>
+                <label className="family-field"><span>Ngày sinh</span><input type="date" value={formData.birth_date} onChange={(event) => setFormData({ ...formData, birth_date: event.target.value })} /></label>
+                <label className="family-field"><span>Giới tính</span><select value={formData.gender} onChange={(event) => setFormData({ ...formData, gender: event.target.value })}><option value="male">Nam</option><option value="female">Nữ</option><option value="other">Khác</option></select></label>
+                <label className="family-field"><span>Quan hệ với chủ hộ <b>*</b></span><select required value={formData.relationship} onChange={(event) => setFormData({ ...formData, relationship: event.target.value })}><option value="">Chọn quan hệ</option><option value="Vợ / Chồng">Vợ / Chồng</option><option value="Con trai">Con trai</option><option value="Con gái">Con gái</option><option value="Con dâu">Con dâu</option><option value="Con rể">Con rể</option><option value="Anh / Chị / Em">Anh / Chị / Em</option><option value="Cháu">Cháu</option><option value="Thành viên khác">Thành viên khác</option></select></label>
+                <label className="family-field"><span>Chi nhánh</span><select value={formData.branch} onChange={(event) => setFormData({ ...formData, branch: event.target.value })}><option>Chi Trưởng</option><option>Chi Hai</option><option>Chi Ba</option><option>Chưa phân chi</option></select></label>
+                <label className="family-field"><span>Đời thứ</span><input type="number" min="1" max="30" value={formData.generation} onChange={(event) => setFormData({ ...formData, generation: Number(event.target.value) || 1 })} /></label>
+                <label className="family-field"><span>Số điện thoại</span><input type="tel" value={formData.phone} onChange={(event) => setFormData({ ...formData, phone: event.target.value })} placeholder="090 000 0000" /></label>
+                <label className="family-field family-field-wide"><span>Email tài khoản</span><input type="email" value={formData.email} onChange={(event) => setFormData({ ...formData, email: event.target.value, has_account: Boolean(event.target.value) })} placeholder="thanhvien@example.com" /><small>Để trống nếu thành viên chưa cần tài khoản đăng nhập.</small></label>
               </div>
+              <div className="family-modal-footer"><button type="button" className="family-secondary-button" onClick={() => setModalMode(null)}>Hủy</button><button type="submit" className="family-primary-button"><Icon name={modalMode === 'edit' ? 'edit' : 'plus'} />{modalMode === 'edit' ? 'Lưu thay đổi' : 'Thêm thành viên'}</button></div>
             </form>
           </div>
         </div>
       )}
-    </div>
+
+      {modalMode === 'detail' && selectedMember && (
+        <div className="family-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setModalMode(null); }}>
+          <div className="family-modal family-detail-modal" role="dialog" aria-modal="true" aria-labelledby="member-detail-title">
+            <div className="family-modal-header"><div><span>Hồ sơ nhân khẩu</span><h2 id="member-detail-title">Chi tiết thành viên</h2></div><button type="button" onClick={() => setModalMode(null)} aria-label="Đóng"><Icon name="close" /></button></div>
+            <div className="family-detail-profile"><div className={`family-member-avatar gender-${selectedMember.gender}`}>{selectedMember.full_name.split(' ').slice(-2).map((word) => word[0]).join('').toUpperCase()}</div><div><h3>{selectedMember.full_name}</h3><p>{selectedMember.other_name || selectedMember.relationship}</p></div></div>
+            <dl className="family-detail-grid">
+              <div><dt>Ngày sinh</dt><dd>{formatDate(selectedMember.birth_date)}</dd></div><div><dt>Giới tính</dt><dd>{selectedMember.gender === 'male' ? 'Nam' : selectedMember.gender === 'female' ? 'Nữ' : 'Khác'}</dd></div><div><dt>Thế hệ</dt><dd>Đời thứ {selectedMember.generation}</dd></div><div><dt>Chi nhánh</dt><dd>{selectedMember.branch || 'Chưa phân chi'}</dd></div><div><dt>Quan hệ</dt><dd>{selectedMember.relationship || 'Thành viên'}</dd></div><div><dt>Điện thoại</dt><dd>{selectedMember.phone || 'Chưa cập nhật'}</dd></div><div className="wide"><dt>Email</dt><dd>{selectedMember.email || 'Chưa liên kết tài khoản'}</dd></div>
+            </dl>
+            <div className="family-modal-footer"><button type="button" className="family-secondary-button" onClick={() => setModalMode(null)}>Đóng</button><button type="button" className="family-primary-button" onClick={() => openEditModal(selectedMember)}><Icon name="edit" />Chỉnh sửa</button></div>
+          </div>
+        </div>
+      )}
+    </section>
   );
 };
 

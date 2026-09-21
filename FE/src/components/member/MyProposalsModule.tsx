@@ -1,280 +1,119 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { FeatureEmptyState, FeatureIcon, FeatureModal, FeaturePagination, FeatureToast } from '../common/FeatureUI';
+import { proposalMockData, type ProposalRecord, type ProposalStatus } from '../../data/sprint5MockData';
 import './MyProposalsModule.css';
 
-export interface ProposalItem {
-  id: string;
-  type: 'profile' | 'relationship';
+type ProposalForm = {
   targetName: string;
-  fieldOrRelation: string;
+  type: 'profile' | 'relationship';
+  relationship: string;
   currentValue: string;
   proposedValue: string;
   reason: string;
-  status: 'pending' | 'approved' | 'rejected';
-  createdAt: string;
-  adminNote?: string;
-}
+};
+
+const EMPTY_FORM: ProposalForm = { targetName: '', type: 'relationship', relationship: '', currentValue: '', proposedValue: '', reason: '' };
+const PAGE_SIZE = 4;
+const statusLabel: Record<ProposalStatus, string> = { pending: 'Chờ duyệt', approved: 'Đã duyệt', rejected: 'Từ chối' };
 
 export const MyProposalsModule: React.FC = () => {
-  const [proposals, setProposals] = useState<ProposalItem[]>([
-    {
-      id: 'prop-001',
-      type: 'profile',
-      targetName: 'Nguyễn Văn A',
-      fieldOrRelation: 'Trình độ học vấn',
-      currentValue: 'Cử nhân',
-      proposedValue: 'Thạc sĩ Khoa học Máy tính',
-      reason: 'Bổ sung bằng cấp mới tốt nghiệp năm 2025.',
-      status: 'pending',
-      createdAt: '2026-09-10 14:30',
-    },
-    {
-      id: 'prop-002',
-      type: 'relationship',
-      targetName: 'Nguyễn Văn B',
-      fieldOrRelation: 'Quan hệ Con trai với Nguyễn Văn A',
-      currentValue: 'Chưa gắn kết',
-      proposedValue: 'Con trai',
-      reason: 'Cập nhật con trai thứ 2 mới sinh.',
-      status: 'approved',
-      createdAt: '2026-09-01 09:15',
-      adminNote: 'Đã xác minh giấy khai sinh và duyệt thành công.',
-    },
-    {
-      id: 'prop-003',
-      type: 'profile',
-      targetName: 'Nguyễn Văn A',
-      fieldOrRelation: 'Năm sinh',
-      currentValue: '1985',
-      proposedValue: '1983',
-      reason: 'Sửa lại theo căn cước công dân.',
-      status: 'rejected',
-      createdAt: '2026-08-20 16:45',
-      adminNote: 'Thông tin không khớp với trích lục khai sinh gia tộc.',
-    },
-  ]);
+  const [proposals, setProposals] = useState<ProposalRecord[]>(proposalMockData);
+  const [search, setSearch] = useState('');
+  const [status, setStatus] = useState<'all' | ProposalStatus>('all');
+  const [type, setType] = useState<'all' | ProposalForm['type']>('all');
+  const [page, setPage] = useState(1);
+  const [selected, setSelected] = useState<ProposalRecord | null>(null);
+  const [showCreate, setShowCreate] = useState(false);
+  const [form, setForm] = useState<ProposalForm>(EMPTY_FORM);
+  const [errors, setErrors] = useState<Partial<Record<keyof ProposalForm, string>>>({});
+  const [toast, setToast] = useState('');
 
-  const [activeStatusTab, setActiveStatusTab] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
-  const [showCreateModal, setShowCreateModal] = useState(false);
+  const filtered = useMemo(() => proposals.filter((item) => {
+    const haystack = `${item.id} ${item.proposerName} ${item.targetName} ${item.relationship} ${item.proposedValue}`.toLocaleLowerCase('vi');
+    return haystack.includes(search.trim().toLocaleLowerCase('vi')) && (status === 'all' || item.status === status) && (type === 'all' || item.type === type);
+  }), [proposals, search, status, type]);
 
-  // Form state
-  const [proposalType, setProposalType] = useState<'profile' | 'relationship'>('profile');
-  const [fieldOrRelation, setFieldOrRelation] = useState('');
-  const [currentValue, setCurrentValue] = useState('');
-  const [proposedValue, setProposedValue] = useState('');
-  const [reason, setReason] = useState('');
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const visible = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  useEffect(() => setPage(1), [search, status, type]);
+  useEffect(() => { if (page > totalPages) setPage(totalPages); }, [page, totalPages]);
 
-  const filteredProposals = proposals.filter((p) => {
-    if (activeStatusTab === 'all') return true;
-    return p.status === activeStatusTab;
-  });
-
-  const handleCreateProposal = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!fieldOrRelation || !proposedValue || !reason) return;
-
-    const newProp: ProposalItem = {
-      id: `prop-${Date.now()}`,
-      type: proposalType,
-      targetName: 'Nguyễn Văn A',
-      fieldOrRelation,
-      currentValue: currentValue || 'N/A',
-      proposedValue,
-      reason,
-      status: 'pending',
-      createdAt: new Date().toISOString().replace('T', ' ').substring(0, 16),
-    };
-
-    setProposals([newProp, ...proposals]);
-    setShowCreateModal(false);
-    // Reset form
-    setFieldOrRelation('');
-    setCurrentValue('');
-    setProposedValue('');
-    setReason('');
+  const openCreate = () => {
+    setForm(EMPTY_FORM);
+    setErrors({});
+    setShowCreate(true);
   };
 
-  return (
-    <div className="proposals-container">
-      <div className="proposals-header">
-        <div>
-          <h2 className="proposals-title">Đề Xuất Chỉnh Sửa & Theo Dõi Phê Duyệt</h2>
-          <p className="proposals-subtitle">
-            Gửi yêu cầu điều chỉnh thông tin cá nhân hoặc quan hệ gia đình tới Quản trị viên dòng họ.
-          </p>
-        </div>
-        <button className="create-proposal-btn" onClick={() => setShowCreateModal(true)}>
-          + Tạo đề xuất mới
-        </button>
-      </div>
+  const submitProposal = (event: React.FormEvent) => {
+    event.preventDefault();
+    const nextErrors: Partial<Record<keyof ProposalForm, string>> = {};
+    if (!form.targetName) nextErrors.targetName = 'Vui lòng chọn thành viên.';
+    if (!form.relationship.trim()) nextErrors.relationship = 'Vui lòng chọn nội dung đề xuất.';
+    if (!form.proposedValue.trim()) nextErrors.proposedValue = 'Giá trị đề xuất là bắt buộc.';
+    if (form.reason.trim().length < 10) nextErrors.reason = 'Lý do cần có tối thiểu 10 ký tự.';
+    setErrors(nextErrors);
+    if (Object.keys(nextErrors).length) return;
+    const record: ProposalRecord = {
+      id: `DX-${String(Date.now()).slice(-6)}`,
+      proposerName: 'Võ Văn Thắng', proposerInitial: 'T', targetName: form.targetName, type: form.type,
+      relationship: form.relationship, currentValue: form.currentValue.trim() || 'Chưa có dữ liệu', proposedValue: form.proposedValue.trim(),
+      reason: form.reason.trim(), status: 'pending', createdAt: new Date().toLocaleString('vi-VN', { hour12: false }),
+    };
+    setProposals((current) => [record, ...current]);
+    setShowCreate(false); setStatus('all'); setPage(1);
+    setToast('Đã gửi đề xuất. Trưởng dòng họ sẽ xem xét trong trung tâm phê duyệt.');
+  };
 
-      {/* Filter Tabs */}
-      <div className="proposals-filter-tabs">
-        <button
-          className={`filter-tab ${activeStatusTab === 'all' ? 'active' : ''}`}
-          onClick={() => setActiveStatusTab('all')}
-        >
-          Tất cả ({proposals.length})
-        </button>
-        <button
-          className={`filter-tab ${activeStatusTab === 'pending' ? 'active' : ''}`}
-          onClick={() => setActiveStatusTab('pending')}
-        >
-          ⏳ Chờ duyệt ({proposals.filter((p) => p.status === 'pending').length})
-        </button>
-        <button
-          className={`filter-tab ${activeStatusTab === 'approved' ? 'active' : ''}`}
-          onClick={() => setActiveStatusTab('approved')}
-        >
-          ✓ Đã duyệt ({proposals.filter((p) => p.status === 'approved').length})
-        </button>
-        <button
-          className={`filter-tab ${activeStatusTab === 'rejected' ? 'active' : ''}`}
-          onClick={() => setActiveStatusTab('rejected')}
-        >
-          ✕ Từ chối ({proposals.filter((p) => p.status === 'rejected').length})
-        </button>
-      </div>
-
-      {/* Proposal Cards List */}
-      <div className="proposals-list">
-        {filteredProposals.length === 0 ? (
-          <div className="proposals-empty">Không có đề xuất nào trong danh mục này.</div>
-        ) : (
-          filteredProposals.map((item) => (
-            <div key={item.id} className="proposal-card">
-              <div className="proposal-card-head">
-                <div className="proposal-badge-group">
-                  <span className={`status-badge ${item.status}`}>
-                    {item.status === 'pending' && '⏳ Chờ duyệt'}
-                    {item.status === 'approved' && '✓ Đã duyệt'}
-                    {item.status === 'rejected' && '✕ Từ chối'}
-                  </span>
-                  <span className="type-badge">
-                    {item.type === 'profile' ? 'Hồ sơ cá nhân' : 'Quan hệ gia đình'}
-                  </span>
-                </div>
-                <span className="proposal-date">{item.createdAt}</span>
-              </div>
-
-              <h3 className="proposal-item-title">{item.fieldOrRelation}</h3>
-
-              <div className="proposal-diff-grid">
-                <div className="diff-box old">
-                  <span className="diff-label">Dữ liệu hiện tại:</span>
-                  <span className="diff-val">{item.currentValue}</span>
-                </div>
-                <div className="diff-arrow">➔</div>
-                <div className="diff-box new">
-                  <span className="diff-label">Dữ liệu đề xuất:</span>
-                  <span className="diff-val">{item.proposedValue}</span>
-                </div>
-              </div>
-
-              <div className="proposal-reason">
-                <strong>Lý do & Minh chứng:</strong> {item.reason}
-              </div>
-
-              {item.adminNote && (
-                <div className={`admin-note-box ${item.status}`}>
-                  <strong>Phản hồi từ Admin:</strong> {item.adminNote}
-                </div>
-              )}
-            </div>
-          ))
-        )}
-      </div>
-
-      {/* Modal create proposal */}
-      {showCreateModal && (
-        <div className="proposal-modal-overlay">
-          <div className="proposal-modal-card">
-            <div className="proposal-modal-header">
-              <h3 className="proposal-modal-title">Gửi Đề Xuất Thay Đổi Dữ Liệu</h3>
-              <button className="modal-close-btn" onClick={() => setShowCreateModal(false)}>
-                ✕
-              </button>
-            </div>
-
-            <form onSubmit={handleCreateProposal} className="proposal-modal-form">
-              <div className="modal-field">
-                <label className="modal-label">Loại đề xuất *</label>
-                <select
-                  className="modal-select"
-                  value={proposalType}
-                  onChange={(e) => setProposalType(e.target.value as any)}
-                >
-                  <option value="profile">Đề xuất sửa thông tin hồ sơ</option>
-                  <option value="relationship">Đề xuất thêm / sửa quan hệ</option>
-                </select>
-              </div>
-
-              <div className="modal-field">
-                <label className="modal-label">
-                  {proposalType === 'profile' ? 'Trường thông tin cần sửa *' : 'Mối quan hệ đề xuất *'}
-                </label>
-                <input
-                  type="text"
-                  className="modal-input"
-                  placeholder={proposalType === 'profile' ? 'VD: Trình độ học vấn, Nghề nghiệp' : 'VD: Thêm quan hệ Cha/Mẹ/Con/Vợ/Chồng'}
-                  value={fieldOrRelation}
-                  onChange={(e) => setFieldOrRelation(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className="modal-field">
-                <label className="modal-label">Giá trị hiện tại (nếu có)</label>
-                <input
-                  type="text"
-                  className="modal-input"
-                  placeholder="Nhập dữ liệu cũ đang hiển thị"
-                  value={currentValue}
-                  onChange={(e) => setCurrentValue(e.target.value)}
-                />
-              </div>
-
-              <div className="modal-field">
-                <label className="modal-label">Giá trị đề xuất mới *</label>
-                <input
-                  type="text"
-                  className="modal-input"
-                  placeholder="Nhập thông tin mới chính xác"
-                  value={proposedValue}
-                  onChange={(e) => setProposedValue(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className="modal-field">
-                <label className="modal-label">Lý do & Minh chứng *</label>
-                <textarea
-                  className="modal-textarea"
-                  rows={3}
-                  placeholder="Mô tả chi tiết lý do đính kèm thông tin đính chính hoặc liên kết minh chứng"
-                  value={reason}
-                  onChange={(e) => setReason(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className="modal-actions">
-                <button
-                  type="button"
-                  className="modal-cancel-btn"
-                  onClick={() => setShowCreateModal(false)}
-                >
-                  Hủy bỏ
-                </button>
-                <button type="submit" className="modal-submit-btn">
-                  Gửi đề xuất duyệt
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+  return <section className="proposals-container" aria-labelledby="proposal-page-title">
+    <header className="proposals-hero">
+      <div><span>HỒ SƠ & QUAN HỆ</span><h1 id="proposal-page-title">Đề xuất cập nhật gia phả</h1><p>Gửi yêu cầu có minh chứng, theo dõi trạng thái và xem phản hồi của người duyệt.</p></div>
+      <button type="button" className="proposal-primary" onClick={openCreate}><FeatureIcon name="plus" /> Tạo đề xuất</button>
+    </header>
+    <div className="proposal-summary-grid">
+      <article><span>Tất cả đề xuất</span><strong>{proposals.length}</strong><small>Hồ sơ và quan hệ</small></article>
+      <article><span>Đang chờ duyệt</span><strong>{proposals.filter((item) => item.status === 'pending').length}</strong><small>Cần trưởng dòng họ xử lý</small></article>
+      <article><span>Đã được duyệt</span><strong>{proposals.filter((item) => item.status === 'approved').length}</strong><small>Dữ liệu đã được xác nhận</small></article>
+      <article><span>Tỷ lệ chấp thuận</span><strong>75%</strong><small>Trong 30 ngày gần đây</small></article>
     </div>
-  );
+    <div className="proposal-list-card">
+      <div className="proposal-toolbar">
+        <label className="proposal-search"><FeatureIcon name="search" /><input aria-label="Tìm kiếm đề xuất" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Tìm mã, người gửi, thành viên..." /></label>
+        <select aria-label="Lọc loại đề xuất" value={type} onChange={(event) => setType(event.target.value as typeof type)}><option value="all">Tất cả loại</option><option value="profile">Cập nhật hồ sơ</option><option value="relationship">Quan hệ gia đình</option></select>
+        <select aria-label="Lọc trạng thái" value={status} onChange={(event) => setStatus(event.target.value as typeof status)}><option value="all">Tất cả trạng thái</option><option value="pending">Chờ duyệt</option><option value="approved">Đã duyệt</option><option value="rejected">Từ chối</option></select>
+      </div>
+      <div className="proposal-table-wrap">
+        <table className="proposal-table">
+          <thead><tr><th>Người đề xuất</th><th>Thành viên liên quan</th><th>Loại / Quan hệ</th><th>Ngày gửi</th><th>Trạng thái</th><th aria-label="Thao tác" /></tr></thead>
+          <tbody>{visible.map((item) => <tr key={item.id}>
+            <td data-label="Người đề xuất"><div className="proposal-person"><span>{item.proposerInitial}</span><div><strong>{item.proposerName}</strong><small>{item.id}</small></div></div></td>
+            <td data-label="Thành viên"><strong>{item.targetName}</strong><small className="proposal-mobile-sub">{item.currentValue} → {item.proposedValue}</small></td>
+            <td data-label="Loại"><span className="proposal-type">{item.type === 'profile' ? 'Hồ sơ' : 'Quan hệ'}</span><small>{item.relationship}</small></td>
+            <td data-label="Ngày gửi">{item.createdAt}</td>
+            <td data-label="Trạng thái"><span className={`proposal-status ${item.status}`}>{statusLabel[item.status]}</span></td>
+            <td><button type="button" className="proposal-icon-btn" onClick={() => setSelected(item)} aria-label={`Xem chi tiết ${item.id}`} title="Xem chi tiết"><FeatureIcon name="eye" /></button></td>
+          </tr>)}</tbody>
+        </table>
+        {!visible.length && <FeatureEmptyState title="Không tìm thấy đề xuất" description="Thử đổi từ khóa hoặc bộ lọc, hoặc tạo một đề xuất mới." action={<button type="button" className="proposal-primary" onClick={openCreate}>Tạo đề xuất</button>} />}
+      </div>
+      <div className="proposal-list-footer"><span>Hiển thị {visible.length} / {filtered.length} đề xuất</span><FeaturePagination page={page} totalPages={totalPages} onChange={setPage} /></div>
+    </div>
+    {selected && <FeatureModal title={`Chi tiết ${selected.id}`} eyebrow="ĐỀ XUẤT GIA PHẢ" onClose={() => setSelected(null)} wide footer={<button type="button" className="feature-button primary" onClick={() => setSelected(null)}>Đóng</button>}>
+      <div className="proposal-detail-head"><div className="proposal-person"><span>{selected.proposerInitial}</span><div><strong>{selected.proposerName}</strong><small>Người gửi · {selected.createdAt}</small></div></div><span className={`proposal-status ${selected.status}`}>{statusLabel[selected.status]}</span></div>
+      <div className="proposal-detail-grid"><div><span>Hồ sơ liên quan</span><strong>{selected.targetName}</strong></div><div><span>Loại đề xuất</span><strong>{selected.type === 'profile' ? 'Cập nhật hồ sơ' : 'Quan hệ gia đình'}</strong></div><div className="full"><span>Nội dung / Quan hệ</span><strong>{selected.relationship}</strong></div><div><span>Dữ liệu hiện tại</span><strong>{selected.currentValue}</strong></div><div className="highlight"><span>Dữ liệu đề xuất</span><strong>{selected.proposedValue}</strong></div><div className="full"><span>Lý do và ghi chú</span><p>{selected.reason}</p></div>{selected.adminNote && <div className="full admin-note"><span>Phản hồi người duyệt</span><p>{selected.adminNote}</p></div>}</div>
+    </FeatureModal>}
+    {showCreate && <FeatureModal title="Tạo đề xuất mới" eyebrow="HỒ SƠ / QUAN HỆ" onClose={() => setShowCreate(false)} wide footer={<><button type="button" className="feature-button secondary" onClick={() => setShowCreate(false)}>Hủy</button><button type="submit" form="proposal-create-form" className="feature-button primary"><FeatureIcon name="check" /> Gửi đề xuất</button></>}>
+      <form id="proposal-create-form" className="feature-form-grid" onSubmit={submitProposal} noValidate>
+        <div className="feature-field"><label>Thành viên gia đình <em>*</em></label><select value={form.targetName} onChange={(event) => setForm({ ...form, targetName: event.target.value })}><option value="">Chọn thành viên</option><option>Nguyễn Văn An</option><option>Nguyễn Thị Lan</option><option>Nguyễn Đức Anh</option><option>Nguyễn Hoàng Long</option></select>{errors.targetName && <span className="feature-field-error">{errors.targetName}</span>}</div>
+        <div className="feature-field"><label>Loại đề xuất <em>*</em></label><select value={form.type} onChange={(event) => setForm({ ...form, type: event.target.value as ProposalForm['type'], relationship: '' })}><option value="profile">Cập nhật hồ sơ</option><option value="relationship">Quan hệ gia đình</option></select></div>
+        <div className="feature-field full"><label>{form.type === 'relationship' ? 'Quan hệ đề xuất' : 'Trường thông tin'} <em>*</em></label><select value={form.relationship} onChange={(event) => setForm({ ...form, relationship: event.target.value })}><option value="">Chọn nội dung</option>{form.type === 'relationship' ? <><option>Quan hệ cha – con</option><option>Quan hệ mẹ – con</option><option>Quan hệ vợ – chồng</option><option>Quan hệ anh – em</option></> : <><option>Ngày sinh</option><option>Nơi cư trú</option><option>Học vấn / nghề nghiệp</option><option>Tiểu sử</option></>}</select>{errors.relationship && <span className="feature-field-error">{errors.relationship}</span>}</div>
+        <div className="feature-field"><label>Giá trị hiện tại</label><input value={form.currentValue} onChange={(event) => setForm({ ...form, currentValue: event.target.value })} placeholder="Nếu chưa có, có thể để trống" /></div>
+        <div className="feature-field"><label>Giá trị đề xuất <em>*</em></label><input value={form.proposedValue} onChange={(event) => setForm({ ...form, proposedValue: event.target.value })} placeholder="Nhập thông tin mới" />{errors.proposedValue && <span className="feature-field-error">{errors.proposedValue}</span>}</div>
+        <div className="feature-field full"><label>Lý do / Minh chứng <em>*</em></label><textarea value={form.reason} onChange={(event) => setForm({ ...form, reason: event.target.value })} placeholder="Mô tả lý do và nguồn thông tin để người duyệt đối chiếu..." />{errors.reason && <span className="feature-field-error">{errors.reason}</span>}</div>
+        <div className="feature-permission-note full"><FeatureIcon name="lock" /><span>Đề xuất chỉ cập nhật dữ liệu sau khi người có quyền quản trị dòng họ phê duyệt.</span></div>
+      </form>
+    </FeatureModal>}
+    {toast && <FeatureToast message={toast} onClose={() => setToast('')} />}
+  </section>;
 };
 
 export default MyProposalsModule;

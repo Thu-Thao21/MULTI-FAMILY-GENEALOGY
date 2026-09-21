@@ -21,28 +21,32 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const metricCards = [
     {
       title: 'Tổng số tài khoản',
-      value: '1 Tài khoản',
-      subtext: 'Tài khoản hệ thống đã đăng ký',
+      value: '2.486',
+      subtext: '+128 tài khoản trong tháng',
       tag: 'Hệ thống',
     },
     {
       title: 'Tổng số dòng họ',
-      value: '0 Dòng họ',
-      subtext: 'Họ tộc liên kết trên nền tảng',
+      value: '186',
+      subtext: '42 dòng họ đã xác minh',
       tag: 'Họ tộc',
     },
     {
       title: 'Yêu cầu cần duyệt',
-      value: '0 Đề xuất',
-      subtext: 'Yêu cầu chỉnh sửa đang chờ duyệt',
+      value: '23',
+      subtext: '8 yêu cầu ưu tiên cao',
       tag: 'Phê duyệt',
     },
     {
       title: 'Trạng thái hệ thống',
-      value: 'Ổn định 100%',
+      value: '99,98%',
       subtext: 'Tất cả dịch vụ vận hành an toàn',
       tag: 'Bảo mật',
     },
+    { title: 'Thành viên gia phả', value: '48.920', subtext: '+1.204 hồ sơ trong 30 ngày', tag: 'Dữ liệu' },
+    { title: 'Người dùng hoạt động', value: '1.742', subtext: '70,1% tổng tài khoản', tag: 'Tương tác' },
+    { title: 'Tư liệu số', value: '12.680', subtext: '438 GB ảnh, phim và tài liệu', tag: 'Lưu trữ' },
+    { title: 'Doanh thu dịch vụ', value: '284,6 triệu', subtext: '+14,2% so với tháng trước', tag: 'Thanh toán' },
   ];
 
   const mockAdminActivities = [
@@ -101,10 +105,28 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
         <div className="admin-operations-grid">
           <button
-            onClick={() => onNavigateTab('admin-permissions')}
+            onClick={() => onNavigateTab('admin-roles')}
             className="admin-operations-btn"
           >
-            Phân quyền tài khoản
+            Phân quyền & Role
+          </button>
+          <button
+            onClick={() => onNavigateTab('admin-packages')}
+            className="admin-operations-btn"
+          >
+            Gói Dịch Vụ
+          </button>
+          <button
+            onClick={() => onNavigateTab('admin-payments')}
+            className="admin-operations-btn"
+          >
+            Thanh Toán
+          </button>
+          <button
+            onClick={() => onNavigateTab('admin-moderation')}
+            className="admin-operations-btn"
+          >
+            Kiểm Duyệt
           </button>
           <button
             onClick={() => onNavigateTab('admin-families-mgmt')}
@@ -142,7 +164,27 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           >
             Sao lưu & Phục hồi
           </button>
+          <button onClick={() => onNavigateTab('admin-packages')} className="admin-operations-btn">Gói dịch vụ</button>
+          <button onClick={() => onNavigateTab('admin-payments')} className="admin-operations-btn">Quản lý thanh toán</button>
+          <button onClick={() => onNavigateTab('admin-moderation')} className="admin-operations-btn">Kiểm duyệt nội dung</button>
+          <button onClick={() => onNavigateTab('admin-roles')} className="admin-operations-btn">Vai trò & Phân quyền</button>
         </div>
+      </div>
+
+      <div className="admin-analytics-grid">
+        <section className="admin-analytics-card">
+          <div className="admin-analytics-heading"><div><h3>Tăng trưởng người dùng & dòng họ</h3><p>Thống kê mô phỏng 6 tháng gần nhất</p></div><span>+18,4%</span></div>
+          <div className="admin-growth-chart" aria-label="Biểu đồ tăng trưởng người dùng và dòng họ">
+            {[{m:'T4',u:46,f:28},{m:'T5',u:55,f:34},{m:'T6',u:62,f:40},{m:'T7',u:71,f:49},{m:'T8',u:82,f:58},{m:'T9',u:94,f:66}].map((point) => <div key={point.m}><span style={{height:`${point.u}%`}} /><i style={{height:`${point.f}%`}} /><small>{point.m}</small></div>)}
+          </div>
+          <div className="admin-chart-legend"><span><i className="users" /> Người dùng</span><span><i className="families" /> Dòng họ</span></div>
+        </section>
+        <section className="admin-analytics-card usage">
+          <div className="admin-analytics-heading"><div><h3>Mức sử dụng hệ thống</h3><p>Phân bổ theo module</p></div><span>30 ngày</span></div>
+          <div className="admin-usage-list">{[
+            ['Cây gia phả', 88], ['Hồ sơ thành viên', 74], ['Kho tư liệu', 61], ['Phòng thờ số', 48], ['Quỹ gia tộc', 36]
+          ].map(([label,value]) => <div key={label as string}><div><span>{label}</span><strong>{value}%</strong></div><i><span style={{width:`${value}%`}} /></i></div>)}</div>
+        </section>
       </div>
 
       {/* Lower Section: Infrastructure Health & Logs */}

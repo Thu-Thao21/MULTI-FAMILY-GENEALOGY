@@ -69,14 +69,26 @@ export const TopBar: React.FC<TopBarProps> = ({
 
   const handleNavToProfile = () => {
     setShowProfileMenu(false);
-    if (onNavigateTab) onNavigateTab('my-profile');
+    if (userRole === 'Admin') {
+      if (onNavigateTab) onNavigateTab('admin-permissions');
+      else navigate(ROUTES.ADMIN.ACCOUNTS);
+    } else if (onNavigateTab) onNavigateTab('my-profile');
     else navigate(ROUTES.USER.MY_PROFILE);
   };
 
   const handleNavToSettings = () => {
     setShowProfileMenu(false);
-    if (onNavigateTab) onNavigateTab('privacy-settings');
+    if (userRole === 'Admin') {
+      if (onNavigateTab) onNavigateTab('admin-roles');
+      else navigate(ROUTES.ADMIN.ROLES);
+    } else if (onNavigateTab) onNavigateTab('privacy-settings');
     else navigate(ROUTES.USER.PRIVACY_SETTINGS);
+  };
+
+  const handleNavToAIConsent = () => {
+    setShowProfileMenu(false);
+    if (onNavigateTab) onNavigateTab('ai-consent');
+    else navigate(ROUTES.USER.AI_CONSENT);
   };
 
   return (
@@ -199,6 +211,12 @@ export const TopBar: React.FC<TopBarProps> = ({
               <button className="topbar-menu-item" onClick={handleNavToSettings}>
                 Cài đặt & Quyền riêng tư
               </button>
+
+              {userRole !== 'Admin' && (
+                <button className="topbar-menu-item" onClick={handleNavToAIConsent}>
+                  Quyền sử dụng AI
+                </button>
+              )}
 
               <div className="topbar-profile-divider" />
 

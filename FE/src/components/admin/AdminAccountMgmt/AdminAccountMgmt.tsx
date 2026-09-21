@@ -13,8 +13,15 @@ export interface UserAccountItem {
   created_at?: string;
 }
 
+const DEMO_ACCOUNTS: UserAccountItem[] = [
+  { id: 'USR-001', username: 'admin.system', email: 'admin@giaphaviet.vn', phone_e164: '+84901234567', display_name: 'Quản trị Hệ thống', primary_role: 'admin', status: 'active', created_at: '01/01/2026' },
+  { id: 'USR-002', username: 'nguyenvanminh', email: 'minh.nguyen@example.vn', phone_e164: '+84912345678', display_name: 'Nguyễn Văn Minh', primary_role: 'family_head', status: 'active', created_at: '12/02/2026' },
+  { id: 'USR-003', username: 'tranthilan', email: 'lan.tran@example.vn', phone_e164: '+84987654321', display_name: 'Trần Thị Lan', primary_role: 'member', status: 'active', created_at: '18/03/2026' },
+  { id: 'USR-004', username: 'lehoanglong', email: 'long.le@example.vn', display_name: 'Lê Hoàng Long', primary_role: 'viewer', status: 'locked', created_at: '04/05/2026' },
+];
+
 export const AdminAccountMgmt: React.FC = () => {
-  const [accounts, setAccounts] = useState<UserAccountItem[]>([]);
+  const [accounts, setAccounts] = useState<UserAccountItem[]>(() => DEMO_ACCOUNTS.map((item) => ({ ...item })));
   const [loading, setLoading] = useState<boolean>(true);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [roleFilter, setRoleFilter] = useState<string>('');
@@ -29,14 +36,11 @@ export const AdminAccountMgmt: React.FC = () => {
     setLoading(true);
     try {
       const res = await apiClient.get<UserAccountItem[]>('/users');
-      if (Array.isArray(res.data)) {
+      if (Array.isArray(res.data) && res.data.length > 0) {
         setAccounts(res.data);
-      } else {
-        setAccounts([]);
       }
-    } catch (err) {
-      console.warn('Fetch accounts from /users failed:', err);
-      setAccounts([]);
+    } catch {
+      // Keep the local demo accounts when the optional endpoint is unavailable.
     } finally {
       setLoading(false);
     }
@@ -126,6 +130,7 @@ export const AdminAccountMgmt: React.FC = () => {
           >
             <option value="">Tất cả vai trò</option>
             <option value="admin">Admin</option>
+            <option value="family_head">Chủ dòng họ</option>
             <option value="member">Thành viên</option>
             <option value="viewer">Người xem</option>
           </select>
@@ -168,6 +173,8 @@ export const AdminAccountMgmt: React.FC = () => {
                       className={`badge-role-pill ${
                         acc.primary_role === 'admin'
                           ? 'badge-role-admin'
+                          : acc.primary_role === 'family_head'
+                          ? 'badge-role-head'
                           : acc.primary_role === 'viewer'
                           ? 'badge-role-viewer'
                           : 'acc-role-member'
@@ -175,6 +182,8 @@ export const AdminAccountMgmt: React.FC = () => {
                     >
                       {acc.primary_role === 'admin'
                         ? 'Admin'
+                        : acc.primary_role === 'family_head'
+                        ? 'Chủ dòng họ'
                         : acc.primary_role === 'viewer'
                         ? 'Người xem'
                         : 'Thành viên'}
@@ -250,6 +259,7 @@ export const AdminAccountMgmt: React.FC = () => {
                   onChange={(e) => setEditRole(e.target.value)}
                 >
                   <option value="admin">Admin (Quản trị toàn bộ)</option>
+                  <option value="family_head">Chủ dòng họ (Quản lý một gia phả)</option>
                   <option value="member">Thành viên (Xem & đóng góp)</option>
                   <option value="viewer">Người xem (Chỉ xem dữ liệu)</option>
                 </select>

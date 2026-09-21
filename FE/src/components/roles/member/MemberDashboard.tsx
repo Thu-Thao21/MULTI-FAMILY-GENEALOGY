@@ -15,7 +15,7 @@ export const MemberDashboard: React.FC<MemberDashboardProps> = ({
   userRole,
   onNavigateTab,
 }) => {
-  const isFamilyOwner = true; // Later: check if user owns any family
+  const isFamilyOwner = userRole === 'Chủ dòng họ';
 
   return (
     <>
@@ -43,7 +43,7 @@ export const MemberDashboard: React.FC<MemberDashboardProps> = ({
 
           <div className="member-dash-head-grid">
             <button
-              onClick={() => onNavigateTab && onNavigateTab('family-management')}
+              onClick={() => onNavigateTab && onNavigateTab('family-members')}
               className="member-dash-head-btn"
             >
                Quản lý thành viên

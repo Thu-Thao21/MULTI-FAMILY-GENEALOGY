@@ -2,11 +2,12 @@ import React from 'react';
 import LoginForm from '../../components/auth/LoginForm';
 import AuthLanding from '../../components/auth/AuthLanding';
 import loginBackground from '../../assets/nenan.png';
+import type { AccountProfile } from '../../context/AuthContext';
 
 export interface LoginPageProps {
   onSwitchToRegister: () => void;
   onSwitchToForgotPassword?: () => void;
-  onSuccess: () => void;
+  onSuccess: (profile?: AccountProfile) => void;
 }
 
 const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToRegister, onSwitchToForgotPassword, onSuccess }) => {

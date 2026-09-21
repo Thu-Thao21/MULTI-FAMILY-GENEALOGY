@@ -5,6 +5,8 @@
   animation: profileFadeIn 0.3s ease-out;
 }
 
+.admin-links-search{min-width:240px;flex:1}.admin-link-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.admin-link-detail-grid>div{padding:12px;border:1px solid #e2e8f0;border-radius:10px;background:#f8fafc}.admin-link-detail-grid .wide{grid-column:1/-1}.admin-link-detail-grid span{display:block;margin-bottom:5px;color:#64748b;font-size:10px;font-weight:800;text-transform:uppercase}.admin-link-detail-grid strong{font-size:13px;color:#0f172a}.admin-link-detail-grid p{margin:0;color:#475569;line-height:1.5}@media(max-width:640px){.admin-link-detail-grid{grid-template-columns:1fr}.admin-link-detail-grid .wide{grid-column:auto}.admin-links-search{min-width:100%;width:100%}}
+
 .admin-links-tabs-wrap {
   display: flex;
   gap: 10px;

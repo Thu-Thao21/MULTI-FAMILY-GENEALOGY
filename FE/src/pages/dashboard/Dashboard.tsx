@@ -14,6 +14,9 @@ import { ClanDocumentsModule } from '../../components/member/ClanDocumentsModule
 import { ClanAIAssistantModule } from '../../components/member/ClanAIAssistantModule';
 import { DigitalAncestralHallModule } from '../../components/member/DigitalAncestralHallModule';
 import { NotificationCenterModule } from '../../components/member/NotificationCenterModule';
+import { AIConsentModule } from '../../components/member/AIConsentModule';
+import { AncestralLibraryModule } from '../../components/member/AncestralLibraryModule';
+import { DataExchangeModule } from '../../components/member/DataExchangeModule';
 import { FirstLoginPasswordModal } from '../../components/auth/FirstLoginPasswordModal';
 import { NotificationModal } from '../../components/common/NotificationModal';
 import { FamilyPaternalTab } from '../../components/network/FamilyPaternalTab';
@@ -30,6 +33,13 @@ import AdminFamilyLinksMgmt from '../../components/admin/AdminFamilyLinksMgmt/Ad
 import AdminApprovalsMgmt from '../../components/admin/AdminApprovalsMgmt/AdminApprovalsMgmt';
 import AdminAuditLogsMgmt from '../../components/admin/AdminAuditLogsMgmt/AdminAuditLogsMgmt';
 import AdminDataBackupMgmt from '../../components/admin/AdminDataBackupMgmt/AdminDataBackupMgmt';
+import { FamilyAdminModule, type FamilyAdminView } from '../../features/familyAdmin/FamilyAdminModule';
+import {
+  ServicePackageManagement,
+  PaymentTransactionManagement,
+  ModerationManagement,
+  RolePermissionManagement
+} from '../../components/admin/Sprint6Admin';
 
 import { useAuth } from '../../hooks/useAuth';
 import { ROUTES } from '../../config/routes';
@@ -58,10 +68,23 @@ const TAB_TO_ROUTE: Record<string, string> = {
   'funds':                ROUTES.USER.FUNDS,
   'documents':            ROUTES.USER.DOCUMENTS,
   'ai-assistant':         ROUTES.USER.AI_ASSISTANT,
+  'ai-consent':           ROUTES.USER.AI_CONSENT,
   'ancestral-hall':       ROUTES.USER.ANCESTRAL_HALL,
+  'ancestral-library':    ROUTES.USER.ANCESTRAL_LIBRARY,
   'privacy-settings':     ROUTES.USER.PRIVACY_SETTINGS,
   'privacy-preview':      ROUTES.USER.PRIVACY_PREVIEW,
+  'family-members':       ROUTES.USER.FAMILY_MANAGEMENT,
+  'family-relations':     ROUTES.USER.FAMILY_RELATIONS,
+  'family-tree':          ROUTES.USER.FAMILY_TREE,
+  'family-search':        ROUTES.USER.FAMILY_SEARCH,
+  'family-branches':      ROUTES.USER.FAMILY_BRANCHES,
+  'family-approvals':     ROUTES.USER.FAMILY_APPROVALS,
+  'family-accounts':      ROUTES.USER.FAMILY_ACCOUNTS,
+  'family-links':         ROUTES.USER.FAMILY_LINKS,
+  'family-import-export': ROUTES.USER.FAMILY_IMPORT_EXPORT,
+  'family-logs':          ROUTES.USER.FAMILY_LOGS,
   // Admin tabs
+  'admin-tree':           ROUTES.ADMIN.TREE,
   'admin-permissions':    ROUTES.ADMIN.ACCOUNTS,
   'admin-approval':       ROUTES.ADMIN.APPROVALS,
   'admin-logs':           ROUTES.ADMIN.SECURITY_LOGS,
@@ -72,9 +95,14 @@ const TAB_TO_ROUTE: Record<string, string> = {
   'admin-approvals':      ROUTES.ADMIN.APPROVALS,
   'admin-security-logs':  ROUTES.ADMIN.SECURITY_LOGS,
   'admin-data-backup':    ROUTES.ADMIN.BACKUP,
+  'admin-packages':       ROUTES.ADMIN.PACKAGES,
+  'admin-payments':       ROUTES.ADMIN.PAYMENTS,
+  'admin-moderation':     ROUTES.ADMIN.MODERATION,
+  'admin-roles':          ROUTES.ADMIN.ROLES,
 };
 
 const ROUTE_TO_TAB: Array<[string, string]> = [
+  [ROUTES.ADMIN.TREE,              'admin-tree'],
   [ROUTES.ADMIN.ACCOUNTS,          'admin-permissions'],
   [ROUTES.ADMIN.FAMILIES,          'admin-families-mgmt'],
   [ROUTES.ADMIN.MEMBERS,           'admin-members-mgmt'],
@@ -82,6 +110,10 @@ const ROUTE_TO_TAB: Array<[string, string]> = [
   [ROUTES.ADMIN.APPROVALS,         'admin-approval'],
   [ROUTES.ADMIN.SECURITY_LOGS,     'admin-logs'],
   [ROUTES.ADMIN.BACKUP,            'admin-data-backup'],
+  [ROUTES.ADMIN.PACKAGES,          'admin-packages'],
+  [ROUTES.ADMIN.PAYMENTS,          'admin-payments'],
+  [ROUTES.ADMIN.MODERATION,        'admin-moderation'],
+  [ROUTES.ADMIN.ROLES,             'admin-roles'],
   [ROUTES.USER.NOTIFICATIONS,      'notifications'],
   [ROUTES.USER.TREE_VERTICAL,      'tree'],
   [ROUTES.USER.TREE_HORIZONTAL,    'tree'],
@@ -101,9 +133,21 @@ const ROUTE_TO_TAB: Array<[string, string]> = [
   [ROUTES.USER.FUNDS,              'funds'],
   [ROUTES.USER.DOCUMENTS,          'documents'],
   [ROUTES.USER.AI_ASSISTANT,       'ai-assistant'],
+  [ROUTES.USER.AI_CONSENT,         'ai-consent'],
   [ROUTES.USER.ANCESTRAL_HALL,     'ancestral-hall'],
+  [ROUTES.USER.ANCESTRAL_LIBRARY,  'ancestral-library'],
   [ROUTES.USER.PRIVACY_SETTINGS,   'privacy-settings'],
   [ROUTES.USER.PRIVACY_PREVIEW,    'privacy-preview'],
+  [ROUTES.USER.FAMILY_BRANCHES,    'family-branches'],
+  [ROUTES.USER.FAMILY_RELATIONS,   'family-relations'],
+  [ROUTES.USER.FAMILY_TREE,        'family-tree'],
+  [ROUTES.USER.FAMILY_SEARCH,      'family-search'],
+  [ROUTES.USER.FAMILY_APPROVALS,   'family-approvals'],
+  [ROUTES.USER.FAMILY_ACCOUNTS,    'family-accounts'],
+  [ROUTES.USER.FAMILY_LINKS,       'family-links'],
+  [ROUTES.USER.FAMILY_IMPORT_EXPORT, 'family-import-export'],
+  [ROUTES.USER.FAMILY_LOGS,        'family-logs'],
+  [ROUTES.USER.FAMILY_MANAGEMENT,  'family-members'],
 ];
 
 export interface DashboardProps {
@@ -117,14 +161,16 @@ export const Dashboard: React.FC<DashboardProps> = ({ userName, onLogout }) => {
   const location = useLocation();
 
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => window.innerWidth <= 760);
   const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
   const [isProcessingToastOpen, setIsProcessingToastOpen] = useState(false);
   const [showFirstLoginModal, setShowFirstLoginModal] = useState(false);
+  const [selectedAncestorId, setSelectedAncestorId] = useState<string | undefined>();
 
   const displayUserName = account?.display_name || account?.username || firebaseUser?.displayName || userName || 'Người dùng';
   const primaryRole = account?.primary_role || 'member';
-  const userRole = primaryRole === 'admin' ? 'Admin' : 'Thành viên';
+  const isFamilyManager = account?.roles?.some((role) => role.role === 'manager' && role.status === 'active') && !account?.roles?.some((role) => role.role === 'family_head' && role.status === 'active');
+  const userRole = primaryRole === 'admin' ? 'Admin' : primaryRole === 'family_head' ? (isFamilyManager ? 'Family Admin' : 'Chủ dòng họ') : 'Thành viên';
   const basePath = primaryRole === 'admin' ? ROUTES.ADMIN.ROOT : ROUTES.USER.ROOT;
 
   // Mandatory first password change check
@@ -172,6 +218,17 @@ export const Dashboard: React.FC<DashboardProps> = ({ userName, onLogout }) => {
   const renderMainContent = () => {
     // ===== Branch for System Admin =====
     if (primaryRole === 'admin') {
+      if (activeTab === 'admin-tree') {
+        return (
+          <TreeLayout
+            initialMode="horizontal"
+            onSelectMemberProfile={(memberId) => {
+              setSelectedMemberId(memberId);
+              handleSelectTab('admin-members-mgmt');
+            }}
+          />
+        );
+      }
       if (activeTab === 'admin-permissions' || activeTab === 'admin-account-mgmt') return <AdminAccountMgmt />;
       if (activeTab === 'admin-families-mgmt') return <AdminFamiliesMgmt />;
       if (activeTab === 'admin-members-mgmt') return <AdminMembersMgmt />;
@@ -179,6 +236,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ userName, onLogout }) => {
       if (activeTab === 'admin-approval' || activeTab === 'admin-approvals') return <AdminApprovalsMgmt />;
       if (activeTab === 'admin-logs' || activeTab === 'admin-security-logs') return <AdminAuditLogsMgmt />;
       if (activeTab === 'admin-data-backup') return <AdminDataBackupMgmt />;
+      if (activeTab === 'admin-packages') return <ServicePackageManagement />;
+      if (activeTab === 'admin-payments') return <PaymentTransactionManagement />;
+      if (activeTab === 'admin-moderation') return <ModerationManagement />;
+      if (activeTab === 'admin-roles') return <RolePermissionManagement />;
 
       return (
         <AdminDashboard
@@ -190,15 +251,35 @@ export const Dashboard: React.FC<DashboardProps> = ({ userName, onLogout }) => {
 
     // ===== Branch for Member (38 FRs) =====
     if (activeTab === 'notifications') return <NotificationCenterModule />;
-    if (activeTab === 'relationship-finder') return <RelationshipFinder />;
+    if (activeTab === 'relationship-finder') return primaryRole === 'family_head' ? <FamilyAdminModule view="search" /> : <RelationshipFinder />;
     if (activeTab === 'my-proposals') return <MyProposalsModule />;
     if (activeTab === 'anniversaries') return <AnniversariesModule />;
-    if (activeTab === 'events') return <ClanEventsModule />;
-    if (activeTab === 'funds') return <ClanFundsModule />;
-    if (activeTab === 'documents') return <ClanDocumentsModule />;
+    if (activeTab === 'events') return <ClanEventsModule canManage={primaryRole === 'family_head'} />;
+    if (activeTab === 'funds') return <ClanFundsModule canManage={primaryRole === 'family_head'} />;
+    if (activeTab === 'documents') return <ClanDocumentsModule canManage={primaryRole === 'family_head'} />;
     if (activeTab === 'ai-assistant') return <ClanAIAssistantModule />;
-    if (activeTab === 'ancestral-hall') return <DigitalAncestralHallModule />;
+    if (activeTab === 'ai-consent') return <AIConsentModule />;
+    if (activeTab === 'ancestral-hall') return <DigitalAncestralHallModule onOpenLibrary={(ancestorId) => { setSelectedAncestorId(ancestorId); handleSelectTab('ancestral-library'); }} />;
+    if (activeTab === 'ancestral-library') return <AncestralLibraryModule initialAncestorId={selectedAncestorId} onOpenWorship={(ancestorId) => { setSelectedAncestorId(ancestorId); handleSelectTab('ancestral-hall'); }} />;
     if (activeTab === 'privacy-settings' || activeTab === 'privacy-preview') return <PrivacySettingsTab />;
+    if (activeTab.startsWith('family-') && primaryRole !== 'family_head') {
+      return <section className="dashboard-permission-page"><div className="dashboard-permission-icon">🔒</div><span>QUYỀN TRUY CẬP DỮ LIỆU</span><h1>Chức năng dành cho Chủ dòng họ</h1><p>Tài khoản Thành viên có thể xem dữ liệu được chia sẻ nhưng không thể mở khu vực quản lý, phê duyệt hoặc xuất nhập dữ liệu.</p><button type="button" onClick={() => handleSelectTab('dashboard')}>Quay lại Trang chủ</button></section>;
+    }
+    const familyViews: Record<string, FamilyAdminView> = {
+      'family-members': 'members', 'family-relations': 'relations', 'family-tree': 'tree',
+      'family-search': 'search', 'family-branches': 'branches', 'family-approvals': 'approvals',
+      'family-accounts': 'accounts', 'family-links': 'links',
+      'family-import-export': 'exchange', 'family-logs': 'audit',
+    };
+    if (familyViews[activeTab]) {
+      const tabs: Record<FamilyAdminView, string> = {
+        overview: 'dashboard', members: 'family-members', relations: 'family-relations',
+        tree: 'family-tree', search: 'family-search', branches: 'family-branches',
+        approvals: 'family-approvals', accounts: 'family-accounts', links: 'family-links',
+        exchange: 'family-import-export', audit: 'family-logs',
+      };
+      return <FamilyAdminModule view={familyViews[activeTab]} onNavigate={(view) => handleSelectTab(tabs[view])} />;
+    }
 
     // Network tabs
     if (activeTab === 'net-noi') return <FamilyPaternalTab />;
@@ -208,6 +289,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ userName, onLogout }) => {
 
     // Tree Layout
     if (activeTab.startsWith('tree')) {
+      if (primaryRole === 'family_head') return <FamilyAdminModule view="tree" onNavigate={() => handleSelectTab('family-relations')} />;
       const mode: TreeViewMode =
         activeTab === 'tree-horizontal'
           ? 'horizontal'
@@ -254,6 +336,16 @@ export const Dashboard: React.FC<DashboardProps> = ({ userName, onLogout }) => {
 
     if (activeTab === 'member-list') {
       return <MemberList onSelectMember={handleSelectMember} />;
+    }
+
+    if (primaryRole === 'family_head') {
+      const tabs: Record<FamilyAdminView, string> = {
+        overview: 'dashboard', members: 'family-members', relations: 'family-relations',
+        tree: 'family-tree', search: 'family-search', branches: 'family-branches',
+        approvals: 'family-approvals', accounts: 'family-accounts', links: 'family-links',
+        exchange: 'family-import-export', audit: 'family-logs',
+      };
+      return <FamilyAdminModule view="overview" onNavigate={(view) => handleSelectTab(tabs[view])} />;
     }
 
     // Default Member Dashboard

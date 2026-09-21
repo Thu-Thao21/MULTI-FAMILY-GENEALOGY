@@ -1,190 +1,68 @@
-import React, { useState } from 'react';
-import './AdminApprovalsMgmt.css';
+import React, { useEffect, useMemo, useState } from 'react';
+import { proposalMockData, type ProposalRecord, type ProposalStatus } from '../../../data/sprint5MockData';
+import { AdminConfirmDialog, AdminModal, AdminPageHeader, AdminPagination, AdminStatePanel, AdminStatusBadge, AdminToast, useAdminToast } from '../Sprint6Admin/shared';
+import '../Sprint6Admin/Sprint6Admin.css';
 
-export interface ChangeProposalItem {
-  id: string;
-  requester_name: string;
-  request_type: string;
-  target_member: string;
-  details: string;
-  status: 'pending' | 'approved' | 'rejected';
-  rejection_reason?: string;
-  created_at: string;
-}
+const PAGE_SIZE = 4;
+const statusLabels: Record<ProposalStatus, string> = { pending: 'Chờ duyệt', approved: 'Đã duyệt', rejected: 'Đã từ chối' };
 
 export const AdminApprovalsMgmt: React.FC = () => {
-  const [proposals, setProposals] = useState<ChangeProposalItem[]>([]);
+  const [proposals, setProposals] = useState<ProposalRecord[]>(() => proposalMockData.map((item) => ({ ...item })));
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [status, setStatus] = useState<'all' | ProposalStatus>('pending');
+  const [type, setType] = useState<'all' | ProposalRecord['type']>('all');
+  const [page, setPage] = useState(1);
+  const [selected, setSelected] = useState<ProposalRecord | null>(null);
+  const [approveTarget, setApproveTarget] = useState<ProposalRecord | null>(null);
+  const [rejectTarget, setRejectTarget] = useState<ProposalRecord | null>(null);
+  const [rejectNote, setRejectNote] = useState('');
+  const [formError, setFormError] = useState('');
+  const { toast, showToast, dismissToast } = useAdminToast();
 
-  const [filter, setFilter] = useState<string>('pending');
-  const [selectedProp, setSelectedProp] = useState<ChangeProposalItem | null>(null);
-  const [rejectionNote, setRejectionNote] = useState<string>('');
-  const [isRejectModalOpen, setIsRejectModalOpen] = useState<boolean>(false);
-  const [msg, setMsg] = useState<string>('');
+  useEffect(() => { const timer = window.setTimeout(() => setLoading(false), 320); return () => window.clearTimeout(timer); }, []);
+  useEffect(() => setPage(1), [search, status, type]);
 
-  const handleApprove = (prop: ChangeProposalItem) => {
-    setProposals((prev) =>
-      prev.map((item) => (item.id === prop.id ? { ...item, status: 'approved' } : item))
-    );
-    setMsg(`Đã phê duyệt đề xuất "${prop.request_type}" thành công!`);
-    setTimeout(() => setMsg(''), 3000);
+  const filtered = useMemo(() => proposals.filter((item) => {
+    const text = `${item.id} ${item.proposerName} ${item.targetName} ${item.relationship} ${item.proposedValue}`.toLocaleLowerCase('vi');
+    return text.includes(search.trim().toLocaleLowerCase('vi')) && (status === 'all' || item.status === status) && (type === 'all' || item.type === type);
+  }), [proposals, search, status, type]);
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const visible = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+
+  const updateStatus = (target: ProposalRecord, nextStatus: ProposalStatus, note?: string) => {
+    const updated: ProposalRecord = { ...target, status: nextStatus, adminNote: note || (nextStatus === 'approved' ? 'Đã xác minh và chấp thuận bởi Quản trị viên.' : target.adminNote) };
+    setProposals((current) => current.map((item) => item.id === target.id ? updated : item));
+    if (selected?.id === target.id) setSelected(updated);
+    setApproveTarget(null); setRejectTarget(null); setRejectNote(''); setFormError('');
+    showToast(nextStatus === 'approved' ? `Đã phê duyệt ${target.id}.` : `Đã từ chối ${target.id}.`);
   };
 
-  const handleOpenRejectModal = (prop: ChangeProposalItem) => {
-    setSelectedProp(prop);
-    setRejectionNote('');
-    setIsRejectModalOpen(true);
+  const submitReject = (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!rejectTarget) return;
+    if (rejectNote.trim().length < 10) { setFormError('Lý do từ chối cần có tối thiểu 10 ký tự.'); return; }
+    updateStatus(rejectTarget, 'rejected', rejectNote.trim());
   };
 
-  const handleConfirmReject = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedProp) return;
+  const clearFilters = () => { setSearch(''); setStatus('all'); setType('all'); };
 
-    setProposals((prev) =>
-      prev.map((item) =>
-        item.id === selectedProp.id
-          ? { ...item, status: 'rejected', rejection_reason: rejectionNote }
-          : item
-      )
-    );
-
-    setIsRejectModalOpen(false);
-    setMsg(`Đã từ chối đề xuất của "${selectedProp.requester_name}".`);
-    setTimeout(() => setMsg(''), 3000);
-  };
-
-  const filteredProposals = proposals.filter((p) => (filter ? p.status === filter : true));
-
-  return (
-    <div className="admin-approvals-container">
-      {/* Header */}
-      <div className="admin-account-header">
-        <div>
-          <h2 className="admin-account-title">Trung Tâm Phê Duyệt & Đề Xuất Thay Đổi Dữ Liệu</h2>
-          <p className="admin-account-subtitle">
-            Phê duyệt hoặc từ chối mọi đề xuất thay đổi hồ sơ, cây gia phả và thông tin thân tộc từ người dùng.
-          </p>
-        </div>
-
-        <div className="admin-account-controls">
-          <button
-            className={`filter-btn ${filter === 'pending' ? 'active' : ''}`}
-            onClick={() => setFilter('pending')}
-          >
-            Chờ duyệt ({proposals.filter((p) => p.status === 'pending').length})
-          </button>
-          <button
-            className={`filter-btn ${filter === 'approved' ? 'active' : ''}`}
-            onClick={() => setFilter('approved')}
-          >
-            Đã duyệt ({proposals.filter((p) => p.status === 'approved').length})
-          </button>
-          <button
-            className={`filter-btn ${filter === 'rejected' ? 'active' : ''}`}
-            onClick={() => setFilter('rejected')}
-          >
-            Đã từ chối ({proposals.filter((p) => p.status === 'rejected').length})
-          </button>
-          <button
-            className={`filter-btn ${filter === '' ? 'active' : ''}`}
-            onClick={() => setFilter('')}
-          >
-            Tất cả
-          </button>
-        </div>
-      </div>
-
-      {msg && <div className="admin-msg-box">{msg}</div>}
-
-      {/* Table */}
-      <div className="admin-table-card">
-        {filteredProposals.length === 0 ? (
-          <p className="admin-table-empty">Không có đề xuất nào trong mục này.</p>
-        ) : (
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th>Người gửi đề xuất</th>
-                <th>Loại đề xuất</th>
-                <th>Đối tượng thành viên</th>
-                <th>Chi tiết đề xuất thay đổi</th>
-                <th>Thời gian</th>
-                <th>Trạng thái & Thao tác</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredProposals.map((p) => (
-                <tr key={p.id}>
-                  <td className="admin-approval-req-name">{p.requester_name}</td>
-                  <td>
-                    <span className="admin-approval-type-badge">
-                      {p.request_type}
-                    </span>
-                  </td>
-                  <td className="admin-approval-target-name">{p.target_member}</td>
-                  <td className="admin-approval-details">
-                    <div>{p.details}</div>
-                    {p.rejection_reason && (
-                      <div className="admin-approval-reject-reason">
-                        Lý do từ chối: {p.rejection_reason}
-                      </div>
-                    )}
-                  </td>
-                  <td className="admin-approval-time">{p.created_at}</td>
-                  <td>
-                    {p.status === 'pending' ? (
-                      <div className="action-btn-row">
-                        <button className="btn-icon-action unlock" onClick={() => handleApprove(p)}>
-                          Phê duyệt
-                        </button>
-                        <button className="btn-icon-action lock" onClick={() => handleOpenRejectModal(p)}>
-                          Từ chối
-                        </button>
-                      </div>
-                    ) : (
-                      <span className={p.status === 'approved' ? 'status-badge-active' : 'status-badge-locked'}>
-                        {p.status === 'approved' ? 'Đã phê duyệt' : 'Đã từ chối'}
-                      </span>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
-
-      {/* Reject Reason Modal */}
-      {isRejectModalOpen && selectedProp && (
-        <div className="admin-modal-overlay">
-          <div className="admin-modal-box">
-            <div className="admin-modal-header">
-              <h3>Từ Chối Đề Xuất Thay Đổi</h3>
-              <button className="admin-modal-close" onClick={() => setIsRejectModalOpen(false)}>✕</button>
-            </div>
-
-            <form onSubmit={handleConfirmReject}>
-              <div className="form-group-admin">
-                <label className="form-label-admin">Lý do từ chối phản hồi cho người dùng *</label>
-                <textarea
-                  className="form-input-admin"
-                  rows={4}
-                  value={rejectionNote}
-                  onChange={(e) => setRejectionNote(e.target.value)}
-                  placeholder="Nhập lý do từ chối (Ví dụ: Thông tin chưa chính xác, thiếu giấy tờ bằng chứng...)"
-                  required
-                />
-              </div>
-
-              <div className="admin-modal-footer">
-                <button type="button" className="btn-icon-action" onClick={() => setIsRejectModalOpen(false)}>Hủy</button>
-                <button type="submit" className="admin-btn-primary admin-btn-reject-confirm">Xác nhận từ chối</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+  return <section className="s6a-page">
+    <AdminPageHeader eyebrow="PHÊ DUYỆT DỮ LIỆU" title="Trung tâm đề xuất gia phả" description="Đối chiếu thay đổi hồ sơ và quan hệ, phê duyệt hoặc phản hồi rõ lý do cho người gửi." actions={<button type="button" className="s6a-button secondary" onClick={() => setStatus('pending')}>{proposals.filter((item) => item.status === 'pending').length} yêu cầu chờ</button>} />
+    <div className="s6a-metric-grid"><article className="s6a-metric-card"><span>Tổng đề xuất</span><strong>{proposals.length}</strong><small>Trong dữ liệu demo</small></article><article className="s6a-metric-card"><span>Chờ xử lý</span><strong>{proposals.filter((item) => item.status === 'pending').length}</strong><small>Cần người có quyền duyệt</small></article><article className="s6a-metric-card"><span>Đã chấp thuận</span><strong>{proposals.filter((item) => item.status === 'approved').length}</strong><small>Dữ liệu đã xác nhận</small></article><article className="s6a-metric-card"><span>Đã từ chối</span><strong>{proposals.filter((item) => item.status === 'rejected').length}</strong><small>Có phản hồi lý do</small></article></div>
+    <div className="s6a-card">
+      <div className="s6a-card-heading"><div><h2>Danh sách đề xuất</h2><p>Tìm kiếm, lọc và mở hồ sơ để ra quyết định.</p></div><span className="s6a-count-pill">{filtered.length} kết quả</span></div>
+      <div className="s6a-filter-bar s6a-filter-grid"><label className="s6a-search-field wide"><span>Tìm kiếm</span><input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Mã, người gửi, thành viên, nội dung..." /></label><label><span>Loại đề xuất</span><select value={type} onChange={(event) => setType(event.target.value as typeof type)}><option value="all">Tất cả</option><option value="profile">Hồ sơ cá nhân</option><option value="relationship">Quan hệ gia đình</option></select></label><label><span>Trạng thái</span><select value={status} onChange={(event) => setStatus(event.target.value as typeof status)}><option value="all">Tất cả</option><option value="pending">Chờ duyệt</option><option value="approved">Đã duyệt</option><option value="rejected">Đã từ chối</option></select></label><button type="button" className="s6a-button ghost align-end" onClick={clearFilters} disabled={!search && status === 'all' && type === 'all'}>Đặt lại</button></div>
+      {loading ? <AdminStatePanel kind="loading" message="Đang chuẩn bị danh sách đề xuất..." /> : !visible.length ? <AdminStatePanel kind="empty" title="Không có đề xuất phù hợp" message="Thử đổi bộ lọc hoặc từ khóa tìm kiếm." action={<button type="button" className="s6a-button secondary" onClick={clearFilters}>Xóa bộ lọc</button>} /> : <><div className="s6a-table-wrap"><table className="s6a-table"><thead><tr><th>Mã / Người gửi</th><th>Thành viên</th><th>Loại & quan hệ</th><th>Thay đổi đề xuất</th><th>Ngày gửi</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody>{visible.map((item) => <tr key={item.id}><td><button type="button" className="s6a-table-id" onClick={() => setSelected(item)}>{item.id}</button><span className="s6a-table-subline">{item.proposerName}</span></td><td><strong>{item.targetName}</strong></td><td><span className="s6a-table-main">{item.type === 'profile' ? 'Hồ sơ' : 'Quan hệ'}</span><span className="s6a-table-subline">{item.relationship}</span></td><td><span className="s6a-table-subline">{item.currentValue}</span><strong>→ {item.proposedValue}</strong></td><td>{item.createdAt}</td><td><AdminStatusBadge status={item.status} label={statusLabels[item.status]} /></td><td><div className="s6a-inline-actions"><button type="button" className="s6a-link-button" onClick={() => setSelected(item)}>Chi tiết</button>{item.status === 'pending' && <><button type="button" className="s6a-link-button success-text" onClick={() => setApproveTarget(item)}>Duyệt</button><button type="button" className="s6a-link-button danger-text" onClick={() => { setRejectTarget(item); setRejectNote(''); setFormError(''); }}>Từ chối</button></>}</div></td></tr>)}</tbody></table></div><AdminPagination page={safePage} totalItems={filtered.length} pageSize={PAGE_SIZE} onPageChange={setPage} /></>}
     </div>
-  );
+    <AdminModal open={Boolean(selected)} title={selected ? `Đề xuất ${selected.id}` : ''} description="Đối chiếu dữ liệu hiện tại, nội dung đề xuất và minh chứng." onClose={() => setSelected(null)} size="lg" footer={selected && <><button type="button" className="s6a-button secondary" onClick={() => setSelected(null)}>Đóng</button>{selected.status === 'pending' && <><button type="button" className="s6a-button danger" onClick={() => { setRejectTarget(selected); setRejectNote(''); }}>Từ chối</button><button type="button" className="s6a-button primary" onClick={() => setApproveTarget(selected)}>Phê duyệt</button></>}</>}>
+      {selected && <div className="s6a-detail-grid"><div><span>Người gửi</span><strong>{selected.proposerName}</strong></div><div><span>Thành viên liên quan</span><strong>{selected.targetName}</strong></div><div><span>Loại</span><strong>{selected.type === 'profile' ? 'Cập nhật hồ sơ' : 'Quan hệ gia đình'}</strong></div><div><span>Ngày gửi</span><strong>{selected.createdAt}</strong></div><div><span>Dữ liệu hiện tại</span><strong>{selected.currentValue}</strong></div><div><span>Dữ liệu đề xuất</span><strong>{selected.proposedValue}</strong></div><div className="wide"><span>Nội dung / Quan hệ</span><strong>{selected.relationship}</strong></div><div className="wide"><span>Lý do & minh chứng</span><p>{selected.reason}</p></div>{selected.adminNote && <div className="wide"><span>Phản hồi người duyệt</span><p>{selected.adminNote}</p></div>}</div>}
+    </AdminModal>
+    <AdminConfirmDialog open={Boolean(approveTarget)} title="Phê duyệt đề xuất?" message={approveTarget ? `${approveTarget.id} sẽ được đánh dấu đã duyệt và sẵn sàng cập nhật dữ liệu.` : ''} confirmLabel="Xác nhận phê duyệt" onCancel={() => setApproveTarget(null)} onConfirm={() => approveTarget && updateStatus(approveTarget, 'approved')} />
+    <AdminModal open={Boolean(rejectTarget)} title="Từ chối đề xuất" description="Phản hồi sẽ hiển thị cho người gửi." onClose={() => setRejectTarget(null)} size="sm" footer={<><button type="button" className="s6a-button secondary" onClick={() => setRejectTarget(null)}>Hủy</button><button type="submit" form="reject-proposal-form" className="s6a-button danger">Xác nhận từ chối</button></>}><form id="reject-proposal-form" className="s6a-form s6a-form-grid one-column" onSubmit={submitReject}><label className="full"><span>Lý do từ chối *</span><textarea value={rejectNote} onChange={(event) => setRejectNote(event.target.value)} placeholder="Nêu dữ liệu còn thiếu hoặc lý do chưa thể xác minh..." rows={4} />{formError && <small className="s6a-form-error">{formError}</small>}</label></form></AdminModal>
+    <AdminToast toast={toast} onDismiss={dismissToast} />
+  </section>;
 };
 
 export default AdminApprovalsMgmt;

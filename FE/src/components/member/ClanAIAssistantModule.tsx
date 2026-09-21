@@ -14,7 +14,7 @@ export const ClanAIAssistantModule: React.FC = () => {
     {
       id: 'msg-01',
       sender: 'ai',
-      text: 'Kính chào ông/bà! Tôi là Trợ lý AI Gia Phả. Tôi có thể hỗ trợ giải đáp thắc mắc về lịch sử dòng họ, tra cứu thông tin thế hệ, thủy tổ hoặc phân tích số liệu tộc họ dựa trên phạm vi dữ liệu được cấp quyền. Ông/bà muốn tìm hiểu thông tin gì hôm nay?',
+      text: 'Đây là bản minh họa giao diện Trợ lý AI. Câu trả lời hiện được tạo từ kịch bản mẫu, chưa tra cứu dữ liệu gia phả thật.',
       timestamp: '12:00',
     },
   ]);
@@ -44,23 +44,18 @@ export const ClanAIAssistantModule: React.FC = () => {
     if (!queryToSend) setInputQuery('');
     setIsThinking(true);
 
-    // Simulate AI thinking and generating answer
+    // Frontend-only scripted response; no model or family data is queried.
     setTimeout(() => {
       let aiText = '';
-      let citations: Array<{ title: string; source: string }> = [];
+      const citations: Array<{ title: string; source: string }> = [];
 
       if (text.includes('khởi tổ') || text.includes('nguồn gốc')) {
-        aiText =
-          'Dòng họ Nguyễn Chi 1 có nguồn gốc từ Cụ Khởi Tổ Nguyễn Văn A (1850-1920), xuất thân tại làng Đông, Xã Kim Liên. Cụ là người lập nên từ đường đầu tiên vào năm 1890.';
-        citations = [{ title: 'Gia phả cổ chữ Nôm (1890)', source: 'Hồ sơ tài liệu #DOC-001' }];
+        aiText = 'Bản xem trước chưa thể xác minh khởi tổ hoặc nguồn gốc. Khi kết nối AI và tư liệu gia phả, câu trả lời sẽ cần dẫn nguồn thật.';
       } else if (text.includes('thế hệ') || text.includes('nam/nữ')) {
-        aiText =
-          'Thống kê theo cơ sở dữ liệu hiện tại: Thế hệ thứ 4 bao gồm tổng cộng 18 thành viên (11 Nam, 7 Nữ). Đa số thành viên đời 4 hiện sinh sống tại Hà Nội và Hải Dương.';
-        citations = [{ title: 'Báo cáo thống kê gia tộc 2026', source: 'Cơ sở dữ liệu Gia Phả Việt' }];
+        aiText = 'Bản xem trước chưa tính thống kê từ dữ liệu gia phả. Khi có backend, thống kê sẽ lấy dữ liệu trong phạm vi quyền của người hỏi.';
       } else {
         aiText =
-          'Hệ thống AI đã phân tích câu hỏi của bạn trong phạm vi dữ liệu dòng họ được công khai. Câu trả lời chi tiết và tài liệu minh chứng đính kèm bên dưới.';
-        citations = [{ title: 'Trích lục thông tin dòng họ', source: 'Hệ thống lưu trữ gia phả' }];
+          'Bản xem trước chưa kết nối dịch vụ AI hoặc dữ liệu gia phả. Đây là câu trả lời mẫu để kiểm tra giao diện hội thoại.';
       }
 
       const aiMsg: ChatMessage = {
@@ -82,7 +77,7 @@ export const ClanAIAssistantModule: React.FC = () => {
         <div>
           <h2 className="ai-title">Trợ Lý AI Gia Phả & Thống Kê Gợi Ý</h2>
           <p className="ai-subtitle">
-            Hỏi đáp thông minh về lịch sử dòng họ, tra cứu dữ liệu tộc họ và xem gợi ý tự động.
+            Bản xem trước giao diện. Phản hồi và thống kê bên dưới là dữ liệu minh họa, chưa kết nối AI.
           </p>
         </div>
       </div>
@@ -117,7 +112,7 @@ export const ClanAIAssistantModule: React.FC = () => {
               <div className="chat-message-item ai">
                 <div className="chat-avatar">🤖</div>
                 <div className="chat-bubble thinking">
-                  <span className="dot-pulse">AI đang suy ngẫm và truy xuất dữ liệu gia phả...</span>
+                  <span className="dot-pulse">Đang tạo phản hồi mẫu...</span>
                 </div>
               </div>
             )}
@@ -144,9 +139,9 @@ export const ClanAIAssistantModule: React.FC = () => {
           </form>
         </div>
 
-        {/* Right Column: AI Stats & Suggestions */}
+        {/* Right Column: AI Stats & Suggestions (FR-ME-32) */}
         <div className="ai-stats-card">
-          <h3 className="ai-side-title">📊 Gợi Ý & Thống Kê AI</h3>
+          <h3 className="ai-side-title">📊 Gợi Ý & Thống Kê AI (FR-ME-32)</h3>
 
           <div className="suggestions-box">
             <span className="suggestions-label">Câu hỏi gợi ý thường gặp:</span>
@@ -167,14 +162,14 @@ export const ClanAIAssistantModule: React.FC = () => {
           <div className="stats-highlight-box">
             <h4 className="stats-box-title">Đặc điểm nổi bật gia tộc</h4>
             <ul className="stats-list">
-              <li>• <strong>Cơ cấu thế hệ:</strong> Đã ghi nhận 6 thế hệ nối tiếp.</li>
-              <li>• <strong>Phân bố địa lý:</strong> 65% sinh sống tại Hà Nội, 20% tại Hải Dương, 15% nước ngoài.</li>
-              <li>• <strong>Trình độ học vấn:</strong> 42 Cử nhân, 8 Thạc sĩ, 2 Tiến sĩ.</li>
+              <li>• <strong>Cơ cấu thế hệ:</strong> Dữ liệu minh họa, chưa tính từ gia phả.</li>
+              <li>• <strong>Phân bố địa lý:</strong> Sẽ hiển thị khi kết nối nguồn dữ liệu.</li>
+              <li>• <strong>Trình độ học vấn:</strong> Sẽ hiển thị khi kết nối nguồn dữ liệu.</li>
             </ul>
           </div>
 
           <div className="ai-package-note">
-            ℹ️ Tính năng AI Assistant sử dụng trong phạm vi dữ liệu Public & Family theo gói Business hiện hành.
+            ℹ️ Chưa kiểm tra gói AI, quyền dữ liệu hoặc đồng ý sử dụng AI ở phía máy chủ.
           </div>
         </div>
       </div>

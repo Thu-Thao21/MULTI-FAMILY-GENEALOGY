@@ -144,3 +144,82 @@
   color: #ffffff;
   font-weight: 700;
 }
+
+/* Family Admin uses the flatter navigation rhythm shown in the visual reference. */
+.sidebar-admin-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sidebar-admin-item {
+  width: 100%;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 0 14px;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  background: transparent;
+  color: #52627a;
+  font-size: 13.5px;
+  font-weight: 650;
+  text-align: left;
+  cursor: pointer;
+  transition: color 160ms ease, background-color 160ms ease, border-color 160ms ease, transform 160ms ease;
+}
+
+.sidebar-admin-item:hover {
+  color: #2b63dc;
+  background: #f6f9ff;
+  border-color: #e7eefb;
+  transform: translateX(2px);
+}
+
+.sidebar-admin-item.active {
+  color: #2864e5;
+  background: #edf4ff;
+  border-color: #e4edfc;
+  font-weight: 800;
+}
+
+.sidebar-admin-item:focus-visible {
+  outline: 3px solid rgba(37, 99, 235, 0.15);
+  outline-offset: 1px;
+}
+
+.sidebar-admin-icon {
+  width: 22px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 22px;
+  color: #74849b;
+}
+
+.sidebar-admin-item.active .sidebar-admin-icon,
+.sidebar-admin-item:hover .sidebar-admin-icon {
+  color: #2f6fed;
+}
+
+.sidebar-container.collapsed .sidebar-admin-item {
+  justify-content: center;
+  padding: 0;
+}
+
+@media (max-width: 760px) {
+  .sidebar-container.expanded {
+    position: fixed;
+    top: 64px;
+    left: 0;
+    z-index: 90;
+    width: min(290px, calc(100vw - 42px));
+    min-width: 0;
+    height: calc(100vh - 64px);
+    box-shadow: 16px 20px 40px rgba(15, 23, 42, 0.16);
+  }
+
+  .sidebar-container.collapsed {
+    display: none;
+  }
+}

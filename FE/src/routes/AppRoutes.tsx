@@ -10,7 +10,9 @@ import { BusinessPlansView } from '../pages/public/BusinessPlansView';
 import { BusinessRegisterWizard } from '../pages/public/BusinessRegisterWizard';
 import { BusinessTrackStatusPage } from '../pages/public/BusinessTrackStatusPage';
 import { InviteActivationPage } from '../pages/public/InviteActivationPage';
+import { FamilyAdminPreviewPage } from '../features/familyAdmin/FamilyAdminPreviewPage';
 import { ProtectedRoute, RoleGuard } from './RouteGuards';
+import type { AccountProfile } from '../context/AuthContext';
 
 export type AuthView = 'login' | 'register' | 'forgot-password' | 'dashboard';
 
@@ -29,8 +31,8 @@ const AppRoutes: React.FC<AppRoutesProps> = ({
 }) => {
   const navigate = useNavigate();
 
-  const handleAuthSuccess = () => {
-    if (primaryRole === 'admin') {
+  const handleAuthSuccess = (profile?: AccountProfile) => {
+    if ((profile?.primary_role || primaryRole) === 'admin') {
       navigate('/admin');
     } else {
       navigate('/user');
@@ -52,6 +54,7 @@ const AppRoutes: React.FC<AppRoutesProps> = ({
       <Route path="/public/business-register" element={<BusinessRegisterWizard />} />
       <Route path="/public/business-register/track" element={<BusinessTrackStatusPage />} />
       <Route path="/activate" element={<InviteActivationPage />} />
+      <Route path="/family-admin-preview" element={<FamilyAdminPreviewPage />} />
 
       {/* Authentication Routes */}
       <Route

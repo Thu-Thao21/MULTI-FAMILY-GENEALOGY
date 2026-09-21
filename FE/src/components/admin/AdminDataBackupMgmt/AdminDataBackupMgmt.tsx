@@ -1,168 +1,63 @@
-import React, { useState } from 'react';
-import './AdminDataBackupMgmt.css';
+import React, { useEffect, useMemo, useState } from 'react';
+import { backupMockData, type BackupRecord, type BackupStatus } from '../../../data/adminOperationsMockData';
+import { AdminConfirmDialog, AdminModal, AdminPageHeader, AdminPagination, AdminStatePanel, AdminStatusBadge, AdminToast, formatAdminDate, useAdminToast } from '../Sprint6Admin/shared';
+import '../Sprint6Admin/Sprint6Admin.css';
+
+const PAGE_SIZE = 4;
 
 export const AdminDataBackupMgmt: React.FC = () => {
-  const [backups, setBackups] = useState<any[]>([]);
+  const [backups, setBackups] = useState<BackupRecord[]>(() => backupMockData.map((item) => ({ ...item })));
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [type, setType] = useState<'all' | BackupRecord['type']>('all');
+  const [status, setStatus] = useState<'all' | BackupStatus>('all');
+  const [page, setPage] = useState(1);
+  const [showCreate, setShowCreate] = useState(false);
+  const [createType, setCreateType] = useState<BackupRecord['type']>('Full');
+  const [createName, setCreateName] = useState('');
+  const [confirm, setConfirm] = useState<{ action: 'restore' | 'delete'; item: BackupRecord } | null>(null);
+  const { toast, showToast, dismissToast } = useAdminToast();
 
-  const [msg, setMsg] = useState<string>('');
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  useEffect(() => { const timer = window.setTimeout(() => setLoading(false), 330); return () => window.clearTimeout(timer); }, []);
+  useEffect(() => setPage(1), [search, type, status]);
+  const filtered = useMemo(() => backups.filter((item) => `${item.name} ${item.id} ${item.createdBy}`.toLowerCase().includes(search.trim().toLowerCase()) && (type === 'all' || item.type === type) && (status === 'all' || item.status === status)), [backups, search, type, status]);
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const visible = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
-  const handleTriggerBackup = () => {
-    const newBak = {
-      id: `bak_${Date.now()}`,
-      file_name: `full_backup_${new Date().toISOString().split('T')[0].replace(/-/g, '_')}.sql.gz`,
-      file_size: '14.5 MB',
-      created_by: 'Quản Trị Viên',
-      created_at: new Date().toLocaleString(),
-    };
-    setBackups((prev) => [newBak, ...prev]);
-    setMsg('Đã tạo bản sao lưu toàn bộ hệ thống thành công!');
-    setTimeout(() => setMsg(''), 4000);
+  const createBackup = (event: React.FormEvent) => {
+    event.preventDefault();
+    const date = new Date();
+    const id = `BAK-${String(Date.now()).slice(-6)}`;
+    const defaultName = `mfgms_${createType.toLowerCase()}_${date.toISOString().slice(0,10).replace(/-/g,'_')}.sql.gz`;
+    const record: BackupRecord = { id, name: createName.trim() || defaultName, type: createType, createdAt: date.toISOString(), size: 'Đang tính...', status: 'processing', createdBy: 'Admin hệ thống' };
+    setBackups((items) => [record, ...items]); setShowCreate(false); showToast('Đã bắt đầu tạo bản sao lưu.', 'info');
+    window.setTimeout(() => { setBackups((items) => items.map((item) => item.id === id ? { ...item, size: createType === 'Incremental' ? '196 MB' : '2.91 GB', status: 'success' } : item)); showToast('Bản sao lưu đã hoàn tất và được kiểm tra checksum.'); }, 1600);
   };
 
-  const handleRestore = (fileName: string) => {
-    if (window.confirm(`Bạn có chắc chắn muốn khôi phục dữ liệu hệ thống từ bản sao lưu "${fileName}"?`)) {
-      setMsg(`Đã gửi lệnh khôi phục dữ liệu từ file ${fileName}.` );
-      setTimeout(() => setMsg(''), 4000);
-    }
+  const download = (item: BackupRecord) => {
+    const blob = new Blob([`MFGMS backup demo\n${item.id}\n${item.createdAt}`], {type:'application/gzip'});
+    const url = URL.createObjectURL(blob); const anchor = document.createElement('a'); anchor.href=url; anchor.download=`${item.name}.demo`; anchor.click(); URL.revokeObjectURL(url); showToast(`Đã tạo tệp tải xuống demo ${item.name}.`);
   };
 
-  const handleExportExcel = () => {
-    setMsg('Đang tạo file Excel danh sách thành viên... File sẽ tự động tải về!');
-    setTimeout(() => setMsg(''), 4000);
+  const confirmAction = () => {
+    if (!confirm) return;
+    if (confirm.action === 'delete') { setBackups((items) => items.filter((item) => item.id !== confirm.item.id)); showToast('Đã xóa bản sao lưu khỏi danh sách demo.'); }
+    else { showToast(`Đã tạo tác vụ khôi phục từ ${confirm.item.name}.`, 'info'); }
+    setConfirm(null);
   };
 
-  const handleExportTreePDF = () => {
-    setMsg('Đang xuất sơ đồ Cây Gia Phả định dạng PDF high-resolution... Sẵn sàng in!');
-    setTimeout(() => setMsg(''), 4000);
-  };
-
-  const handleImportExcelSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedFile) {
-      alert('Vui lòng chọn file Excel (.xlsx) trước khi tải lên.');
-      return;
-    }
-    setMsg(`Đã nhập dữ liệu thành công từ file "${selectedFile.name}". Cập nhật 45 thành viên!`);
-    setSelectedFile(null);
-    setTimeout(() => setMsg(''), 4000);
-  };
-
-  return (
-    <div className="admin-backup-container">
-      {/* Header */}
-      <div className="admin-account-header">
-        <div>
-          <h2 className="admin-account-title">Xuất Nhập File & Sao Lưu Khôi Phục Hệ Thống</h2>
-          <p className="admin-account-subtitle">
-            Xuất sơ đồ cây PNG/PDF/In, xuất danh sách Excel, nhập dữ liệu từ Excel, sao lưu và khôi phục toàn bộ CSDL.
-          </p>
-        </div>
-      </div>
-
-      {msg && <div className="admin-msg-box">{msg}</div>}
-
-      {/* Grid of Action Cards */}
-      <div className="admin-grid-action-cards">
-        {/* Card 1: Export Tree & Reports */}
-        <div className="admin-card-box">
-          <div className="admin-box-header">
-            <h3>Xuất Sơ Đồ Cây & Báo Cáo In ấn</h3>
-          </div>
-          <p className="admin-backup-desc">
-            Xuất hình ảnh sơ đồ gia phả trực hệ (PNG high-res), bản in PDF khổ lớn A0/A1 hoặc in trực tiếp.
-          </p>
-          <div className="admin-btn-group-wrap">
-            <button className="admin-btn-primary" onClick={handleExportTreePDF}>
-              Xuất PDF / In Sơ Đồ
-            </button>
-            <button className="btn-icon-action" onClick={handleExportTreePDF}>
-              Xuất Ảnh PNG High-Res
-            </button>
-          </div>
-        </div>
-
-        {/* Card 2: Export / Import Excel */}
-        <div className="admin-card-box">
-          <div className="admin-box-header">
-            <h3>Báo Cáo & Nhập/Xuất File Excel</h3>
-          </div>
-          <p className="admin-backup-desc">
-            Xuất danh sách thành viên toàn bộ gia tộc ra file Excel hoặc nhập hàng loạt từ file mẫu Excel.
-          </p>
-          <form onSubmit={handleImportExcelSubmit} className="admin-form-col">
-            <button type="button" className="btn-icon-action admin-btn-export-excel" onClick={handleExportExcel}>
-              Xuất Danh Sách Thành Viên (Excel)
-            </button>
-            <div className="admin-upload-row">
-              <input
-                type="file"
-                accept=".xlsx, .xls"
-                className="form-input-admin admin-input-file"
-                onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
-              />
-              <button type="submit" className="admin-btn-primary admin-btn-nowrap">
-                Import Excel
-              </button>
-            </div>
-          </form>
-        </div>
-
-        {/* Card 3: Full Backup System */}
-        <div className="admin-card-box">
-          <div className="admin-box-header">
-            <h3>Sao Lưu Khôi Phục Toàn Bộ Hệ Thống</h3>
-          </div>
-          <p className="admin-backup-desc">
-            Tạo bản đóng gói snapshot CSDL PostgresSQL toàn hệ thống để bảo vệ dữ liệu an toàn.
-          </p>
-          <button className="admin-btn-primary admin-btn-danger" onClick={handleTriggerBackup}>
-            Tạo Bản Sao Lưu Ngay (Create Instant Snapshot)
-          </button>
-        </div>
-      </div>
-
-      {/* Backup Records Table */}
-      <div className="admin-table-card">
-        <div className="admin-table-header-box">
-          <h3 className="admin-table-title">
-            Lịch Sử Bản Sao Lưu CSDL (Backup Records)
-          </h3>
-        </div>
-        <table className="admin-table">
-          <thead>
-            <tr>
-              <th>File sao lưu (.sql.gz)</th>
-              <th>Dung lượng</th>
-              <th>Người thực hiện</th>
-              <th>Thời gian tạo</th>
-              <th>Thao tác</th>
-            </tr>
-          </thead>
-          <tbody>
-            {backups.map((b) => (
-              <tr key={b.id}>
-                <td className="admin-backup-filename">{b.file_name}</td>
-                <td><span className="admin-backup-filesize">{b.file_size}</span></td>
-                <td>{b.created_by}</td>
-                <td className="admin-backup-time">{b.created_at}</td>
-                <td>
-                  <div className="action-btn-row">
-                    <button className="btn-icon-action unlock" onClick={() => handleRestore(b.file_name)}>
-                      Khôi phục CSDL
-                    </button>
-                    <button className="btn-icon-action" onClick={() => alert(`Đang tải file ${b.file_name}...`)}>
-                      Tải về
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+  const reset = () => { setSearch(''); setType('all'); setStatus('all'); };
+  return <section className="s6a-page">
+    <AdminPageHeader eyebrow="AN TOÀN DỮ LIỆU" title="Sao lưu & Khôi phục" description="Tạo snapshot, theo dõi trạng thái và mô phỏng quy trình khôi phục có xác nhận." actions={<button type="button" className="s6a-button primary" onClick={() => { setCreateName(''); setCreateType('Full'); setShowCreate(true); }}>+ Tạo bản sao lưu</button>} />
+    <div className="s6a-metric-grid"><article className="s6a-metric-card"><span>Bản sao lưu</span><strong>{backups.length}</strong><small>Trong lịch sử hiện tại</small></article><article className="s6a-metric-card"><span>Hoàn tất</span><strong>{backups.filter((item) => item.status === 'success').length}</strong><small>Checksum hợp lệ</small></article><article className="s6a-metric-card"><span>Đang xử lý</span><strong>{backups.filter((item) => item.status === 'processing').length}</strong><small>Tác vụ nền demo</small></article><article className="s6a-metric-card"><span>Lần gần nhất</span><strong>02:00</strong><small>14/09/2026 · Full</small></article></div>
+    <div className="s6a-card"><div className="s6a-card-heading"><div><h2>Lịch sử sao lưu</h2><p>Tải xuống, khôi phục hoặc xóa các bản snapshot.</p></div><span className="s6a-count-pill">{filtered.length} bản ghi</span></div><div className="s6a-filter-bar s6a-filter-grid"><label className="s6a-search-field wide"><span>Tìm kiếm</span><input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Tên file, mã backup, người tạo..." /></label><label><span>Loại</span><select value={type} onChange={(event) => setType(event.target.value as typeof type)}><option value="all">Tất cả</option><option value="Full">Full</option><option value="Incremental">Incremental</option><option value="Manual">Manual</option></select></label><label><span>Trạng thái</span><select value={status} onChange={(event) => setStatus(event.target.value as typeof status)}><option value="all">Tất cả</option><option value="success">Hoàn tất</option><option value="processing">Đang xử lý</option><option value="failed">Thất bại</option></select></label><button type="button" className="s6a-button ghost align-end" onClick={reset}>Đặt lại</button></div>
+      {loading ? <AdminStatePanel kind="loading" message="Đang tải lịch sử sao lưu..." /> : !visible.length ? <AdminStatePanel kind="empty" title="Không có bản sao lưu phù hợp" message="Thử thay đổi bộ lọc hoặc tạo một bản sao lưu mới." /> : <><div className="s6a-table-wrap"><table className="s6a-table"><thead><tr><th>Tên / Mã</th><th>Loại</th><th>Ngày tạo</th><th>Dung lượng</th><th>Người tạo</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody>{visible.map((item) => <tr key={item.id}><td><strong>{item.name}</strong><span className="s6a-table-subline">{item.id}</span></td><td>{item.type}</td><td>{formatAdminDate(item.createdAt,true)}</td><td>{item.size}</td><td>{item.createdBy}</td><td><AdminStatusBadge status={item.status} label={item.status === 'success' ? 'Hoàn tất' : item.status === 'processing' ? 'Đang xử lý' : 'Thất bại'} /></td><td><div className="s6a-inline-actions"><button className="s6a-link-button" disabled={item.status !== 'success'} onClick={() => download(item)}>Tải xuống</button><button className="s6a-link-button" disabled={item.status !== 'success'} onClick={() => setConfirm({action:'restore',item})}>Khôi phục</button><button className="s6a-link-button danger-text" disabled={item.status === 'processing'} onClick={() => setConfirm({action:'delete',item})}>Xóa</button></div></td></tr>)}</tbody></table></div><AdminPagination page={safePage} totalItems={filtered.length} pageSize={PAGE_SIZE} onPageChange={setPage} /></>}
     </div>
-  );
+    <AdminModal open={showCreate} title="Tạo bản sao lưu" description="Tác vụ được mô phỏng trên giao diện và không chạm cơ sở dữ liệu." onClose={() => setShowCreate(false)} size="sm" footer={<><button type="button" className="s6a-button secondary" onClick={() => setShowCreate(false)}>Hủy</button><button type="submit" form="create-backup-form" className="s6a-button primary">Bắt đầu sao lưu</button></>}><form id="create-backup-form" className="s6a-form s6a-form-grid one-column" onSubmit={createBackup}><label className="full"><span>Loại sao lưu</span><select value={createType} onChange={(event) => setCreateType(event.target.value as BackupRecord['type'])}><option value="Full">Toàn bộ hệ thống (Full)</option><option value="Incremental">Thay đổi gần nhất (Incremental)</option><option value="Manual">Snapshot thủ công</option></select></label><label className="full"><span>Tên file tùy chọn</span><input value={createName} onChange={(event) => setCreateName(event.target.value)} placeholder="Để trống để hệ thống tự đặt tên" /></label><div className="s6a-form-note full">Bản sao lưu demo sẽ chuyển từ “Đang xử lý” sang “Hoàn tất” sau vài giây.</div></form></AdminModal>
+    <AdminConfirmDialog open={Boolean(confirm)} title={confirm?.action === 'restore' ? 'Khôi phục từ bản sao lưu?' : 'Xóa bản sao lưu?'} message={confirm ? (confirm.action === 'restore' ? `Hệ thống sẽ mô phỏng khôi phục từ ${confirm.item.name}.` : `${confirm.item.name} sẽ bị xóa khỏi danh sách demo.`) : ''} confirmLabel={confirm?.action === 'restore' ? 'Tạo tác vụ khôi phục' : 'Xác nhận xóa'} tone={confirm?.action === 'delete' ? 'danger' : 'primary'} onCancel={() => setConfirm(null)} onConfirm={confirmAction} />
+    <AdminToast toast={toast} onDismiss={dismissToast} />
+  </section>;
 };
 
 export default AdminDataBackupMgmt;
