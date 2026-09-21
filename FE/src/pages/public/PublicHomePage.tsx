@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PublicLayout } from '../../components/guest/PublicLayout';
 import { ROUTES } from '../../config/routes';
-import familyTreeImage from '../../assets/cay3.png';
+import circularEmblemLogo from '../../assets/logo/logo_circular_emblem.png';
 import './PublicHomePage.css';
 
 export const PublicHomePage: React.FC = () => {
@@ -47,7 +47,9 @@ export const PublicHomePage: React.FC = () => {
             </div>
 
             <div className="pub-hero-image-box">
-              <img src={familyTreeImage} alt="Family Tree Graphic" className="pub-hero-img" />
+              <div className="pub-hero-emblem-wrapper">
+                <img src={circularEmblemLogo} alt="Gia Phả Dòng Tộc Emblem Logo" className="pub-hero-emblem-logo" />
+              </div>
             </div>
           </div>
         </section>
@@ -60,42 +62,42 @@ export const PublicHomePage: React.FC = () => {
             <div className="pub-feature-card">
               <h3 className="feature-title">Cây Gia Phả Tương Tác</h3>
               <p className="feature-desc">
-                Sơ đồ cây trực hệ đa thế hệ dọc/ngang, Focus View, thu mở nhánh linh hoạt với quy mô hàng nghìn thành viên.
+                Xem sơ đồ cây gia phả nhiều thế hệ dạng đứng hoặc ngang, thu phóng dễ dàng và tìm kiếm thông tin ông bà, con cháu nhanh chóng.
               </p>
             </div>
 
             <div className="pub-feature-card">
               <h3 className="feature-title">Mạng Lưới Liên Họ</h3>
               <p className="feature-desc">
-                Kết nối dòng họ Nội, Ngoại, Dâu/Rể, Thông gia với chính sách phân quyền chia sẻ dữ liệu an toàn.
+                Gắn kết các nhánh họ Nội, Ngoại, Dâu, Rể và Thông gia, dễ dàng chia sẻ thông tin gia tộc nhưng vẫn bảo đảm an toàn riêng tư.
               </p>
             </div>
 
             <div className="pub-feature-card">
               <h3 className="feature-title">Tra Cứu & Xưng Hô Tự Động</h3>
               <p className="feature-desc">
-                Tính toán chuỗi quan hệ A → B và suy luận danh xưng phong tục Việt Nam chuẩn xác.
+                Tự động xác định thứ bậc và gợi ý cách xưng hô chuẩn phong tục Việt Nam giữa hai người bất kỳ trong dòng họ.
               </p>
             </div>
 
             <div className="pub-feature-card">
               <h3 className="feature-title">Phòng Thờ Số & Ngày Giỗ</h3>
               <p className="feature-desc">
-                Thắp hương tưởng niệm trực tuyến, viết lời tưởng niệm và nhận thông báo nhắc nhở giỗ Âm/Dương lịch.
+                Thắp hương, dâng hoa tưởng nhớ tổ tiên từ xa, viết lời tri ân và nhận thông báo nhắc nhở ngày giỗ Âm/Dương lịch hàng năm.
               </p>
             </div>
 
             <div className="pub-feature-card">
               <h3 className="feature-title">Trợ Lý AI Gia Phả</h3>
               <p className="feature-desc">
-                Hỏi đáp thông minh về thủy tổ, nguồn gốc dòng họ và phân tích thống kê nhân khẩu gia tộc.
+                Trò chuyện thông minh để tìm hiểu lịch sử, gốc tích dòng họ và xem thống kê tổng số con cháu trong gia tộc.
               </p>
             </div>
 
             <div className="pub-feature-card">
               <h3 className="feature-title">Bảo Mật & Phân Quyền</h3>
               <p className="feature-desc">
-                Bảo vệ riêng tư 4 mức (PUBLIC, FAMILY, ADMIN_ONLY, PRIVATE). Khách vãng lai chỉ xem dữ liệu công khai.
+                An tâm lưu trữ thông tin gia đình với các chế độ bảo mật linh hoạt, chỉ người trong dòng họ mới được xem sơ đồ gia phả chi tiết.
               </p>
             </div>
           </div>

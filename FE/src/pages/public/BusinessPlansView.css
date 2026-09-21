@@ -50,11 +50,14 @@
   flex-direction: column;
   position: relative;
   box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04);
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
-.plan-card.recommended {
-  border: 2px solid #2563eb;
-  box-shadow: 0 10px 30px rgba(37, 99, 235, 0.12);
+/* Dynamic Hover Effect on Plan Card */
+.plan-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  border-color: #2563eb;
+  box-shadow: 0 20px 45px rgba(37, 99, 235, 0.16);
 }
 
 .plan-recom-badge {
@@ -63,10 +66,11 @@
   right: 24px;
   background: linear-gradient(135deg, #2563eb, #1d4ed8);
   color: #ffffff;
-  padding: 4px 12px;
+  padding: 4px 14px;
   border-radius: 20px;
   font-size: 12px;
   font-weight: 800;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
 }
 
 .plan-name {
@@ -106,23 +110,29 @@
   color: #334155;
 }
 
+/* Default state for all plan buttons */
 .select-plan-btn {
-  padding: 12px;
-  border-radius: 12px;
+  padding: 14px 20px;
+  border-radius: 16px;
   border: 1px solid #cbd5e1;
-  background: #ffffff;
-  color: #0f172a;
+  background: #f8fafc;
+  color: #475569;
   font-weight: 700;
   font-size: 15px;
   cursor: pointer;
   width: 100%;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.select-plan-btn.primary {
-  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+/* Hover state matching the exact user image: Solid Royal Blue Pill Button with Glowing Shadow & Bold White Text */
+.plan-card:hover .select-plan-btn,
+.select-plan-btn:hover {
+  background: linear-gradient(135deg, #1d4ed8, #2563eb);
   color: #ffffff;
-  border: none;
-  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
+  font-weight: 800;
+  border: 1.5px solid transparent;
+  box-shadow: 0 8px 24px rgba(29, 78, 216, 0.45);
+  transform: scale(1.02);
 }
 
 .plans-note-card {

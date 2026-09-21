@@ -185,7 +185,7 @@ export const BusinessRegisterWizard: React.FC = () => {
 
                 <div className="wiz-action-row">
                   <button type="submit" className="wiz-next-btn">
-                    Tiếp tục Bước 2 ➔
+                    Tiếp tục ➔
                   </button>
                 </div>
               </form>
@@ -247,7 +247,7 @@ export const BusinessRegisterWizard: React.FC = () => {
                     ← Quay lại
                   </button>
                   <button type="submit" className="wiz-next-btn">
-                    Tiếp tục Bước 3 ➔
+                    Tiếp tục ➔
                   </button>
                 </div>
               </form>
@@ -293,7 +293,7 @@ export const BusinessRegisterWizard: React.FC = () => {
                     ← Quay lại
                   </button>
                   <button type="button" className="wiz-next-btn" onClick={handleNextStep3}>
-                    Tiếp tục Xem lại ➔
+                    Tiếp tục ➔
                   </button>
                 </div>
               </div>

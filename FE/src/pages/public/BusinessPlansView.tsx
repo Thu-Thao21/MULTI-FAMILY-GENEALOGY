@@ -37,7 +37,6 @@ export const BusinessPlansView: React.FC = () => {
       id: 'tier-pro',
       name: 'Gói Dòng Họ Chuyên Nghiệp',
       badge: 'Phổ biến nhất',
-      recommended: true,
       memberLimit: 'Tối đa 1.000 Thành viên',
       storage: '50 GB Lưu trữ tư liệu cổ',
       pricePeriod: 'Đầy đủ tính năng nâng cao',
@@ -79,9 +78,8 @@ export const BusinessPlansView: React.FC = () => {
 
         <div className="plans-cards-grid">
           {tiers.map((t) => (
-            <div key={t.id} className={`plan-card ${t.recommended ? 'recommended' : ''}`}>
+            <div key={t.id} className="plan-card">
               {t.badge && <span className="plan-recom-badge">{t.badge}</span>}
-
               <h3 className="plan-name">{t.name}</h3>
               <div className="plan-limit">{t.memberLimit}</div>
               <div className="plan-storage">{t.storage}</div>
@@ -95,7 +93,7 @@ export const BusinessPlansView: React.FC = () => {
               </ul>
 
               <button
-                className={`select-plan-btn ${t.recommended ? 'primary' : ''}`}
+                className="select-plan-btn"
                 onClick={() => navigate(`${ROUTES.PUBLIC.BUSINESS_REGISTER}?tier=${t.id}`)}
               >
                 Chọn Gói Này ➔

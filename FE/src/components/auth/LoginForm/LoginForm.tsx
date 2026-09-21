@@ -74,7 +74,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   return (
     <div className="login-form-card">
       <div className="login-form-glow-top" />
-      <div className="login-form-glow-bottom" />
 
       <div className="login-form-header">
         <div className="login-form-badge">
@@ -100,27 +99,19 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           onClick={() => setSelectedRole('admin')}
           className={`login-role-btn ${selectedRole === 'admin' ? 'active' : ''}`}
         >
-          Admin
+          Trưởng Tộc
         </button>
       </div>
 
       <form onSubmit={handleSubmit} className="login-form-body">
         <div className="login-form-group">
-          <label className="login-form-label">
-            {selectedRole === 'admin'
-              ? 'Tên đăng nhập hoặc Email Admin'
-              : 'Email / SĐT Thành Viên'}
-          </label>
+          <label className="login-form-label">Email / SĐT</label>
           <input
             type="text"
             name="emailOrPhone"
             value={formData.emailOrPhone}
             onChange={handleChange}
-            placeholder={
-              selectedRole === 'admin'
-                ? 'thuthaor120608@gmail.com'
-                : 'email@example.com hoặc 0912345678'
-            }
+            placeholder="Email hoặc số điện thoại"
             required
             className="login-form-input"
           />
@@ -153,18 +144,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({
         {error ? <p className="login-form-error">{error}</p> : null}
 
         <button type="submit" disabled={isSubmitting} className="login-form-submit">
-          {isSubmitting
-            ? 'Đang đăng nhập...'
-            : selectedRole === 'admin'
-              ? 'Đăng nhập Quyền Admin'
-              : 'Đăng nhập Quyền Thành Viên'}
+          {isSubmitting ? 'Đang đăng nhập...' : 'Đăng Nhập'}
         </button>
-
-        <p className="login-form-footer-note">
-          {selectedRole === 'admin'
-            ? 'Tài khoản Admin đã được tạo sẵn trong hệ thống database.'
-            : 'Dữ liệu được bảo mật và phân quyền truy cập theo vai trò.'}
-        </p>
 
         {selectedRole !== 'admin' && (
           <>

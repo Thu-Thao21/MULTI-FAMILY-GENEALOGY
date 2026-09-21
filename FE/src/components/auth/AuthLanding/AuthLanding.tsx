@@ -11,15 +11,15 @@ export interface AuthLandingProps {
 
 export const AuthLanding: React.FC<AuthLandingProps> = ({ title, subtitle, children, backgroundImage }) => {
   return (
-    <div
-      className="auth-landing-container"
-      style={{
-        background: backgroundImage
-          ? `url(${backgroundImage}) no-repeat right center`
-          : 'linear-gradient(135deg, #eef2ff, #dbeafe)',
-        backgroundSize: backgroundImage ? 'contain' : 'cover',
-      }}
-    >
+    <div className="auth-landing-container">
+      {/* Decorative Traditional Bronze Drum Watermark Background */}
+      {backgroundImage && (
+        <div
+          className="auth-landing-trong-dong-bg"
+          style={{ backgroundImage: `url(${backgroundImage})` }}
+        />
+      )}
+
       <div className="auth-landing-grid">
         <div className="auth-landing-banner">
           <div className="auth-landing-banner-overlay" />

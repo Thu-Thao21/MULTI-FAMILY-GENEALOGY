@@ -1,35 +1,60 @@
 .auth-landing-container {
-  min-height: 100vh;
+  height: 100vh;
+  max-height: 100vh;
   position: relative;
   overflow: hidden;
-  background-color: #eef2ff;
-  background-attachment: fixed;
+  background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* Decorative Traditional Bronze Drum Watermark */
+.auth-landing-trong-dong-bg {
+  position: absolute;
+  top: 50%;
+  right: -5%;
+  transform: translateY(-50%);
+  width: min(720px, 50vw);
+  height: min(720px, 50vw);
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center center;
+  opacity: 0.14;
+  pointer-events: none;
+  z-index: 0;
+  filter: drop-shadow(0 0 30px rgba(37, 99, 235, 0.25));
 }
 
 .auth-landing-grid {
   width: 100%;
-  max-width: 1440px;
+  max-width: 1320px;
+  height: 100%;
+  max-height: 840px;
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: 1.2fr 1fr;
-  gap: 36px;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 28px;
   align-items: center;
 }
 
 .auth-landing-banner {
   position: relative;
-  min-height: 560px;
-  border-radius: 32px;
+  height: 100%;
+  max-height: 800px;
+  border-radius: 28px;
   overflow: hidden;
-  background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+  background: linear-gradient(135deg, #1d4ed8 0%, #6d28d9 100%);
   color: #ffffff;
-  padding: 48px;
-  box-shadow: 0 28px 90px rgba(15, 23, 42, 0.18);
+  padding: 36px 40px;
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.16);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-sizing: border-box;
 }
 
 .auth-landing-banner-overlay {
@@ -44,8 +69,8 @@
   position: absolute;
   top: 12px;
   right: 12px;
-  width: 110px;
-  height: 110px;
+  width: 90px;
+  height: 90px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.12);
 }
@@ -56,81 +81,93 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  justify-content: center;
+  justify-content: space-between;
 }
 
 .auth-landing-tagline {
   margin: 0;
   text-transform: uppercase;
-  letter-spacing: 0.28em;
+  letter-spacing: 0.25em;
   font-weight: 700;
   opacity: 0.85;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .auth-landing-title {
-  margin: 16px 0 22px;
-  font-size: 3rem;
-  line-height: 1.05;
+  margin: 10px 0 14px;
+  font-size: clamp(2rem, 2.5vw, 2.5rem);
+  line-height: 1.15;
   font-weight: 800;
 }
 
 .auth-landing-subtitle {
   margin: 0;
-  max-width: 520px;
-  font-size: 1.05rem;
-  line-height: 1.75;
-  opacity: 0.95;
+  max-width: 480px;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  opacity: 0.92;
 }
 
 .auth-landing-tags {
-  margin-top: 28px;
+  margin-top: 16px;
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
 }
 
 .auth-landing-tag {
-  padding: 8px 14px;
+  padding: 6px 12px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.2);
   color: #ffffff;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
 }
 
 .auth-landing-tag-secondary {
-  padding: 8px 14px;
+  padding: 6px 12px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.12);
   color: #ffffff;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
 }
 
 .auth-landing-image-wrapper {
-  margin-top: 36px;
+  margin-top: 16px;
   display: flex;
   justify-content: center;
+  align-items: center;
+  flex: 1;
+  max-height: 360px;
 }
 
 .auth-landing-image {
-  width: 100%;
-  max-width: 520px;
-  border-radius: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.15);
+  max-width: 100%;
+  max-height: 320px;
+  object-fit: contain;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.2);
 }
 
 .auth-landing-form-wrapper {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 560px;
+  height: 100%;
+  max-height: 800px;
 }
 
 @media (max-width: 1024px) {
+  .auth-landing-container {
+    height: auto;
+    min-height: 100vh;
+    overflow: auto;
+  }
+
   .auth-landing-grid {
     grid-template-columns: 1fr;
+    height: auto;
   }
 }

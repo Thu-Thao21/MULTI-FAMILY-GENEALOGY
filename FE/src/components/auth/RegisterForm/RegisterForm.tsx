@@ -68,7 +68,6 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin, onS
   return (
     <div className="register-form-card">
       <div className="register-form-glow-top" />
-      <div className="register-form-glow-bottom" />
 
       <div className="register-form-header">
         <div className="register-form-badge">
@@ -81,7 +80,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin, onS
 
       <form onSubmit={handleSubmit} className="register-form-body">
         <div className="register-form-group">
-          <label className="register-form-label">Tên đăng nhập (Username)</label>
+          <label className="register-form-label">Tên đăng nhập</label>
           <input
             type="text"
             name="username"
@@ -149,10 +148,6 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin, onS
         <button type="submit" disabled={isSubmitting} className="register-form-submit">
           {isSubmitting ? 'Đang xử lý...' : 'Tạo Tài Khoản'}
         </button>
-
-        <p className="register-form-footer-note">
-          Tài khoản đăng ký mặc định là Thành viên. Bạn có thể tạo dòng họ của riêng mình sau khi đăng nhập.
-        </p>
 
         <div className="register-form-divider">
           <span className="register-form-divider-line" />
