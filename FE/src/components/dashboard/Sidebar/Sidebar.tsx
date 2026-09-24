@@ -23,6 +23,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     docs_ai: true,
     settings: true,
     admin: true,
+    family_management: true,
   });
 
   const toggleGroup = (groupId: string) => {
@@ -143,7 +144,35 @@ export const Sidebar: React.FC<SidebarProps> = ({
     },
   ];
 
-  const menuGroups = memberGroups;
+  const familyManagementGroup = {
+    id: 'family_management',
+    label: 'QUẢN LÝ DÒNG HỌ',
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M6 3v12" />
+        <path d="M6 8h7a4 4 0 0 0 4-4" />
+        <path d="M6 14h7a4 4 0 0 1 4 4v3" />
+        <circle cx="6" cy="19" r="2" />
+      </svg>
+    ),
+    items: [
+      { id: 'family-members', label: 'Quản lý thành viên' },
+      { id: 'family-relations', label: 'Quan hệ gia phả' },
+      { id: 'family-tree', label: 'Cây theo quan hệ' },
+      { id: 'family-search', label: 'Tìm đường quan hệ' },
+      { id: 'family-branches', label: 'Quản lý Chi & Nhánh' },
+      { id: 'family-approvals', label: 'Phê duyệt đề xuất' },
+      { id: 'family-accounts', label: 'Tài khoản thành viên' },
+      { id: 'family-links', label: 'Yêu cầu liên họ' },
+      { id: 'family-import-export', label: 'Nhập xuất dữ liệu' },
+      { id: 'family-logs', label: 'Nhật ký bản xem trước' },
+    ],
+  };
+
+  const canManageFamily = ['chủ dòng họ', 'family admin'].includes((userRole || '').toLowerCase());
+  const menuGroups = canManageFamily
+    ? memberGroups.flatMap((group) => group.id === 'network' ? [group, familyManagementGroup] : [group])
+    : memberGroups;
 
   return (
     <aside className={`sidebar-container ${isCollapsed ? 'collapsed' : 'expanded'}`}>

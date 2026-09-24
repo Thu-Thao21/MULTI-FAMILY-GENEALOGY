@@ -19,7 +19,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({
 }) => {
   const navigate = useNavigate();
   const { login } = useAuth();
-  const [selectedRole, setSelectedRole] = useState<'admin' | 'member'>('member');
   const [formData, setFormData] = useState({ emailOrPhone: '', password: '' });
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -38,7 +37,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       await login({
         emailOrPhone: formData.emailOrPhone,
         password: formData.password,
-        role: selectedRole,
       });
       onSuccess();
     } catch (err) {
@@ -142,36 +140,30 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           {isSubmitting ? 'Đang đăng nhập...' : 'Đăng Nhập'}
         </button>
 
-        {selectedRole !== 'admin' && (
-          <>
-            <div className="login-form-divider">
-              <span className="login-form-divider-line" />
-              <span className="login-form-divider-text">HOẶC</span>
-              <span className="login-form-divider-line" />
-            </div>
+        <div className="login-form-divider">
+          <span className="login-form-divider-line" />
+          <span className="login-form-divider-text">HOẶC</span>
+          <span className="login-form-divider-line" />
+        </div>
 
-            <div className="login-form-socials">
-              <button type="button" onClick={handleGoogleLogin} className="btn-social-google">
-                <span className="btn-social-icon-google">G</span>
-                <span>Google</span>
-              </button>
-              <button type="button" onClick={handleFacebookLogin} className="btn-social-facebook">
-                <span className="btn-social-icon-facebook">F</span>
-                <span>Facebook</span>
-              </button>
-            </div>
-          </>
-        )}
-      </form>
-
-      {selectedRole !== 'admin' && (
-        <div className="login-form-switch">
-          Chưa có tài khoản?{' '}
-          <button type="button" onClick={onSwitchToRegister} className="btn-switch-link">
-            Đăng ký ngay
+        <div className="login-form-socials">
+          <button type="button" onClick={handleGoogleLogin} className="btn-social-google">
+            <span className="btn-social-icon-google">G</span>
+            <span>Google</span>
+          </button>
+          <button type="button" onClick={handleFacebookLogin} className="btn-social-facebook">
+            <span className="btn-social-icon-facebook">F</span>
+            <span>Facebook</span>
           </button>
         </div>
-      )}
+      </form>
+
+      <div className="login-form-switch">
+        Chưa có tài khoản?{' '}
+        <button type="button" onClick={onSwitchToRegister} className="btn-switch-link">
+          Đăng ký ngay
+        </button>
+      </div>
     </div>
   );
 };

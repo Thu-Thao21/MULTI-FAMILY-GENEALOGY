@@ -57,8 +57,13 @@ export const ROUTES = {
     PROPOSALS: '/user/proposals',
     // Family Management (For owners)
     FAMILY_MANAGEMENT: '/user/family-management',
+    FAMILY_RELATIONS: '/user/family-management/relations',
+    FAMILY_TREE: '/user/family-management/tree',
+    FAMILY_SEARCH: '/user/family-management/search',
     FAMILY_BRANCHES: '/user/family-management/branches',
     FAMILY_APPROVALS: '/user/family-management/approvals',
+    FAMILY_ACCOUNTS: '/user/family-management/accounts',
+    FAMILY_LINKS: '/user/family-management/links',
     FAMILY_IMPORT_EXPORT: '/user/family-management/import-export',
     FAMILY_LOGS: '/user/family-management/logs',
   },
