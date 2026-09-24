@@ -8,24 +8,6 @@ export interface SidebarProps {
   userRole?: string;
 }
 
-const AdminNavIcon = ({ name }: { name: string }) => {
-  const paths: Record<string, React.ReactNode> = {
-    dashboard: <><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></>,
-    tree: <><path d="M12 3v5" /><path d="M5 13V9h14v4" /><rect x="2" y="13" width="6" height="7" rx="1.5" /><rect x="9" y="13" width="6" height="7" rx="1.5" /><rect x="16" y="13" width="6" height="7" rx="1.5" /></>,
-    people: <><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.9" /><path d="M16 3.1a4 4 0 0 1 0 7.8" /></>,
-    relation: <><circle cx="6" cy="12" r="3" /><circle cx="18" cy="6" r="3" /><circle cx="18" cy="18" r="3" /><path d="m8.7 10.6 6.6-3.2" /><path d="m8.7 13.4 6.6 3.2" /></>,
-    branch: <><path d="M6 3v12" /><path d="M6 8h7a4 4 0 0 0 4-4" /><path d="M6 14h7a4 4 0 0 1 4 4v3" /><circle cx="6" cy="19" r="2" /></>,
-    approval: <><path d="M9 11l3 3L22 4" /><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" /></>,
-    account: <><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /><path d="M19 8h3" /><path d="M20.5 6.5v3" /></>,
-    package: <><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /><polyline points="3.27 6.96 12 12.01 20.73 6.96" /><line x1="12" y1="22.08" x2="12" y2="12" /></>,
-    payment: <><rect x="2" y="5" width="20" height="14" rx="2" /><line x1="2" y1="10" x2="22" y2="10" /></>,
-    moderation: <><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></>,
-    logs: <><path d="M4 4h16v16H4z" /><path d="M8 9h8M8 13h8M8 17h5" /></>,
-    backup: <><path d="M4 7v5h5" /><path d="M6.2 17a8 8 0 1 0 .2-10.2L4 9" /><path d="M12 8v5l3 2" /></>,
-  };
-  return <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{paths[name]}</svg>;
-};
-
 export const Sidebar: React.FC<SidebarProps> = ({
   activeTab,
   onSelectTab,
@@ -41,6 +23,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     docs_ai: true,
     settings: true,
     admin: true,
+    family_management: true,
   });
 
   const toggleGroup = (groupId: string) => {
@@ -61,7 +44,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       ),
       items: [
         { id: 'dashboard', label: 'Trang chủ' },
-        { id: 'notifications', label: 'Thông báo & Cài đặt' },
+        { id: 'notifications', label: 'Thông báo cá nhân' },
       ],
     },
     {
@@ -144,8 +127,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
       items: [
         { id: 'documents', label: 'Tư liệu lịch sử' },
         { id: 'ai-assistant', label: 'Trợ lý AI dòng họ' },
-        { id: 'ai-consent', label: 'Đồng ý sử dụng AI' },
-        { id: 'ancestral-library', label: 'Thư viện 3D/360' },
       ],
     },
     {
@@ -159,32 +140,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
       ),
       items: [
         { id: 'privacy-settings', label: 'Quyền riêng tư' },
-        { id: 'privacy-preview', label: 'Xem trước góc nhìn' },
       ],
     },
   ];
 
-  const adminMenuItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
-    { id: 'admin-tree', label: 'Cây Gia Phả', icon: 'tree' },
-    { id: 'admin-members-mgmt', label: 'Quản lý Nhân Khẩu', icon: 'people' },
-    { id: 'admin-family-links', label: 'Quản lý Quan Hệ', icon: 'relation' },
-    { id: 'admin-families-mgmt', label: 'Quản lý Chi Nhánh', icon: 'branch' },
-    { id: 'admin-approval', label: 'Phê duyệt', icon: 'approval' },
-    { id: 'admin-packages', label: 'Gói Dịch Vụ', icon: 'package' },
-    { id: 'admin-payments', label: 'Thanh Toán', icon: 'payment' },
-    { id: 'admin-moderation', label: 'Kiểm Duyệt', icon: 'moderation' },
-    { id: 'admin-roles', label: 'Phân Quyền & Role', icon: 'account' },
-    { id: 'admin-permissions', label: 'Quản Lý Tài Khoản', icon: 'account' },
-    { id: 'admin-logs', label: 'Nhật Ký Hệ Thống', icon: 'logs' },
-    { id: 'admin-data-backup', label: 'Sao Lưu & Khôi Phục', icon: 'backup' },
-  ];
-
-  const isFamilyHead = ['chủ dòng họ', 'family admin'].includes((userRole || '').toLowerCase());
   const familyManagementGroup = {
     id: 'family_management',
     label: 'QUẢN LÝ DÒNG HỌ',
-    icon: <AdminNavIcon name="branch" />,
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M6 3v12" />
+        <path d="M6 8h7a4 4 0 0 0 4-4" />
+        <path d="M6 14h7a4 4 0 0 1 4 4v3" />
+        <circle cx="6" cy="19" r="2" />
+      </svg>
+    ),
     items: [
       { id: 'family-members', label: 'Quản lý thành viên' },
       { id: 'family-relations', label: 'Quan hệ gia phả' },
@@ -198,32 +168,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
       { id: 'family-logs', label: 'Nhật ký bản xem trước' },
     ],
   };
-  const visibleMemberGroups = isFamilyHead
+
+  const canManageFamily = ['chủ dòng họ', 'family admin'].includes((userRole || '').toLowerCase());
+  const menuGroups = canManageFamily
     ? memberGroups.flatMap((group) => group.id === 'network' ? [group, familyManagementGroup] : [group])
     : memberGroups;
 
   return (
     <aside className={`sidebar-container ${isCollapsed ? 'collapsed' : 'expanded'}`}>
-      {!isCollapsed && <div className="sidebar-section-title">{isAdmin ? 'QUẢN LÝ GIA PHẢ' : 'DANH MỤC DÒNG HỌ'}</div>}
-
-      {isAdmin && (
-        <nav className="sidebar-admin-menu" aria-label="Điều hướng Family Admin">
-          {adminMenuItems.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              title={isCollapsed ? item.label : undefined}
-              className={`sidebar-admin-item ${activeTab === item.id ? 'active' : ''}`}
-              onClick={() => onSelectTab(item.id)}
-            >
-              <span className="sidebar-admin-icon"><AdminNavIcon name={item.icon} /></span>
-              {!isCollapsed && <span>{item.label}</span>}
-            </button>
-          ))}
-        </nav>
+      {!isCollapsed && (
+        <div className="sidebar-section-title">
+          DANH MỤC DÒNG HỌ
+        </div>
       )}
 
-      {!isAdmin && visibleMemberGroups.map((group) => {
+      {menuGroups.map((group) => {
         const isGroupActive = group.items.some((item) => item.id === activeTab);
         const isExpanded = expandedGroups[group.id] !== false;
 

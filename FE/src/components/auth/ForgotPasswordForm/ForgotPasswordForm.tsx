@@ -1,10 +1,12 @@
 import React, { useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   requestPasswordResetOTP,
   resetPasswordWithOTP,
   sendPhoneOtp,
   setupPhoneRecaptcha,
 } from '../../../services/auth.service';
+import { ROUTES } from '../../../config/routes';
 import './ForgotPasswordForm.css';
 
 export interface ForgotPasswordFormProps {
@@ -12,6 +14,7 @@ export interface ForgotPasswordFormProps {
 }
 
 export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onSwitchToLogin }) => {
+  const navigate = useNavigate();
   const [step, setStep] = useState<'REQUEST_OTP' | 'VERIFY_AND_RESET'>('REQUEST_OTP');
   const [emailOrPhone, setEmailOrPhone] = useState('');
   const [otpCode, setOtpCode] = useState('');
@@ -91,6 +94,18 @@ export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onSwitch
     <div className="forgot-form-card">
       <div className="forgot-form-glow-top" />
 
+      <button
+        type="button"
+        onClick={() => navigate(ROUTES.PUBLIC.ROOT)}
+        className="btn-back-home-icon"
+        title="Quay lại trang chủ"
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12" />
+          <polyline points="12 19 5 12 12 5" />
+        </svg>
+      </button>
+
       <div className="forgot-form-header">
         <div className="forgot-form-badge">
           <span className="forgot-form-badge-dot" />
@@ -99,11 +114,6 @@ export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onSwitch
         <h1 className="forgot-form-title">
           {step === 'REQUEST_OTP' ? 'Quên mật khẩu?' : 'Nhập mã OTP & Mật khẩu mới'}
         </h1>
-        <p className="forgot-form-subtitle">
-          {step === 'REQUEST_OTP'
-            ? 'Nhập email hoặc số điện thoại tài khoản để nhận mã xác thực OTP.'
-            : `Nhập mã OTP vừa được gửi về ${emailOrPhone} và cài đặt mật khẩu mới.`}
-        </p>
       </div>
 
       <div id="forgot-recaptcha"></div>

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '../../../config/routes';
-import circularEmblemLogo from '../../../assets/logo/logo_circular_emblem.png';
+import smallAppLogo from '../../../assets/logo/logo_small_app.png';
 import './TopBar.css';
 
 export interface TopBarProps {
@@ -70,26 +70,14 @@ export const TopBar: React.FC<TopBarProps> = ({
 
   const handleNavToProfile = () => {
     setShowProfileMenu(false);
-    if (userRole === 'Admin') {
-      if (onNavigateTab) onNavigateTab('admin-permissions');
-      else navigate(ROUTES.ADMIN.ACCOUNTS);
-    } else if (onNavigateTab) onNavigateTab('my-profile');
+    if (onNavigateTab) onNavigateTab('my-profile');
     else navigate(ROUTES.USER.MY_PROFILE);
   };
 
   const handleNavToSettings = () => {
     setShowProfileMenu(false);
-    if (userRole === 'Admin') {
-      if (onNavigateTab) onNavigateTab('admin-roles');
-      else navigate(ROUTES.ADMIN.ROLES);
-    } else if (onNavigateTab) onNavigateTab('privacy-settings');
+    if (onNavigateTab) onNavigateTab('privacy-settings');
     else navigate(ROUTES.USER.PRIVACY_SETTINGS);
-  };
-
-  const handleNavToAIConsent = () => {
-    setShowProfileMenu(false);
-    if (onNavigateTab) onNavigateTab('ai-consent');
-    else navigate(ROUTES.USER.AI_CONSENT);
   };
 
   return (
@@ -104,7 +92,7 @@ export const TopBar: React.FC<TopBarProps> = ({
         </button>
 
         <div className="topbar-brand-box" onClick={() => navigate(userRole === 'Admin' ? ROUTES.ADMIN.ROOT : ROUTES.USER.ROOT)} style={{ cursor: 'pointer' }}>
-          <img src={circularEmblemLogo} alt="Gia Phả Việt Logo" className="topbar-logo-icon" />
+          <img src={smallAppLogo} alt="Gia Phả Việt Logo" className="topbar-logo-img" />
           <div>
             <div className="topbar-system-tag">HỆ THỐNG GIA PHẢ LIÊN HỌ</div>
             <div className="topbar-brand-title">Gia Phả Việt</div>
@@ -212,12 +200,6 @@ export const TopBar: React.FC<TopBarProps> = ({
               <button className="topbar-menu-item" onClick={handleNavToSettings}>
                 Cài đặt & Quyền riêng tư
               </button>
-
-              {userRole !== 'Admin' && (
-                <button className="topbar-menu-item" onClick={handleNavToAIConsent}>
-                  Quyền sử dụng AI
-                </button>
-              )}
 
               <div className="topbar-profile-divider" />
 

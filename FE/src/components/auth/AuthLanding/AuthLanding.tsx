@@ -1,5 +1,7 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import familyTreeImage from '../../../assets/cay3.png';
+import { ROUTES } from '../../../config/routes';
 import './AuthLanding.css';
 
 export interface AuthLandingProps {

@@ -33,3 +33,11 @@ def test_calculate_primary_role_ignores_inactive_admin():
         AccountRole(role="admin", status="locked"),
     ]
     assert calculate_primary_role(roles) == "member"
+
+
+def test_family_manager_keeps_member_primary_role():
+    roles = [
+        AccountRole(role="member", status="active", family_id="family-1"),
+        AccountRole(role="manager", status="active", family_id="family-1"),
+    ]
+    assert calculate_primary_role(roles) == "member"

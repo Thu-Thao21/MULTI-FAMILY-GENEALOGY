@@ -10,9 +10,7 @@ import { BusinessPlansView } from '../pages/public/BusinessPlansView';
 import { BusinessRegisterWizard } from '../pages/public/BusinessRegisterWizard';
 import { BusinessTrackStatusPage } from '../pages/public/BusinessTrackStatusPage';
 import { InviteActivationPage } from '../pages/public/InviteActivationPage';
-import { FamilyAdminPreviewPage } from '../features/familyAdmin/FamilyAdminPreviewPage';
 import { ProtectedRoute, RoleGuard } from './RouteGuards';
-import type { AccountProfile } from '../context/AuthContext';
 
 export type AuthView = 'login' | 'register' | 'forgot-password' | 'dashboard';
 
@@ -31,12 +29,8 @@ const AppRoutes: React.FC<AppRoutesProps> = ({
 }) => {
   const navigate = useNavigate();
 
-  const handleAuthSuccess = (profile?: AccountProfile) => {
-    if ((profile?.primary_role || primaryRole) === 'admin') {
-      navigate('/admin');
-    } else {
-      navigate('/user');
-    }
+  const handleAuthSuccess = () => {
+    navigate('/user');
   };
 
   const handleLogout = () => {
@@ -54,14 +48,13 @@ const AppRoutes: React.FC<AppRoutesProps> = ({
       <Route path="/public/business-register" element={<BusinessRegisterWizard />} />
       <Route path="/public/business-register/track" element={<BusinessTrackStatusPage />} />
       <Route path="/activate" element={<InviteActivationPage />} />
-      <Route path="/family-admin-preview" element={<FamilyAdminPreviewPage />} />
 
       {/* Authentication Routes */}
       <Route
         path="/login"
         element={
           isAuthenticated ? (
-            <Navigate to={primaryRole === 'admin' ? '/admin' : '/user'} replace />
+            <Navigate to="/user" replace />
           ) : (
             <LoginPage
               onSwitchToRegister={() => navigate('/register')}
@@ -92,23 +85,15 @@ const AppRoutes: React.FC<AppRoutesProps> = ({
         path="/user/*"
         element={
           <ProtectedRoute>
-            <RoleGuard allowedRoles={['member', 'family_head']}>
-              <Dashboard userName={userName} onLogout={handleLogout} />
-            </RoleGuard>
+            <Dashboard userName={userName} onLogout={handleLogout} />
           </ProtectedRoute>
         }
       />
 
-      {/* Protected Admin Dashboard Routes */}
+      {/* Admin Dashboard Routes Redirect to /user */}
       <Route
         path="/admin/*"
-        element={
-          <ProtectedRoute>
-            <RoleGuard allowedRoles={['admin']}>
-              <Dashboard userName={userName} onLogout={handleLogout} />
-            </RoleGuard>
-          </ProtectedRoute>
-        }
+        element={<Navigate to="/user" replace />}
       />
 
       {/* Fallback 404 Route */}
@@ -116,7 +101,7 @@ const AppRoutes: React.FC<AppRoutesProps> = ({
         path="*"
         element={
           isAuthenticated ? (
-            <Navigate to={primaryRole === 'admin' ? '/admin' : '/user'} replace />
+            <Navigate to="/user" replace />
           ) : (
             <Navigate to="/public" replace />
           )

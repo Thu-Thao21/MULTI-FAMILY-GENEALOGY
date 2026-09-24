@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../hooks/useAuth';
-import PasswordInput from '../PasswordInput/PasswordInput';
-import type { AccountProfile } from '../../../context/AuthContext';
+import { ROUTES } from '../../../config/routes';
 import './LoginForm.css';
 
 import { loginWithGoogle, loginWithFacebook } from '../../../services/auth.service';
@@ -9,7 +9,7 @@ import { loginWithGoogle, loginWithFacebook } from '../../../services/auth.servi
 export interface LoginFormProps {
   onSwitchToRegister: () => void;
   onSwitchToForgotPassword?: () => void;
-  onSuccess: (profile?: AccountProfile) => void;
+  onSuccess: () => void;
 }
 
 export const LoginForm: React.FC<LoginFormProps> = ({
@@ -17,7 +17,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   onSwitchToForgotPassword,
   onSuccess,
 }) => {
-  const { login, refreshAccount } = useAuth();
+  const navigate = useNavigate();
+  const { login } = useAuth();
   const [formData, setFormData] = useState({ emailOrPhone: '', password: '' });
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -33,11 +34,11 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     setIsSubmitting(true);
 
     try {
-      const profile = await login({
+      await login({
         emailOrPhone: formData.emailOrPhone,
         password: formData.password,
       });
-      onSuccess(profile);
+      onSuccess();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Đăng nhập thất bại.');
     } finally {
@@ -49,11 +50,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     setError('');
     setIsSubmitting(true);
     try {
-      const profile = await loginWithGoogle();
-      if (profile.id) {
-        localStorage.removeItem('auth_token');
-        onSuccess(await refreshAccount() || profile);
-      }
+      await loginWithGoogle();
+      onSuccess();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Đăng nhập Google thất bại.');
     } finally {
@@ -65,11 +63,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     setError('');
     setIsSubmitting(true);
     try {
-      const profile = await loginWithFacebook();
-      if (profile.id) {
-        localStorage.removeItem('auth_token');
-        onSuccess(await refreshAccount() || profile);
-      }
+      await loginWithFacebook();
+      onSuccess();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Đăng nhập Facebook thất bại.');
     } finally {
@@ -81,26 +76,35 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     <div className="login-form-card">
       <div className="login-form-glow-top" />
 
+      <button
+        type="button"
+        onClick={() => navigate(ROUTES.PUBLIC.ROOT)}
+        className="btn-back-home-icon"
+        title="Quay lại trang chủ"
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12" />
+          <polyline points="12 19 5 12 12 5" />
+        </svg>
+      </button>
+
       <div className="login-form-header">
         <div className="login-form-badge">
           <span className="login-form-badge-dot" />
           <span className="login-form-badge-text">ĐĂNG NHẬP HỆ THỐNG</span>
         </div>
         <h1 className="login-form-title">Chào mừng bạn trở lại!</h1>
-        <p className="login-form-subtitle">Đăng nhập bằng tài khoản của bạn. Hệ thống sẽ tự xác định quyền truy cập.</p>
       </div>
 
       <form onSubmit={handleSubmit} className="login-form-body">
         <div className="login-form-group">
-          <label className="login-form-label" htmlFor="login-identifier">Tên đăng nhập, email hoặc số điện thoại</label>
+          <label className="login-form-label">Email / SĐT</label>
           <input
-            id="login-identifier"
             type="text"
             name="emailOrPhone"
             value={formData.emailOrPhone}
             onChange={handleChange}
-            placeholder="Tên đăng nhập, email hoặc số điện thoại"
-            autoComplete="username"
+            placeholder="Email hoặc số điện thoại"
             required
             className="login-form-input"
           />
@@ -119,12 +123,12 @@ export const LoginForm: React.FC<LoginFormProps> = ({
               </button>
             )}
           </div>
-          <PasswordInput
+          <input
+            type="password"
             name="password"
             value={formData.password}
             onChange={handleChange}
             placeholder="Nhập mật khẩu"
-            autoComplete="current-password"
             required
             className="login-form-input"
           />
@@ -133,12 +137,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({
         {error ? <p className="login-form-error">{error}</p> : null}
 
         <button type="submit" disabled={isSubmitting} className="login-form-submit">
-          {isSubmitting ? 'Đang đăng nhập...' : 'Đăng nhập'}
+          {isSubmitting ? 'Đang đăng nhập...' : 'Đăng Nhập'}
         </button>
-
-        <p className="login-form-footer-note">
-          Quyền truy cập được xác định theo vai trò đã cấp cho tài khoản.
-        </p>
 
         <div className="login-form-divider">
           <span className="login-form-divider-line" />

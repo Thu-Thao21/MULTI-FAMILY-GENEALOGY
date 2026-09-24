@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { fetchMemberDetail } from '../../../services/member.service';
 import type { MemberDetail } from '../../../types/member';
 import { AccountTab } from '../AccountTab';
@@ -22,6 +22,17 @@ export const ProfileLayout: React.FC<ProfileLayoutProps> = ({ memberId, onBack }
   const [member, setMember] = useState<MemberDetail | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [activeTab, setActiveTab] = useState<ProfileTabKey>('personal');
+  const tabsRef = useRef<HTMLDivElement>(null);
+
+  const handleScrollTabs = (direction: 'left' | 'right') => {
+    if (tabsRef.current) {
+      const scrollAmount = 240;
+      tabsRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth',
+      });
+    }
+  };
 
   useEffect(() => {
     setLoading(true);
@@ -64,14 +75,6 @@ export const ProfileLayout: React.FC<ProfileLayoutProps> = ({ memberId, onBack }
 
   return (
     <div className="profile-layout">
-      {onBack && (
-        <div>
-          <button className="profile-back-btn" onClick={onBack}>
-            ← Quay lại danh sách thành viên
-          </button>
-        </div>
-      )}
-
       {/* Header Banner */}
       <div className="profile-header-card">
         <div className="profile-header-top">

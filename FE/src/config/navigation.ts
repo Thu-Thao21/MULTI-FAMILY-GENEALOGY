@@ -74,7 +74,6 @@ export const memberNavigation: NavGroup[] = [
     groupLabel: 'CÀI ĐẶT & BẢO MẬT',
     items: [
       { id: 'privacy-settings', label: 'Quyền riêng tư', route: ROUTES.USER.PRIVACY_SETTINGS },
-      { id: 'privacy-preview', label: 'Xem trước góc nhìn', route: ROUTES.USER.PRIVACY_PREVIEW },
     ],
   },
 ];
