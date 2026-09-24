@@ -1,36 +1,56 @@
 import React from 'react';
-import ClanAdminLayout from '../components/shared/Layout/ClanAdminLayout';
-import DashboardPage from '../pages/clan-admin/Dashboard/DashboardPage';
-import ClanProfileMgmt from '../pages/clan-admin/FamilyProfile/ClanProfileMgmt';
-import AncestorsPage from '../pages/clan-admin/Ancestors/AncestorsPage';
-import BranchesPage from '../pages/clan-admin/Branches/BranchesPage';
-import FamilyAdminsPage from '../pages/clan-admin/FamilyAdmins/FamilyAdminsPage';
-import ClanMembersMgmt from '../pages/clan-admin/Members/ClanMembersMgmt';
-import PersonsPage from '../pages/clan-admin/Persons/PersonsPage';
-import RelationshipsPage from '../pages/clan-admin/Relationships/RelationshipsPage';
-import GenealogyTreePage from '../pages/clan-admin/GenealogyTree/GenealogyTreePage';
-import SearchPage from '../pages/clan-admin/Search/SearchPage';
-import MemorialDaysPage from '../pages/clan-admin/MemorialDays/MemorialDaysPage';
-import EventsPage from '../pages/clan-admin/Events/EventsPage';
-import FundsPage from '../pages/clan-admin/Funds/FundsPage';
-import ArchivesPage from '../pages/clan-admin/Archives/ArchivesPage';
-import AIPage from '../pages/clan-admin/AI/AIPage';
-import WorshipSpacePage from '../pages/clan-admin/WorshipSpace/WorshipSpacePage';
-import Library3DPage from '../pages/clan-admin/3DLibrary/Library3DPage';
-import ImportExportPage from '../pages/clan-admin/ImportExport/ImportExportPage';
-import BusinessPage from '../pages/clan-admin/Business/BusinessPage';
-import PrivacyPage from '../pages/clan-admin/Privacy/PrivacyPage';
-import ClanApprovalsMgmt from '../pages/clan-admin/Approvals/ClanApprovalsMgmt';
-import ClanFamilyLinksMgmt from '../pages/clan-admin/InterFamily/ClanFamilyLinksMgmt';
-import ClanAccountMgmt from '../pages/clan-admin/Settings/ClanAccountMgmt';
-import ClanAuditLogsMgmt from '../pages/clan-admin/AuditLogs/ClanAuditLogsMgmt';
-import ClanDataBackupMgmt from '../pages/clan-admin/Backup/ClanDataBackupMgmt';
-import ProfilePage from '../pages/clan-admin/Profile/ProfilePage';
+
+import SystemAdminLayout from '../shared/Layout/SystemAdminLayout';
+import { AdminDashboard } from '../shared/dashboard/AdminDashboard/AdminDashboard';
+import AdminBusinessRequests from '../components/system-admin/AdminBusinessRequests/AdminBusinessRequests';
+import AdminBusinessesMgmt from '../components/system-admin/AdminBusinessesMgmt/AdminBusinessesMgmt';
+import AdminPlansMgmt from '../components/system-admin/AdminPlansMgmt/AdminPlansMgmt';
+import AdminPaymentsMgmt from '../components/system-admin/AdminPaymentsMgmt/AdminPaymentsMgmt';
+import AdminAccountMgmt from '../components/system-admin/AdminAccountMgmt/AdminAccountMgmt';
+import AdminManagerTransfer from '../components/system-admin/AdminManagerTransfer/AdminManagerTransfer';
+import AdminReportsMgmt from '../components/system-admin/AdminReportsMgmt/AdminReportsMgmt';
+import AdminAuditLogsMgmt from '../components/system-admin/AdminAuditLogsMgmt/AdminAuditLogsMgmt';
+import AdminDataBackupMgmt from '../components/system-admin/AdminDataBackupMgmt/AdminDataBackupMgmt';
+import AdminSupportAccess from '../components/system-admin/AdminSupportAccess/AdminSupportAccess';
+import AdminSecurity from '../components/system-admin/AdminSecurity/AdminSecurity';
+
+import AdminProfilePage from '../components/system-admin/AdminProfile/AdminProfilePage';
+import AdminSettingsPage from '../components/system-admin/AdminSettings/AdminSettingsPage';
+
+import ClanAdminLayout from '../shared/Layout/ClanAdminLayout';
+import DashboardPage from '../components/clan-admin/Dashboard/DashboardPage';
+// ... rest imports are fine, wait I need to insert it correctly
+
+import ClanProfileMgmt from '../components/clan-admin/FamilyProfile/ClanProfileMgmt';
+import AncestorsPage from '../components/clan-admin/Ancestors/AncestorsPage';
+import BranchesPage from '../components/clan-admin/Branches/BranchesPage';
+import FamilyAdminsPage from '../components/clan-admin/FamilyAdmins/FamilyAdminsPage';
+import ClanMembersMgmt from '../components/clan-admin/Members/ClanMembersMgmt';
+import PersonsPage from '../components/clan-admin/Persons/PersonsPage';
+import RelationshipsPage from '../components/clan-admin/Relationships/RelationshipsPage';
+import GenealogyTreePage from '../components/clan-admin/GenealogyTree/GenealogyTreePage';
+import SearchPage from '../components/clan-admin/Search/SearchPage';
+import MemorialDaysPage from '../components/clan-admin/MemorialDays/MemorialDaysPage';
+import EventsPage from '../components/clan-admin/Events/EventsPage';
+import FundsPage from '../components/clan-admin/Funds/FundsPage';
+import ArchivesPage from '../components/clan-admin/Archives/ArchivesPage';
+import AIPage from '../components/clan-admin/AI/AIPage';
+import WorshipSpacePage from '../components/clan-admin/WorshipSpace/WorshipSpacePage';
+import Library3DPage from '../components/clan-admin/3DLibrary/Library3DPage';
+import ImportExportPage from '../components/clan-admin/ImportExport/ImportExportPage';
+import BusinessPage from '../components/clan-admin/Business/BusinessPage';
+import PrivacyPage from '../components/clan-admin/Privacy/PrivacyPage';
+import ClanApprovalsMgmt from '../components/clan-admin/Approvals/ClanApprovalsMgmt';
+import ClanFamilyLinksMgmt from '../components/clan-admin/InterFamily/ClanFamilyLinksMgmt';
+import ClanAccountMgmt from '../components/clan-admin/Settings/ClanAccountMgmt';
+import ClanAuditLogsMgmt from '../components/clan-admin/AuditLogs/ClanAuditLogsMgmt';
+import ClanDataBackupMgmt from '../components/clan-admin/Backup/ClanDataBackupMgmt';
+import ProfilePage from '../components/clan-admin/Profile/ProfilePage';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import LoginPage from '../pages/auth/Login';
 import RegisterPage from '../pages/auth/Register';
 import ForgotPasswordPage from '../pages/auth/ForgotPassword';
-import Dashboard from '../pages/dashboard/Dashboard';
+
 import { ProtectedRoute, RoleGuard } from './RouteGuards';
 
 export type AuthView = 'login' | 'register' | 'forgot-password' | 'dashboard';
@@ -54,7 +74,7 @@ const AppRoutes: React.FC<AppRoutesProps> = ({
     if (primaryRole === 'admin') {
       navigate('/admin');
     } else {
-      navigate('/user');
+      navigate('/login');
     }
   };
 
@@ -90,26 +110,30 @@ const AppRoutes: React.FC<AppRoutesProps> = ({
           <ForgotPasswordPage onSwitchToLogin={() => navigate('/login')} />
         }
       />
-      <Route
-        path="/user/*"
-        element={
-          <ProtectedRoute>
-            <RoleGuard allowedRoles={['member', 'family_head']}>
-              <Dashboard userName={userName} onLogout={handleLogout} />
-            </RoleGuard>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/admin/*"
-        element={
-          <ProtectedRoute>
-            <RoleGuard allowedRoles={['admin']}>
-              <Dashboard userName={userName} onLogout={handleLogout} />
-            </RoleGuard>
-          </ProtectedRoute>
-        }
-      />
+      
+      <Route path="/admin" element={
+        <ProtectedRoute>
+          <RoleGuard allowedRoles={['admin']}>
+            <SystemAdminLayout />
+          </RoleGuard>
+        </ProtectedRoute>
+      }>
+        <Route index element={<Navigate to="dashboard" replace />} />
+        <Route path="dashboard" element={<AdminDashboard userName="Quản Trị Viên" onNavigateTab={() => {}} />} />
+        <Route path="business-requests" element={<AdminBusinessRequests onNavigateToCreateBusiness={() => {}} />} />
+        <Route path="businesses" element={<AdminBusinessesMgmt />} />
+        <Route path="manager-transfer" element={<AdminManagerTransfer />} />
+        <Route path="plans" element={<AdminPlansMgmt />} />
+        <Route path="payments" element={<AdminPaymentsMgmt />} />
+        <Route path="accounts" element={<AdminAccountMgmt />} />
+        <Route path="reports" element={<AdminReportsMgmt />} />
+        <Route path="audit-logs" element={<AdminAuditLogsMgmt />} />
+        <Route path="backup" element={<AdminDataBackupMgmt />} />
+        <Route path="support-access" element={<AdminSupportAccess />} />
+        <Route path="security" element={<AdminSecurity />} />
+        <Route path="profile" element={<AdminProfilePage />} />
+        <Route path="settings" element={<AdminSettingsPage />} />
+      </Route>
       
       {/* Clan Admin Routes */}
       <Route path="/clan-admin" element={<ClanAdminLayout />}>

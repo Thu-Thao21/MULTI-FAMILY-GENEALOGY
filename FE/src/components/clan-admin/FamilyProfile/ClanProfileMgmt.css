@@ -1,0 +1,32 @@
+@reference "../../../index.css";
+/* CSS cho ClanProfileMgmt */
+
+.clan-profile-alert {
+  @apply p-4 mb-4 bg-blue-50 text-blue-600 rounded-lg border border-blue-200 font-medium;
+}
+
+
+
+
+
+.clan-profile-loading { padding: 24px; color: #64748b; }
+.clan-profile-error { padding: 24px; color: #ef4444; }
+.clan-profile-info-group { display: flex; flex-direction: column; gap: 16px; }
+.clan-profile-info-label { font-size: 0.85rem; color: #64748b; font-weight: 600; text-transform: uppercase; }
+.clan-profile-info-value { font-size: 1.1rem; color: #0f172a; font-weight: 700; margin-top: 4px; }
+.clan-profile-info-subvalue { color: #334155; margin-top: 4px; }
+.clan-profile-history-box { color: #334155; margin-top: 4px; line-height: 1.5; background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; }
+.clan-profile-side-group { display: flex; flex-direction: column; gap: 24px; }
+.clan-profile-founder-row { display: flex; align-items: center; gap: 16px; }
+.clan-profile-founder-avatar { width: 60px; height: 60px; border-radius: 50%; background: #e0e7ff; display: flex; align-items: center; justify-content: center; color: #4338ca; font-size: 1.5rem; font-weight: 700; }
+.clan-profile-founder-name { font-size: 1.2rem; font-weight: 700; color: #0f172a; }
+.clan-profile-founder-desc { color: #64748b; margin-top: 4px; }
+.clan-profile-add-btn { padding: 4px 8px; font-size: 0.8rem; }
+.clan-profile-card-body-no-pad { padding: 0 !important; }
+.clan-profile-branch-list { list-style: none; margin: 0; padding: 0; }
+.clan-profile-branch-item { padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; }
+.clan-profile-branch-item.border-bottom { border-bottom: 1px solid #e2e8f0; }
+.clan-profile-branch-name { font-weight: 600; color: #1e293b; }
+.clan-profile-branch-head { font-size: 0.85rem; color: #64748b; margin-top: 4px; }
+.clan-profile-modal-body { padding: 24px; }
+.clan-profile-textarea { resize: vertical; }

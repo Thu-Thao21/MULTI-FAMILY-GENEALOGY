@@ -1,0 +1,106 @@
+@reference "../../../index.css";
+/* CSS cho ArchivesPage */
+
+.archive-name-col {
+  @apply flex items-center gap-2;
+}
+
+.archive-name-link {
+  @apply text-blue-600 hover:underline cursor-pointer;
+}
+
+.archive-actions {
+  @apply flex gap-2;
+}
+
+.archive-btn-permission {
+  @apply text-blue-600 hover:text-purple-800 text-sm font-medium px-3 py-1 bg-purple-50 rounded;
+}
+
+.archive-btn-download {
+  @apply text-blue-600 hover:text-blue-800 text-sm font-medium px-3 py-1;
+}
+
+.archive-btn-delete {
+  @apply text-red-600 hover:text-red-800 text-sm font-medium px-3 py-1;
+}
+
+.archive-filter-bar {
+  @apply bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-6 flex gap-4;
+}
+
+
+
+
+
+.archive-table-container {
+  @apply flex-1 overflow-auto;
+}
+
+.archive-modal-overlay {
+  @apply fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6;
+}
+
+.archive-modal-backdrop {
+  @apply absolute inset-0 bg-slate-900/40 backdrop-blur-sm;
+}
+
+
+
+.archive-modal-header {
+  @apply p-6 border-b border-slate-200 flex justify-between items-center bg-slate-50;
+}
+
+.archive-modal-header-left {
+  @apply flex items-center gap-3;
+}
+
+.archive-modal-title {
+  @apply text-lg font-bold text-slate-800 line-clamp-1;
+}
+
+.archive-modal-subtitle {
+  @apply text-sm text-slate-500;
+}
+
+.archive-modal-close-btn {
+  @apply w-8 h-8 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center hover:bg-slate-300;
+}
+
+.archive-modal-body {
+  @apply p-6 flex-1 overflow-auto;
+}
+
+.archive-perm-title {
+  @apply font-bold text-slate-800 mb-4;
+}
+
+.archive-perm-option-active {
+  @apply flex gap-3 p-4 border border-blue-500 bg-blue-50 rounded-xl cursor-pointer;
+}
+
+.archive-perm-option {
+  @apply flex gap-3 p-4 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50;
+}
+
+.archive-perm-option-title {
+  @apply font-bold text-slate-800;
+}
+
+.archive-perm-option-desc {
+  @apply text-sm text-slate-600;
+}
+
+.archive-perm-branch-title {
+  @apply font-bold text-slate-800 mb-4;
+}
+
+
+
+.archive-perm-branch-hint {
+  @apply text-xs text-slate-500 mt-2;
+}
+
+.archive-modal-footer {
+  @apply p-6 border-t border-slate-200 flex justify-end gap-3 bg-white;
+}
