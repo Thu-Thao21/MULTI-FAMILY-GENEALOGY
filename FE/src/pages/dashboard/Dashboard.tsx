@@ -142,12 +142,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ userName, onLogout }) => {
   const [showFirstLoginModal, setShowFirstLoginModal] = useState(false);
 
   const displayUserName = account?.display_name || account?.username || firebaseUser?.displayName || userName || 'Người dùng';
-  const primaryRole = (account?.primary_role || 'member').toLowerCase();
-  const activeRoles = (account?.roles || [])
-    .filter((role) => role.status.toLowerCase() === 'active')
-    .map((role) => role.role.toLowerCase());
-  const isFamilyHead = primaryRole === 'family_head' || activeRoles.includes('family_head');
-  const isFamilyManager = activeRoles.includes('manager');
+  const activeFamilyRoles = (account?.roles || []).filter(
+    (role) => role.status.toLowerCase() === 'active' && Boolean(role.family_id),
+  );
+  const isFamilyHead = activeFamilyRoles.some((role) => role.role.toLowerCase() === 'family_head');
+  const isFamilyManager = activeFamilyRoles.some((role) => role.role.toLowerCase() === 'manager');
   const canManageFamily = isFamilyHead || isFamilyManager;
   const userRole = isFamilyHead ? 'Chủ dòng họ' : isFamilyManager ? 'Family Admin' : 'Thành viên';
   const basePath = ROUTES.USER.ROOT;
@@ -237,7 +236,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ userName, onLogout }) => {
         exchange: 'family-import-export',
         audit: 'family-logs',
       };
-      return <FamilyAdminModule view={familyViews[activeTab]} onNavigate={(view) => handleSelectTab(tabs[view])} />;
+      return <FamilyAdminModule view={familyViews[activeTab]} canDelegateManagers={isFamilyHead} onNavigate={(view) => handleSelectTab(tabs[view])} />;
     }
 
     // Network tabs

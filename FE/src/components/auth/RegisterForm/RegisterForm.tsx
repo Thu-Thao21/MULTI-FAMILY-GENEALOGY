@@ -58,7 +58,6 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin, onS
         password: formData.password,
         confirmPassword: formData.confirmPassword,
         displayName: formData.displayName,
-        role: 'member',
       });
       onSuccess();
     } catch (err) {

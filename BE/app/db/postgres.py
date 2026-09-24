@@ -86,8 +86,9 @@ async def init_db() -> None:
                         status='active'
                     ))
 
-            # Fixed Family Admin demo account: familyadmin / familyadmin123
+            # Demo family used to verify family-scoped delegation.
             family_admin_pwd_hash = hash_password('familyadmin123')
+            family_head_pwd_hash = hash_password('truongtoc123')
             res_family = await session.execute(
                 select(Family).where(Family.name == 'Dòng họ Nguyễn · Nam Định')
             )
@@ -105,7 +106,74 @@ async def init_db() -> None:
                 )
                 session.add(family)
                 await session.flush()
+            was_legacy_family_admin_owner = family.owner_id == 'family_admin_demo_001'
 
+            # The family head owns the family and is the only demo account that
+            # may grant/revoke the family-scoped manager role.
+            res_family_head = await session.execute(
+                select(Account).where(Account.username == 'truongtoc')
+            )
+            family_head = res_family_head.scalar_one_or_none()
+            created_family_head = family_head is None
+            if not family_head:
+                family_head = Account(
+                    id='family_head_demo_001',
+                    firebase_uid='family_head_demo_001',
+                    username='truongtoc',
+                    email='truongtoc@giaphaviet.vn',
+                    display_name='Trưởng tộc Demo',
+                    password_hash=family_head_pwd_hash,
+                    email_verified=True,
+                    status='active',
+                )
+                session.add(family_head)
+                await session.flush()
+            else:
+                family_head.password_hash = family_head_pwd_hash
+                family_head.status = 'active'
+                family_head.email_verified = True
+
+            res_head_role = await session.execute(
+                select(AccountRole).where(
+                    AccountRole.account_id == family_head.id,
+                    AccountRole.role == 'family_head',
+                    AccountRole.family_id == family.id,
+                )
+            )
+            head_role = res_head_role.scalars().first()
+            if not head_role:
+                session.add(AccountRole(
+                    account_id=family_head.id,
+                    role='family_head',
+                    family_id=family.id,
+                    status='active',
+                ))
+            else:
+                head_role.status = 'active'
+
+            res_head_membership = await session.execute(
+                select(FamilyMembership).where(
+                    FamilyMembership.user_id == family_head.id,
+                    FamilyMembership.family_id == family.id,
+                )
+            )
+            head_membership = res_head_membership.scalars().first()
+            if not head_membership:
+                session.add(FamilyMembership(
+                    user_id=family_head.id,
+                    family_id=family.id,
+                    membership_role='owner',
+                    status='active',
+                ))
+            else:
+                head_membership.membership_role = 'owner'
+                head_membership.status = 'active'
+
+            family.owner_id = family_head.id
+            family.created_by = family_head.id
+
+            # familyadmin starts as an ordinary member. It only becomes a
+            # Family Admin after the family head explicitly grants manager.
             res_family_admin = await session.execute(
                 select(Account).where(Account.username == 'familyadmin')
             )
@@ -128,26 +196,37 @@ async def init_db() -> None:
                 family_admin.status = 'active'
                 family_admin.email_verified = True
 
-            family.owner_id = family_admin.id
-            family.created_by = family_admin.id
-
-            res_family_role = await session.execute(
+            res_member_role = await session.execute(
                 select(AccountRole).where(
                     AccountRole.account_id == family_admin.id,
-                    AccountRole.role == 'manager',
+                    AccountRole.role == 'member',
+                    AccountRole.family_id == family.id,
                 )
             )
-            family_role = res_family_role.scalars().first()
-            if not family_role:
+            member_role = res_member_role.scalars().first()
+            if not member_role:
                 session.add(AccountRole(
                     account_id=family_admin.id,
-                    role='manager',
+                    role='member',
                     family_id=family.id,
                     status='active',
                 ))
             else:
-                family_role.family_id = family.id
-                family_role.status = 'active'
+                member_role.status = 'active'
+
+            # One-time migration from the previous demo seed, which granted
+            # manager automatically. Later grants are preserved across restarts.
+            if created_family_head or was_legacy_family_admin_owner:
+                res_old_manager = await session.execute(
+                    select(AccountRole).where(
+                        AccountRole.account_id == family_admin.id,
+                        AccountRole.role == 'manager',
+                        AccountRole.family_id == family.id,
+                    )
+                )
+                old_manager_role = res_old_manager.scalars().first()
+                if old_manager_role:
+                    old_manager_role.status = 'revoked'
 
             res_membership = await session.execute(
                 select(FamilyMembership).where(
@@ -160,11 +239,12 @@ async def init_db() -> None:
                 session.add(FamilyMembership(
                     user_id=family_admin.id,
                     family_id=family.id,
-                    membership_role='owner',
+                    membership_role='member',
                     status='active',
                 ))
             else:
-                membership.membership_role = 'owner'
+                if (created_family_head or was_legacy_family_admin_owner) and membership.membership_role in {'owner', 'manager'}:
+                    membership.membership_role = 'member'
                 membership.status = 'active'
 
             await session.commit()
