@@ -143,46 +143,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
     },
   ];
 
-  const adminGroups = [
-    {
-      id: 'admin_dash',
-      label: 'TRANG CHỦ ADMIN',
-      icon: (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-          <polyline points="9 22 9 12 15 12 15 22" />
-        </svg>
-      ),
-      items: [{ id: 'dashboard', label: 'Dashboard Admin' }],
-    },
-    {
-      id: 'admin_mgmt',
-      label: 'QUẢN TRỊ HỆ THỐNG',
-      icon: (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="3" />
-          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
-        </svg>
-      ),
-      items: [
-        { id: 'admin-permissions', label: 'Phân quyền tài khoản' },
-        { id: 'admin-families-mgmt', label: 'Quản lý dòng họ' },
-        { id: 'admin-members-mgmt', label: 'Quản lý thành viên' },
-        { id: 'admin-family-links', label: 'Liên kết dòng họ' },
-        { id: 'admin-approval', label: 'Phê duyệt đề xuất' },
-        { id: 'admin-logs', label: 'Nhật ký hệ thống' },
-        { id: 'admin-data-backup', label: 'Sao lưu & Khôi phục' },
-      ],
-    },
-  ];
-
-  const menuGroups = isAdmin ? adminGroups : memberGroups;
+  const menuGroups = memberGroups;
 
   return (
     <aside className={`sidebar-container ${isCollapsed ? 'collapsed' : 'expanded'}`}>
       {!isCollapsed && (
         <div className="sidebar-section-title">
-          {isAdmin ? 'HỆ THỐNG QUẢN TRỊ' : 'DANH MỤC DÒNG HỌ'}
+          DANH MỤC DÒNG HỌ
         </div>
       )}
 

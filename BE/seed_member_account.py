@@ -46,6 +46,10 @@ async def seed_member():
                 id="mem_001",
                 family_id=family.id,
                 full_name="Nguyễn Văn A",
+                username="thanhvien",
+                email="thanhvien@giaphaviet.vn",
+                password_hash=pwd_hash,
+                role="member",
                 gender="male",
                 generation=4,
                 occupation="Kỹ sư Phần mềm",
@@ -57,6 +61,11 @@ async def seed_member():
             session.add(member_person)
             await session.commit()
             await session.refresh(member_person)
+        else:
+            member_person.username = "thanhvien"
+            member_person.email = "thanhvien@giaphaviet.vn"
+            member_person.password_hash = pwd_hash
+            member_person.role = "member"
 
         if not existing_acc:
             acc = Account(

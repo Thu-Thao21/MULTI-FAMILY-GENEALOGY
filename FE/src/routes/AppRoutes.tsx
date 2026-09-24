@@ -30,11 +30,7 @@ const AppRoutes: React.FC<AppRoutesProps> = ({
   const navigate = useNavigate();
 
   const handleAuthSuccess = () => {
-    if (primaryRole === 'admin') {
-      navigate('/admin');
-    } else {
-      navigate('/user');
-    }
+    navigate('/user');
   };
 
   const handleLogout = () => {
@@ -58,7 +54,7 @@ const AppRoutes: React.FC<AppRoutesProps> = ({
         path="/login"
         element={
           isAuthenticated ? (
-            <Navigate to={primaryRole === 'admin' ? '/admin' : '/user'} replace />
+            <Navigate to="/user" replace />
           ) : (
             <LoginPage
               onSwitchToRegister={() => navigate('/register')}
@@ -89,23 +85,15 @@ const AppRoutes: React.FC<AppRoutesProps> = ({
         path="/user/*"
         element={
           <ProtectedRoute>
-            <RoleGuard allowedRoles={['member', 'family_head']}>
-              <Dashboard userName={userName} onLogout={handleLogout} />
-            </RoleGuard>
+            <Dashboard userName={userName} onLogout={handleLogout} />
           </ProtectedRoute>
         }
       />
 
-      {/* Protected Admin Dashboard Routes */}
+      {/* Admin Dashboard Routes Redirect to /user */}
       <Route
         path="/admin/*"
-        element={
-          <ProtectedRoute>
-            <RoleGuard allowedRoles={['admin']}>
-              <Dashboard userName={userName} onLogout={handleLogout} />
-            </RoleGuard>
-          </ProtectedRoute>
-        }
+        element={<Navigate to="/user" replace />}
       />
 
       {/* Fallback 404 Route */}
@@ -113,7 +101,7 @@ const AppRoutes: React.FC<AppRoutesProps> = ({
         path="*"
         element={
           isAuthenticated ? (
-            <Navigate to={primaryRole === 'admin' ? '/admin' : '/user'} replace />
+            <Navigate to="/user" replace />
           ) : (
             <Navigate to="/public" replace />
           )

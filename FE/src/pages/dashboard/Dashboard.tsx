@@ -121,9 +121,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ userName, onLogout }) => {
   const [showFirstLoginModal, setShowFirstLoginModal] = useState(false);
 
   const displayUserName = account?.display_name || account?.username || firebaseUser?.displayName || userName || 'Người dùng';
-  const primaryRole = account?.primary_role || 'member';
-  const userRole = primaryRole === 'admin' ? 'Admin' : 'Thành viên';
-  const basePath = primaryRole === 'admin' ? ROUTES.ADMIN.ROOT : ROUTES.USER.ROOT;
+  const userRole = 'Thành viên';
+  const basePath = ROUTES.USER.ROOT;
 
   // Mandatory first password change check
   useEffect(() => {
@@ -168,24 +167,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ userName, onLogout }) => {
   };
 
   const renderMainContent = () => {
-    // ===== Branch for System Admin =====
-    if (primaryRole === 'admin') {
-      if (activeTab === 'admin-permissions' || activeTab === 'admin-account-mgmt') return <AdminAccountMgmt />;
-      if (activeTab === 'admin-families-mgmt') return <AdminFamiliesMgmt />;
-      if (activeTab === 'admin-members-mgmt') return <AdminMembersMgmt />;
-      if (activeTab === 'admin-family-links') return <AdminFamilyLinksMgmt />;
-      if (activeTab === 'admin-approval' || activeTab === 'admin-approvals') return <AdminApprovalsMgmt />;
-      if (activeTab === 'admin-logs' || activeTab === 'admin-security-logs') return <AdminAuditLogsMgmt />;
-      if (activeTab === 'admin-data-backup') return <AdminDataBackupMgmt />;
-
-      return (
-        <AdminDashboard
-          userName={displayUserName}
-          onNavigateTab={handleSelectTab}
-        />
-      );
-    }
-
     // ===== Branch for Member (38 FRs) =====
     if (activeTab === 'notifications') return <NotificationCenterModule />;
     if (activeTab === 'relationship-finder') return <RelationshipFinder />;

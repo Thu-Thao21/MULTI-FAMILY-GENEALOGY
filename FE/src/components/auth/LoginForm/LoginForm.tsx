@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../hooks/useAuth';
+import { ROUTES } from '../../../config/routes';
 import './LoginForm.css';
 
 import { loginWithGoogle, loginWithFacebook } from '../../../services/auth.service';
@@ -15,6 +17,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   onSwitchToForgotPassword,
   onSuccess,
 }) => {
+  const navigate = useNavigate();
   const { login } = useAuth();
   const [selectedRole, setSelectedRole] = useState<'admin' | 'member'>('member');
   const [formData, setFormData] = useState({ emailOrPhone: '', password: '' });
@@ -75,32 +78,24 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     <div className="login-form-card">
       <div className="login-form-glow-top" />
 
+      <button
+        type="button"
+        onClick={() => navigate(ROUTES.PUBLIC.ROOT)}
+        className="btn-back-home-icon"
+        title="Quay lại trang chủ"
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12" />
+          <polyline points="12 19 5 12 12 5" />
+        </svg>
+      </button>
+
       <div className="login-form-header">
         <div className="login-form-badge">
           <span className="login-form-badge-dot" />
           <span className="login-form-badge-text">ĐĂNG NHẬP HỆ THỐNG</span>
         </div>
         <h1 className="login-form-title">Chào mừng bạn trở lại!</h1>
-        <p className="login-form-subtitle">Vui lòng chọn vai trò và đăng nhập để truy cập dữ liệu.</p>
-      </div>
-
-      {/* Role Selection Tabs */}
-      <div className="login-role-selector">
-        <button
-          type="button"
-          onClick={() => setSelectedRole('member')}
-          className={`login-role-btn ${selectedRole === 'member' ? 'active' : ''}`}
-        >
-          Thành Viên
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setSelectedRole('admin')}
-          className={`login-role-btn ${selectedRole === 'admin' ? 'active' : ''}`}
-        >
-          Trưởng Tộc
-        </button>
       </div>
 
       <form onSubmit={handleSubmit} className="login-form-body">
