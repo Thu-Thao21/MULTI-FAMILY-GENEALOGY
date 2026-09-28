@@ -7,7 +7,7 @@ from sqlalchemy.orm import selectinload
 
 from app.db.postgres import get_db
 from app.dependencies.auth import get_current_account
-from app.models.postgres import Account, AccountRole, Admin, FamilyMembership, Member
+from app.models.postgres import Account, AccountRole, FamilyMembership, Member
 from app.schemas.auth_schemas import AccountOut
 from app.services.auth_service import format_account_me
 
@@ -153,12 +153,12 @@ async def update_family_manager_access(
 
 @router.get("/", response_model=List[UserOut])
 async def list_users(role: Optional[str] = None, db: AsyncSession = Depends(get_db)):
-    """Lấy danh sách tất cả tài khoản từ 2 bảng (admins, members)."""
+    """Lấy danh sách các tài khoản thành viên."""
     results: List[UserOut] = []
 
-    if not role or role == "admin":
-        res = await db.execute(select(Admin))
-        for item in res.scalars().all():
+    res = await db.execute(select(Member))
+    for item in res.scalars().all():
+        if item.username:
             results.append(
                 UserOut(
                     id=item.id,
@@ -166,33 +166,9 @@ async def list_users(role: Optional[str] = None, db: AsyncSession = Depends(get_
                     full_name=item.full_name,
                     email=item.email,
                     phone=item.phone,
-                    role="admin",
+                    role="member",
                     status=item.status,
                 )
             )
 
-    if not role or role == "member":
-        res = await db.execute(select(Member))
-        for item in res.scalars().all():
-            if item.username:
-                results.append(
-                    UserOut(
-                        id=item.id,
-                        username=item.username,
-                        full_name=item.full_name,
-                        email=item.email,
-                        phone=item.phone,
-                        role="member",
-                        status=item.status,
-                    )
-                )
-
     return results
-
-
-@router.get("/admins")
-async def list_admins(db: AsyncSession = Depends(get_db)):
-    """Lấy danh sách tài khoản từ bảng admins."""
-    result = await db.execute(select(Admin))
-    admins = result.scalars().all()
-    return admins

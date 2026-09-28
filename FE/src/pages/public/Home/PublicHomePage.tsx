@@ -1,8 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PublicLayout } from '../../components/guest/PublicLayout';
-import { ROUTES } from '../../config/routes';
-import circularEmblemLogo from '../../assets/logo/logo_circular_emblem.png';
+import { PublicLayout } from '../../../components/guest/PublicLayout';
+import { ROUTES } from '../../../config/routes';
+import circularEmblemLogo from '../../../assets/logo/logo_circular_emblem.png';
 import './PublicHomePage.css';
 
 export const PublicHomePage: React.FC = () => {

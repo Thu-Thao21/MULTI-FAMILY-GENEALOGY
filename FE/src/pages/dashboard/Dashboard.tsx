@@ -21,15 +21,7 @@ import { FamilyMaternalTab } from '../../components/network/FamilyMaternalTab';
 import { InLawMarriagesTab } from '../../components/network/InLawMarriagesTab';
 import { AffiliatedFamiliesTab } from '../../components/network/AffiliatedFamiliesTab';
 import { TreeLayout } from '../../components/tree/TreeLayout';
-import { MemberDashboard, AdminDashboard } from '../../components/roles';
-
-import AdminAccountMgmt from '../../components/admin/AdminAccountMgmt/AdminAccountMgmt';
-import AdminFamiliesMgmt from '../../components/admin/AdminFamiliesMgmt/AdminFamiliesMgmt';
-import AdminMembersMgmt from '../../components/admin/AdminMembersMgmt/AdminMembersMgmt';
-import AdminFamilyLinksMgmt from '../../components/admin/AdminFamilyLinksMgmt/AdminFamilyLinksMgmt';
-import AdminApprovalsMgmt from '../../components/admin/AdminApprovalsMgmt/AdminApprovalsMgmt';
-import AdminAuditLogsMgmt from '../../components/admin/AdminAuditLogsMgmt/AdminAuditLogsMgmt';
-import AdminDataBackupMgmt from '../../components/admin/AdminDataBackupMgmt/AdminDataBackupMgmt';
+import { MemberDashboard } from '../../components/roles';
 import { FamilyAdminModule, type FamilyAdminView } from '../../features/familyAdmin/FamilyAdminModule';
 
 import { useAuth } from '../../hooks/useAuth';
@@ -71,27 +63,9 @@ const TAB_TO_ROUTE: Record<string, string> = {
   'family-links':         ROUTES.USER.FAMILY_LINKS,
   'family-import-export': ROUTES.USER.FAMILY_IMPORT_EXPORT,
   'family-logs':          ROUTES.USER.FAMILY_LOGS,
-  // Admin tabs
-  'admin-permissions':    ROUTES.ADMIN.ACCOUNTS,
-  'admin-approval':       ROUTES.ADMIN.APPROVALS,
-  'admin-logs':           ROUTES.ADMIN.SECURITY_LOGS,
-  'admin-account-mgmt':   ROUTES.ADMIN.ACCOUNTS,
-  'admin-families-mgmt':  ROUTES.ADMIN.FAMILIES,
-  'admin-members-mgmt':   ROUTES.ADMIN.MEMBERS,
-  'admin-family-links':   ROUTES.ADMIN.FAMILY_LINKS,
-  'admin-approvals':      ROUTES.ADMIN.APPROVALS,
-  'admin-security-logs':  ROUTES.ADMIN.SECURITY_LOGS,
-  'admin-data-backup':    ROUTES.ADMIN.BACKUP,
 };
 
 const ROUTE_TO_TAB: Array<[string, string]> = [
-  [ROUTES.ADMIN.ACCOUNTS,          'admin-permissions'],
-  [ROUTES.ADMIN.FAMILIES,          'admin-families-mgmt'],
-  [ROUTES.ADMIN.MEMBERS,           'admin-members-mgmt'],
-  [ROUTES.ADMIN.FAMILY_LINKS,      'admin-family-links'],
-  [ROUTES.ADMIN.APPROVALS,         'admin-approval'],
-  [ROUTES.ADMIN.SECURITY_LOGS,     'admin-logs'],
-  [ROUTES.ADMIN.BACKUP,            'admin-data-backup'],
   [ROUTES.USER.NOTIFICATIONS,      'notifications'],
   [ROUTES.USER.TREE_VERTICAL,      'tree'],
   [ROUTES.USER.TREE_HORIZONTAL,    'tree'],
@@ -135,6 +109,19 @@ export const Dashboard: React.FC<DashboardProps> = ({ userName, onLogout }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // URL query demoRole persistence
+  const searchParams = new URLSearchParams(location.search);
+  const demoRoleParam = searchParams.get('demoRole');
+
+  useEffect(() => {
+    if (demoRoleParam) {
+      localStorage.setItem('active_demo_role', demoRoleParam.toUpperCase());
+    }
+  }, [demoRoleParam]);
+
+  const storedDemoRole = (localStorage.getItem('active_demo_role') || '').toUpperCase();
+  const activeDemoRole = (demoRoleParam || storedDemoRole).toUpperCase();
+
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
@@ -145,10 +132,28 @@ export const Dashboard: React.FC<DashboardProps> = ({ userName, onLogout }) => {
   const activeFamilyRoles = (account?.roles || []).filter(
     (role) => role.status.toLowerCase() === 'active' && Boolean(role.family_id),
   );
-  const isFamilyHead = activeFamilyRoles.some((role) => role.role.toLowerCase() === 'family_head');
-  const isFamilyManager = activeFamilyRoles.some((role) => role.role.toLowerCase() === 'manager');
-  const canManageFamily = isFamilyHead || isFamilyManager;
-  const userRole = isFamilyHead ? 'Chủ dòng họ' : isFamilyManager ? 'Family Admin' : 'Thành viên';
+  const isAccountFamilyHead = activeFamilyRoles.some((role) => role.role.toLowerCase() === 'family_head');
+  const isAccountFamilyManager = activeFamilyRoles.some(
+    (role) => role.role.toLowerCase() === 'manager' || role.role.toLowerCase() === 'family_admin',
+  );
+
+  let isFamilyHead = isAccountFamilyHead;
+  let isFamilyManager = isAccountFamilyManager;
+  let canManageFamily = isAccountFamilyHead || isAccountFamilyManager;
+  let userRole = isAccountFamilyHead ? 'Chủ dòng họ' : isAccountFamilyManager ? 'Family Admin' : 'Thành viên';
+
+  if (activeDemoRole === 'FAMILY_ADMIN' || activeDemoRole === 'FAMILY_HEAD' || activeDemoRole === 'ADMIN') {
+    isFamilyHead = true;
+    isFamilyManager = true;
+    canManageFamily = true;
+    userRole = 'Family Admin';
+  } else if (activeDemoRole === 'MEMBER') {
+    isFamilyHead = false;
+    isFamilyManager = false;
+    canManageFamily = false;
+    userRole = 'Thành viên';
+  }
+
   const basePath = ROUTES.USER.ROOT;
 
   // Mandatory first password change check
@@ -196,7 +201,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ userName, onLogout }) => {
   const renderMainContent = () => {
     // ===== Branch for Member (38 FRs) =====
     if (activeTab === 'notifications') return <NotificationCenterModule />;
-    if (activeTab === 'relationship-finder') return canManageFamily ? <FamilyAdminModule view="search" /> : <RelationshipFinder />;
+    if (activeTab === 'relationship-finder') return <RelationshipFinder />;
     if (activeTab === 'my-proposals') return <MyProposalsModule />;
     if (activeTab === 'anniversaries') return <AnniversariesModule />;
     if (activeTab === 'events') return <ClanEventsModule />;
@@ -247,7 +252,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ userName, onLogout }) => {
 
     // Tree Layout
     if (activeTab.startsWith('tree')) {
-      if (canManageFamily) return <FamilyAdminModule view="tree" onNavigate={() => handleSelectTab('family-relations')} />;
       const mode: TreeViewMode =
         activeTab === 'tree-horizontal'
           ? 'horizontal'
@@ -306,12 +310,17 @@ export const Dashboard: React.FC<DashboardProps> = ({ userName, onLogout }) => {
     );
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('active_demo_role');
+    onLogout();
+  };
+
   return (
     <div className="dashboard-page-container">
       <TopBar
         userName={displayUserName}
         userRole={userRole}
-        onLogout={onLogout}
+        onLogout={handleLogout}
         isSidebarCollapsed={isSidebarCollapsed}
         onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
         onNavigateTab={handleSelectTab}

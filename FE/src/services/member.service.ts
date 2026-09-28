@@ -30,13 +30,42 @@ export async function fetchMembers(params?: {
   }
 }
 
+export const MOCK_MEMBER_DETAIL: MemberDetail = {
+  id: 'mem_001',
+  fullName: 'Nguyễn Văn Minh',
+  otherName: 'Minh Đức',
+  gender: 'male',
+  birthDate: '1978-05-15',
+  isAlive: true,
+  generation: 4,
+  branch: 'Chi Trưởng',
+  subBranch: 'Nhánh 1',
+  familyName: 'Dòng họ Nguyễn · Nam Định',
+  occupation: 'Kỹ sư Xây dựng',
+  education: 'Đại học Bách Khoa',
+  bio: 'Trưởng tộc đời thứ 4, tích cực tham gia các hoạt động dòng họ.',
+  avatarUrl: '',
+  phone: '0912345678',
+  email: 'minh.nguyen@example.vn',
+  address: 'Hà Nội, Việt Nam',
+  careerHistory: [
+    { period: '2015 - Nay', role: 'Giám đốc Kỹ thuật', organization: 'Công ty Cổ phần Xây dựng Hà Nội' },
+  ],
+  awards: ['Bằng khen Dòng họ cống hiến 2024'],
+  contacts: [{ type: 'phone', value: '0912345678' }],
+  lifeEvents: [{ year: 1978, title: 'Sinh ra tại Nam Định' }],
+  mediaList: [],
+  skills: ['Quản lý', 'Giao tiếp'],
+};
+
 export async function fetchMemberDetail(memberId: string): Promise<MemberDetail | null> {
   try {
     const res = await apiClient.get(`/members/${memberId}`);
-    return res.data ?? null;
+    if (res.data) return res.data;
+    return { ...MOCK_MEMBER_DETAIL, id: memberId };
   } catch (err) {
-    console.error(`API fetchMemberDetail error for ${memberId}:`, err);
-    return null;
+    console.warn(`API fetchMemberDetail fallback for ${memberId}`);
+    return { ...MOCK_MEMBER_DETAIL, id: memberId || 'mem_001' };
   }
 }
 

@@ -91,7 +91,7 @@ export const TopBar: React.FC<TopBarProps> = ({
           {isSidebarCollapsed ? '☰' : '✕'}
         </button>
 
-        <div className="topbar-brand-box" onClick={() => navigate(userRole === 'Admin' ? ROUTES.ADMIN.ROOT : ROUTES.USER.ROOT)} style={{ cursor: 'pointer' }}>
+        <div className="topbar-brand-box" onClick={() => navigate(ROUTES.USER.ROOT)} style={{ cursor: 'pointer' }}>
           <img src={smallAppLogo} alt="Gia Phả Việt Logo" className="topbar-logo-img" />
           <div>
             <div className="topbar-system-tag">HỆ THỐNG GIA PHẢ LIÊN HỌ</div>
