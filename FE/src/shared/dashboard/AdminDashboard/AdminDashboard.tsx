@@ -15,25 +15,25 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const metricCards = [
     {
       title: 'Không Gian Dòng Họ (Business)',
-      value: '288',
+      value: '0',
       unit: 'Dòng họ',
-      subtext: '274 đang hoạt động • 14 chờ kích hoạt',
+      subtext: '0 đang hoạt động • 0 chờ kích hoạt',
       tag: 'Họ tộc',
       accentColor: '#0284c7',
       tab: 'admin-businesses',
     },
     {
       title: 'Tài Khoản Toàn Hệ Thống',
-      value: '1,420',
+      value: '0',
       unit: 'Tài khoản',
-      subtext: '288 Trưởng tộc • 1,132 Người dùng',
+      subtext: '0 Trưởng tộc • 0 Người dùng',
       tag: 'Tài khoản',
       accentColor: '#0284c7',
       tab: 'admin-accounts',
     },
     {
       title: 'Hồ Sơ Thành Viên Phả Hệ',
-      value: '184,500',
+      value: '0',
       unit: 'Cá nhân',
       subtext: 'Gia phả số hóa kết nối đa dòng họ',
       tag: 'Phả hệ',
@@ -41,28 +41,28 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       tab: 'admin-businesses',
     },
     {
-      title: 'Doanh Thu Dịch Vụ (Năm 2026)',
-      value: '142.5',
-      unit: 'Triệu VNĐ',
-      subtext: 'Gói Pro & Enterprise tăng trưởng 24%',
+      title: 'Doanh Thu Dịch Vụ (Năm nay)',
+      value: '0',
+      unit: 'VNĐ',
+      subtext: 'Đang cập nhật...',
       tag: 'Tài chính',
       accentColor: '#0284c7',
       tab: 'admin-payments',
     },
     {
       title: 'Dung Lượng Lưu Trữ Đám Mây',
-      value: '42.8',
+      value: '0',
       unit: 'GB / 1000 GB',
-      subtext: 'Tư liệu Hán Nôm & Ảnh bia mộ 3D',
+      subtext: 'Đang cập nhật...',
       tag: 'Hạ tầng',
       accentColor: '#0284c7',
       tab: 'admin-data-backup',
     },
     {
       title: 'Yêu Cầu & Báo Cáo Chờ Xử Lý',
-      value: '5',
+      value: '0',
       unit: 'Mục chờ duyệt',
-      subtext: '3 đơn mở Business • 2 báo cáo vi phạm',
+      subtext: '0 đơn mở Business • 0 báo cáo vi phạm',
       tag: 'Kiểm duyệt',
       accentColor: '#0284c7',
       tab: 'admin-business-requests',
@@ -90,7 +90,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             Xin chào {userName}, chúc bạn một ngày làm việc hiệu quả!
           </h1>
           <p className="admin-subtext">
-            Nền tảng đang trực tuyến, kết nối <strong>288 dòng họ</strong> và <strong>184,500 nhân khẩu</strong> trên toàn quốc. Các dịch vụ lõi và sao lưu tự động đang vận hành mượt mà.
+            Nền tảng đang trực tuyến, kết nối <strong>0 dòng họ</strong> và <strong>0 nhân khẩu</strong> trên toàn quốc. Các dịch vụ lõi và sao lưu tự động đang vận hành mượt mà.
           </p>
         </div>
       </div>
@@ -105,9 +105,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             </svg>
           </span>
           <div>
-            <strong className="urgent-title">Có 3 hồ sơ đăng ký Business và 2 báo cáo vi phạm mới cần thẩm định</strong>
+            <strong className="urgent-title">Có 0 hồ sơ đăng ký Business và 0 báo cáo vi phạm mới cần thẩm định</strong>
             <p className="urgent-sub">
-              Dòng họ Nguyễn Văn và Tộc Lê Khắc đang chờ phê duyệt tài khoản Trưởng tộc để kích hoạt không gian dòng họ.
+              Hiện tại không có tác vụ khẩn cấp nào cần phê duyệt.
             </p>
           </div>
         </div>

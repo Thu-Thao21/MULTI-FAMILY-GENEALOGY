@@ -1,107 +1,152 @@
-import '../../clan-admin/Profile/ProfilePage.css';
+import '../../common/profile/Profile.css';
 import React, { useState } from 'react';
-import PageHeader from '../../../shared/Layout/PageHeader';
 
 export const AdminProfilePage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'info' | 'security'>('info');
 
+  const tabs = [
+    { key: 'info', label: 'Thông tin cá nhân' },
+    { key: 'security', label: 'Bảo mật & Mật khẩu' }
+  ];
+
   return (
-    <div className="admin-account-container">
+    <div className="profile-layout" style={{ maxWidth: '900px', margin: '0 auto', padding: '24px' }}>
       
-      <div className="admin-account-header">
-        <div>
-          <h2 className="admin-account-title">Hồ sơ Quản trị viên</h2>
-          <p className="admin-account-subtitle">Quản lý thông tin cá nhân và bảo mật tài khoản quản trị hệ thống.</p>
+      {/* Header Banner */}
+      <div className="profile-header-card">
+        <div className="profile-header-top">
+          <div className="profile-avatar-wrapper">
+            <div className="profile-avatar-placeholder">Q</div>
+          </div>
+
+          <div className="profile-header-info">
+            <h1 className="profile-name">
+              Quản Trị Viên (Demo)
+              <span className="profile-generation-badge">System Admin</span>
+            </h1>
+
+            <div className="profile-subtext">
+              <span>admin@system.vn</span>
+              <span>• 0999999999</span>
+            </div>
+
+            <div className="profile-header-meta">
+              <div className="profile-meta-item">
+                <strong>Quản trị viên cấp cao</strong>
+              </div>
+              <div className="profile-meta-item">
+                Đang hoạt động
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="profile-page-content">
-        <div className="profile-grid">
-          {/* Sidebar */}
-          <div className="profile-sidebar">
-            <div className="profile-user-info">
-              <div className="profile-avatar">
-                Q
+      {/* Navigation Tabs */}
+      <div className="profile-tabs-bar">
+        {tabs.map((t) => (
+          <button
+            key={t.key}
+            className={`profile-tab-btn ${activeTab === t.key ? 'active' : ''}`}
+            onClick={() => setActiveTab(t.key as any)}
+          >
+            <span>{t.label}</span>
+          </button>
+        ))}
+      </div>
+
+      {/* Tab Contents */}
+      <div>
+        {activeTab === 'info' && (
+          <div className="profile-card">
+            <h3 className="profile-card-title">Cập nhật thông tin quản trị</h3>
+            <div className="profile-info-grid">
+              
+              <div className="profile-info-item">
+                <span className="profile-info-label">Họ và tên</span>
+                <input 
+                  type="text" 
+                  defaultValue="Quản Trị Viên (Demo)" 
+                  style={{ padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', width: '100%', outline: 'none' }} 
+                />
               </div>
-              <h3 className="profile-name">Quản Trị Viên (Demo)</h3>
-              <p className="profile-role">System Admin</p>
+
+              <div className="profile-info-item">
+                <span className="profile-info-label">Email hệ thống</span>
+                <input 
+                  type="email" 
+                  defaultValue="admin@system.vn" 
+                  style={{ padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', width: '100%', outline: 'none' }} 
+                />
+              </div>
+
+              <div className="profile-info-item">
+                <span className="profile-info-label">Số điện thoại liên hệ</span>
+                <input 
+                  type="text" 
+                  defaultValue="0999999999" 
+                  style={{ padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', width: '100%', outline: 'none' }} 
+                />
+              </div>
+
+            </div>
+            
+            <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid #e2e8f0', paddingTop: '20px' }}>
+              <button style={{ padding: '10px 24px', background: '#2563eb', color: '#fff', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 600 }}>
+                Lưu thay đổi
+              </button>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'security' && (
+          <div className="profile-card">
+            <h3 className="profile-card-title">Đổi mật khẩu bảo mật</h3>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '400px' }}>
+              <div className="profile-info-item">
+                <span className="profile-info-label">Mật khẩu hiện tại</span>
+                <input 
+                  type="password" 
+                  placeholder="Nhập mật khẩu cũ..." 
+                  style={{ padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', width: '100%', outline: 'none' }} 
+                />
+              </div>
+              
+              <div className="profile-info-item">
+                <span className="profile-info-label">Mật khẩu mới</span>
+                <input 
+                  type="password" 
+                  placeholder="Nhập mật khẩu mới..." 
+                  style={{ padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', width: '100%', outline: 'none' }} 
+                />
+              </div>
+
+              <div className="profile-info-item">
+                <span className="profile-info-label">Xác nhận mật khẩu mới</span>
+                <input 
+                  type="password" 
+                  placeholder="Nhập lại mật khẩu mới..." 
+                  style={{ padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', width: '100%', outline: 'none' }} 
+                />
+              </div>
+
+              <div style={{ marginTop: '12px' }}>
+                <button style={{ padding: '10px 24px', background: '#2563eb', color: '#fff', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 600 }}>
+                  Cập nhật mật khẩu
+                </button>
+              </div>
             </div>
 
-            <nav className="profile-nav">
-              <button 
-                onClick={() => setActiveTab('info')}
-                className={`profile-nav-btn ${activeTab === 'info' ? 'nav-active' : 'nav-inactive'}`}
-              >
-                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-                Thông tin chung
-              </button>
-              <button 
-                onClick={() => setActiveTab('security')}
-                className={`profile-nav-btn ${activeTab === 'security' ? 'nav-active' : 'nav-inactive'}`}
-              >
-                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-                Bảo mật & Mật khẩu
-              </button>
-            </nav>
+            <div style={{ marginTop: '40px', paddingTop: '24px', borderTop: '1px dashed #cbd5e1' }}>
+               <h3 className="profile-card-title">Xác thực 2 bước (2FA)</h3>
+               <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '16px' }}>Bảo vệ tài khoản quản trị viên cấp cao bằng mã xác thực phụ qua điện thoại.</p>
+               <button style={{ padding: '8px 20px', background: 'transparent', color: '#2563eb', borderRadius: '8px', border: '1px solid #2563eb', cursor: 'pointer', fontWeight: 600 }}>
+                  Bật xác thực 2 yếu tố
+               </button>
+            </div>
           </div>
-
-          {/* Main Content */}
-          <div className="profile-main">
-            {activeTab === 'info' ? (
-              <div className="animate-fade-in">
-                <h3 className="profile-section-title">Thông tin cá nhân</h3>
-                <div className="profile-form-grid">
-                  <div className="form-group-admin">
-                    <label className="form-label-admin">Họ và tên</label>
-                    <input type="text" className="form-input-admin" defaultValue="Quản Trị Viên (Demo)" />
-                  </div>
-                  <div className="form-group-admin">
-                    <label className="form-label-admin">Email quản trị</label>
-                    <input type="email" className="form-input-admin" defaultValue="admin@system.vn" />
-                  </div>
-                  <div className="form-group-admin">
-                    <label className="form-label-admin">Số điện thoại</label>
-                    <input type="text" className="form-input-admin" defaultValue="0999999999" />
-                  </div>
-                  <div className="form-group-admin">
-                    <label className="form-label-admin">Ngày tham gia</label>
-                    <input type="date" className="form-input-admin" defaultValue="2024-01-01" readOnly />
-                  </div>
-                </div>
-                <div className="profile-form-actions">
-                  <button className="profile-btn-save admin-btn-primary px-8">Lưu thay đổi</button>
-                </div>
-              </div>
-            ) : (
-              <div className="animate-fade-in">
-                <h3 className="profile-section-title">Đổi mật khẩu</h3>
-                <div className="profile-form-col">
-                  <div className="form-group-admin">
-                    <label className="form-label-admin">Mật khẩu hiện tại</label>
-                    <input type="password" className="form-input-admin" placeholder="Nhập mật khẩu hiện tại" />
-                  </div>
-                  <div className="form-group-admin">
-                    <label className="form-label-admin">Mật khẩu mới</label>
-                    <input type="password" className="form-input-admin" placeholder="Nhập mật khẩu mới" />
-                  </div>
-                  <div className="form-group-admin">
-                    <label className="form-label-admin">Xác nhận mật khẩu mới</label>
-                    <input type="password" className="form-input-admin" placeholder="Nhập lại mật khẩu mới" />
-                  </div>
-                  <div className="mt-6">
-                    <button className="admin-btn-primary">Cập nhật mật khẩu</button>
-                  </div>
-                </div>
-
-                <div className="profile-security-section">
-                  <h3 className="profile-section-title">Xác thực 2 yếu tố (2FA)</h3>
-                  <p className="profile-section-desc">Bảo vệ tài khoản quản trị bằng mã xác thực 2 bước để tăng cường bảo mật.</p>
-                  <button className="admin-btn-secondary">Bật xác thực 2 yếu tố</button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );

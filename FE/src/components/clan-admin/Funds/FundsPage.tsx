@@ -16,12 +16,7 @@ export const FundsPage: React.FC = () => {
   const [search, setSearch] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   
-  const data: FundTransaction[] = [
-    { id: '1', type: 'in', amount: 500000, description: 'Đóng góp Quỹ khuyến học', date: '10/09/2026', personName: 'Nguyễn Văn A' },
-    { id: '2', type: 'out', amount: 2000000, description: 'Sửa chữa Từ đường', date: '05/09/2026', personName: 'Ban Trị sự' },
-    { id: '3', type: 'in', amount: 1000000, description: 'Cúng dường lễ thanh minh', date: '01/09/2026', personName: 'Nguyễn Văn C' },
-    { id: '4', type: 'out', amount: 500000, description: 'Hỗ trợ gia đình khó khăn', date: '28/08/2026', personName: 'Ban Trị sự' },
-  ];
+  const data: FundTransaction[] = [];
 
   const columns: Column<FundTransaction>[] = [
     { key: 'date', header: 'Ngày', render: (item) => item.date },
@@ -65,8 +60,8 @@ export const FundsPage: React.FC = () => {
           <div className="fund-stat-card">
             <div className="fund-stat-info">
               <p className="fund-stat-title">Tổng Quỹ Khuyến học</p>
-              <h3 className="fund-stat-amount">12,500,000 đ</h3>
-              <p className="fund-stat-trend">↑ Tăng 5% so với tháng trước</p>
+              <h3 className="fund-stat-amount">0 đ</h3>
+              <p className="fund-stat-trend">Chưa có dữ liệu</p>
             </div>
             <div className="fund-stat-icon">
               <svg width="120" height="120" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.31-8.86c-1.77-.45-2.34-.94-2.34-1.67 0-.84.79-1.43 2.1-1.43 1.38 0 1.9.66 1.94 1.64h1.71c-.05-1.34-.87-2.57-2.49-2.97V5H10.9v1.69c-1.51.32-2.72 1.3-2.72 2.81 0 1.79 1.49 2.69 3.66 3.21 1.95.46 2.34 1.15 2.34 1.87 0 .53-.39 1.64-2.25 1.64-1.74 0-2.1-.96-2.17-1.92H8c.11 1.71 1.31 2.86 2.9 3.22V19h2.33v-1.64c1.72-.3 2.87-1.35 2.87-2.92-.01-1.79-1.5-2.7-3.79-3.3z"></path></svg>
@@ -75,8 +70,8 @@ export const FundsPage: React.FC = () => {
           <div className="fund-stat-card">
             <div className="fund-stat-info">
               <p className="fund-stat-title">Tổng Quỹ Xây dựng</p>
-              <h3 className="fund-stat-amount">85,000,000 đ</h3>
-              <p className="fund-stat-trend">↑ Tăng 12% so với tháng trước</p>
+              <h3 className="fund-stat-amount">0 đ</h3>
+              <p className="fund-stat-trend">Chưa có dữ liệu</p>
             </div>
             <div className="fund-stat-icon">
               <svg width="120" height="120" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 22h20L12 2zm0 3.84L18.4 19H5.6L12 5.84zM11 10h2v5h-2zm0 6h2v2h-2z"></path></svg>
@@ -85,8 +80,8 @@ export const FundsPage: React.FC = () => {
           <div className="fund-stat-card">
             <div className="fund-stat-info">
               <p className="fund-stat-title">Tổng Chi (Tháng này)</p>
-              <h3 className="fund-stat-amount">2,500,000 đ</h3>
-              <p className="fund-stat-trend">↓ Giảm 2% so với tháng trước</p>
+              <h3 className="fund-stat-amount">0 đ</h3>
+              <p className="fund-stat-trend">Chưa có dữ liệu</p>
             </div>
             <div className="fund-stat-icon">
               <svg width="120" height="120" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"></path></svg>
@@ -149,21 +144,8 @@ export const FundsPage: React.FC = () => {
           <div className="fund-pending-list">
             <h4 className="fund-pending-title">Giao dịch chờ duyệt</h4>
             <div className="space-y-3">
-              <div className="fund-pending-item">
-                <div className="fund-pending-item-title">Cúng dường xây cổng</div>
-                <div className="fund-pending-item-author">Bởi: Phạm Thị Y</div>
-                <div className="fund-pending-item-action">
-                  <span className="fund-pending-item-amount">+5,000,000 đ</span>
-                  <button className="fund-pending-btn-approve">Duyệt</button>
-                </div>
-              </div>
-              <div className="fund-pending-item">
-                <div className="fund-pending-item-title">Mua sắm vật tư cúng</div>
-                <div className="fund-pending-item-author">Bởi: Ban Trị sự</div>
-                <div className="fund-pending-item-action">
-                  <span className="fund-pending-item-amount">-1,200,000 đ</span>
-                  <button className="fund-pending-btn-approve">Duyệt</button>
-                </div>
+              <div className="fund-pending-empty text-gray-500 text-sm">
+                Không có giao dịch nào đang chờ duyệt.
               </div>
             </div>
           </div>

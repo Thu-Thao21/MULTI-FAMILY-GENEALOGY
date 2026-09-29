@@ -28,14 +28,16 @@ import FamilyAdminsPage from '../components/clan-admin/FamilyAdmins/FamilyAdmins
 import ClanMembersMgmt from '../components/clan-admin/Members/ClanMembersMgmt';
 import PersonsPage from '../components/clan-admin/Persons/PersonsPage';
 import RelationshipsPage from '../components/clan-admin/Relationships/RelationshipsPage';
-import GenealogyTreePage from '../components/clan-admin/GenealogyTree/GenealogyTreePage';
 import SearchPage from '../components/clan-admin/Search/SearchPage';
 import MemorialDaysPage from '../components/clan-admin/MemorialDays/MemorialDaysPage';
 import EventsPage from '../components/clan-admin/Events/EventsPage';
 import FundsPage from '../components/clan-admin/Funds/FundsPage';
-import ArchivesPage from '../components/clan-admin/Archives/ArchivesPage';
-import AIPage from '../components/clan-admin/AI/AIPage';
-import WorshipSpacePage from '../components/clan-admin/WorshipSpace/WorshipSpacePage';
+import {
+  AIPage,
+  WorshipSpacePage,
+  GenealogyTreePage,
+  ArchivesPage,
+} from '../components/common/SharedPages';
 import Library3DPage from '../components/clan-admin/3DLibrary/Library3DPage';
 import ImportExportPage from '../components/clan-admin/ImportExport/ImportExportPage';
 import BusinessPage from '../components/clan-admin/Business/BusinessPage';
@@ -45,7 +47,17 @@ import ClanFamilyLinksMgmt from '../components/clan-admin/InterFamily/ClanFamily
 import ClanAccountMgmt from '../components/clan-admin/Settings/ClanAccountMgmt';
 import ClanAuditLogsMgmt from '../components/clan-admin/AuditLogs/ClanAuditLogsMgmt';
 import ClanDataBackupMgmt from '../components/clan-admin/Backup/ClanDataBackupMgmt';
-import ProfilePage from '../components/clan-admin/Profile/ProfilePage';
+import { ProfilePage } from '../components/common/SharedPages';
+
+// Public & User Dashboard Imports
+import Dashboard from '../pages/dashboard/Dashboard';
+import { PublicHomePage } from '../pages/public/Home';
+import { PublicFamilySearchPage } from '../pages/public/FamilySearch';
+import { BusinessPlansView } from '../pages/public/BusinessPlans';
+import { BusinessRegisterWizard } from '../pages/public/BusinessRegister';
+import { BusinessTrackStatusPage } from '../pages/public/BusinessTrack';
+import { InviteActivationPage } from '../pages/public/InviteActivation';
+
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import LoginPage from '../pages/auth/Login';
 import RegisterPage from '../pages/auth/Register';
@@ -85,6 +97,16 @@ const AppRoutes: React.FC<AppRoutesProps> = ({
 
   return (
     <Routes>
+      {/* Public Guest Routes */}
+      <Route path="/" element={<PublicHomePage />} />
+      <Route path="/public" element={<PublicHomePage />} />
+      <Route path="/public/families" element={<PublicFamilySearchPage />} />
+      <Route path="/public/business-plans" element={<BusinessPlansView />} />
+      <Route path="/public/business-register" element={<BusinessRegisterWizard />} />
+      <Route path="/public/business-register/track" element={<BusinessTrackStatusPage />} />
+      <Route path="/activate" element={<InviteActivationPage />} />
+
+      {/* Authentication Routes */}
       <Route
         path="/login"
         element={
@@ -110,7 +132,14 @@ const AppRoutes: React.FC<AppRoutesProps> = ({
           <ForgotPasswordPage onSwitchToLogin={() => navigate('/login')} />
         }
       />
+
+      {/* Protected User Dashboard Routes */}
+      <Route
+        path="/user/*"
+        element={<Dashboard userName={userName} onLogout={handleLogout} />}
+      />
       
+      {/* System Admin Routes */}
       <Route path="/admin" element={
         <ProtectedRoute>
           <RoleGuard allowedRoles={['admin']}>
@@ -161,7 +190,7 @@ const AppRoutes: React.FC<AppRoutesProps> = ({
           <Route path="business" element={<BusinessPage />} />
           <Route path="privacy" element={<PrivacyPage />} />
           <Route path="settings" element={<ClanAccountMgmt />} />
-          <Route path="profile" element={<ProfilePage />} />
+          <Route path="profile" element={<ProfilePage memberId="mem_001" onBack={() => navigate('/clan-admin/dashboard')} />} />
           <Route path="backup" element={<ClanDataBackupMgmt />} />
           <Route path="audit-logs" element={<ClanAuditLogsMgmt />} />
       </Route>

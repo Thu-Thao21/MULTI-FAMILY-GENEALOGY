@@ -1,0 +1,13 @@
+/* PersonalInfoTab Styles */
+.personal-info-tab-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.personal-info-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 24px;
+}

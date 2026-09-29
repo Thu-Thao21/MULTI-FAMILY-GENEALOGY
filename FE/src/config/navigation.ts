@@ -13,17 +13,26 @@ export interface NavGroup {
   items: NavItem[];
 }
 
-// 1. MEMBER NAVIGATION (THÀNH VIÊN THƯỜNG)
+// 1. MEMBER NAVIGATION (THÀNH VIÊN THƯỜNG - 38 FRs)
 export const memberNavigation: NavGroup[] = [
   {
-    groupLabel: 'QUẢN LÝ GIA PHẢ',
+    groupLabel: 'TỔNG QUAN',
     items: [
       { id: 'dashboard', label: 'Trang chủ', route: ROUTES.USER.DASHBOARD },
-      {
-        id: 'tree',
-        label: 'Cây Gia Phả',
-        route: ROUTES.USER.TREE_HORIZONTAL,
-      },
+      { id: 'notifications', label: 'Thông báo & Cài đặt', route: ROUTES.USER.NOTIFICATIONS },
+    ],
+  },
+  {
+    groupLabel: 'GIA PHẢ & QUAN HỆ',
+    items: [
+      { id: 'tree', label: 'Cây Gia Phả', route: ROUTES.USER.TREE_HORIZONTAL },
+      { id: 'member-list', label: 'Danh sách thành viên', route: ROUTES.USER.MEMBERS },
+      { id: 'relationship-finder', label: 'Tra cứu & Xưng hô', route: ROUTES.USER.RELATIONSHIP },
+    ],
+  },
+  {
+    groupLabel: 'MẠNG LƯỚI LIÊN HỌ',
+    items: [
       {
         id: 'network',
         label: 'Mạng lưới Liên họ',
@@ -37,51 +46,40 @@ export const memberNavigation: NavGroup[] = [
     ],
   },
   {
-    groupLabel: 'CÁ NHÂN & THÔNG TIN',
+    groupLabel: 'HỒ SƠ & ĐỀ XUẤT',
     items: [
-      { id: 'member-list', label: 'Hồ sơ & Thành viên', route: ROUTES.USER.MEMBERS },
-      { id: 'relationship-finder', label: 'Tra cứu & Xưng hô', route: ROUTES.USER.RELATIONSHIP },
-      { id: 'reports-export', label: 'Báo cáo & Xuất nhập', route: ROUTES.USER.REPORTS },
+      { id: 'my-profile', label: 'Hồ sơ của tôi', route: ROUTES.USER.MY_PROFILE },
+      { id: 'my-proposals', label: 'Đề xuất của tôi', route: ROUTES.USER.PROPOSALS },
+    ],
+  },
+  {
+    groupLabel: 'ĐỜI SỐNG DÒNG HỌ',
+    items: [
+      { id: 'anniversaries', label: 'Lịch ngày giỗ', route: ROUTES.USER.ANNIVERSARIES },
+      { id: 'events', label: 'Sự kiện dòng họ', route: ROUTES.USER.EVENTS },
+      { id: 'funds', label: 'Quỹ & Đóng góp', route: ROUTES.USER.FUNDS },
+      { id: 'ancestral-hall', label: 'Phòng thờ số', route: ROUTES.USER.ANCESTRAL_HALL },
+      { id: 'ancestral-library', label: 'Thư viện Tổ tiên 3D/360°', route: ROUTES.USER.ANCESTRAL_LIBRARY },
+    ],
+  },
+  {
+    groupLabel: 'TƯ LIỆU & AI',
+    items: [
+      { id: 'documents', label: 'Tư liệu lịch sử', route: ROUTES.USER.DOCUMENTS },
+      { id: 'ai-assistant', label: 'Trợ lý AI dòng họ', route: ROUTES.USER.AI_ASSISTANT },
+      { id: 'ai-consent', label: 'Đồng ý sử dụng AI', route: ROUTES.USER.AI_CONSENT },
+    ],
+  },
+  {
+    groupLabel: 'CÀI ĐẶT & BẢO MẬT',
+    items: [
+      { id: 'privacy-settings', label: 'Quyền riêng tư', route: ROUTES.USER.PRIVACY_SETTINGS },
     ],
   },
 ];
 
 
-// 3. ADMIN NAVIGATION (QUẢN TRỊ VIÊN HỆ THỐNG)
-export const adminNavigation: NavGroup[] = [
-  {
-    groupLabel: 'QUẢN TRỊ HỆ THỐNG',
-    items: [
-      { id: 'dashboard', label: 'Dashboard Admin', route: ROUTES.ADMIN.DASHBOARD },
-      { id: 'admin-account-mgmt', label: 'Quản Lý Tài Khoản & Phân Quyền', route: ROUTES.ADMIN.ACCOUNTS },
-      { id: 'admin-families-mgmt', label: 'Quản Lý Danh Sách Dòng Họ', route: ROUTES.ADMIN.FAMILIES },
-    ],
-  },
-  {
-    groupLabel: 'AN NINH & BẢO MẬT',
-    items: [
-      { id: 'admin-moderation', label: 'Kiểm Duyệt & Tranh Chấp', route: ROUTES.ADMIN.ROOT + '/moderation' },
-      { id: 'admin-security-logs', label: 'Nhật Ký Bảo Mật & Hệ Thống', route: ROUTES.ADMIN.SECURITY_LOGS },
-      { id: 'admin-service-health', label: 'Trạng Thái Dịch Vụ API/DB', route: ROUTES.ADMIN.ROOT + '/health' },
-    ],
-  },
-  {
-    groupLabel: 'LIÊN KẾT & MỞ RỘNG (MỚI)',
-    items: [
-      { id: 'admin-members-mgmt', label: 'Hồ Sơ Thành Viên Gia Tộc', route: ROUTES.ADMIN.MEMBERS },
-      { id: 'admin-family-links', label: 'Yêu Cầu & Phê Duyệt Liên Họ', route: ROUTES.ADMIN.FAMILY_LINKS },
-      { id: 'admin-approvals', label: 'Trung Tâm Phê Duyệt Đề Xuất', route: ROUTES.ADMIN.APPROVALS },
-      { id: 'admin-data-backup', label: 'Xuất Nhập & Sao Lưu Dữ Liệu', route: ROUTES.ADMIN.BACKUP },
-    ],
-  },
-];
-
-export function getNavigationForRole(role: string): NavGroup[] {
-  const r = role.toLowerCase();
-  if (r === 'admin') {
-    return adminNavigation;
-  }
-
+export function getNavigationForRole(_role: string): NavGroup[] {
   return memberNavigation;
 }
 

@@ -93,6 +93,8 @@ export interface MemberListResponse {
 export interface Family {
   id: string;
   name: string;
+  code?: string;
+  description?: string;
   founderName?: string;
   originPlace?: string;
   status: string;

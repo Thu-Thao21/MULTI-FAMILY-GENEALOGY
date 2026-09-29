@@ -16,10 +16,7 @@ export const RelationshipsPage: React.FC = () => {
   const [search, setSearch] = useState('');
   
   // Mock data
-  const data: Relationship[] = [
-    { id: '1', person1: 'Nguyễn Văn Khoa', person2: 'Nguyễn Văn A', type: 'Cha - Con', details: 'Con ruột', status: 'verified' },
-    { id: '2', person1: 'Nguyễn Thị Hoa', person2: 'Trần Văn B', type: 'Vợ - Chồng', details: 'Kết hôn năm 2010', status: 'verified' },
-  ];
+  const data: Relationship[] = [];
 
   const columns: Column<Relationship>[] = [
     { key: 'person1', header: 'Người thứ nhất', render: (item) => <strong className="text-blue-700">{item.person1}</strong> },

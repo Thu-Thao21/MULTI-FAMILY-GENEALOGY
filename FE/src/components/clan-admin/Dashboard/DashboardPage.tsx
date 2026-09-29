@@ -22,7 +22,7 @@ export const DashboardPage: React.FC = () => {
         <div className="admin-header-banner-inner dashboard-banner-relative">
           <div className="dashboard-tag-inner admin-system-tag text-blue-100 bg-blue-900/50 inline-block px-3 py-1 rounded-full mb-3 text-xs font-bold tracking-widest border border-blue-400/30">QUẢN TRỊ DÒNG HỌ • CLAN ADMIN</div>
           <h1 className="dashboard-title admin-greeting text-white text-3xl font-black mb-3 drop-shadow-md">
-            Tổng quan Dòng họ Nguyễn Đại Tôn
+            Tổng quan Dòng họ (Đang tải...)
           </h1>
           <p className="dashboard-subtitle admin-subtext text-blue-50 text-base leading-relaxed max-w-none drop-shadow-sm pr-4 md:pr-12">
             Kính chào Trưởng tộc. Không gian gia phả kỹ thuật số của dòng họ đang hoạt động ổn định trên nền tảng đám mây. Hệ thống phân tích huyết thống đã tự động chạy quét và sao lưu dữ liệu toàn vẹn vào lúc 03:00 sáng nay. Dưới đây là bức tranh toàn cảnh về quy mô, tình hình tài chính và các hoạt động đang diễn ra của toàn thể dòng họ.
@@ -96,7 +96,7 @@ export const DashboardPage: React.FC = () => {
               </div>
               <span className="dashboard-stat-badge">Cập nhật 2h trước</span>
             </div>
-            <h4 className="dashboard-stat-value">1,245</h4>
+            <h4 className="dashboard-stat-value">0</h4>
             <p className="dashboard-stat-label">Nhân khẩu (Person)</p>
             <p className="dashboard-stat-detail">Toàn bộ hồ sơ danh tính của những người thuộc dòng máu Nguyễn Đại Tôn đã được lưu trữ an toàn.</p>
           </div>
@@ -113,7 +113,7 @@ export const DashboardPage: React.FC = () => {
               </div>
               <span className="dashboard-stat-badge">+12 tuần này</span>
             </div>
-            <h4 className="dashboard-stat-value">450</h4>
+            <h4 className="dashboard-stat-value">0</h4>
             <p className="dashboard-stat-label">Tài khoản (Account)</p>
             <p className="dashboard-stat-detail">Tài khoản được cấp quyền truy cập, tương tác trực tuyến với bản đồ gia phả số hóa.</p>
           </div>
@@ -130,7 +130,7 @@ export const DashboardPage: React.FC = () => {
               </div>
               <span className="dashboard-stat-badge">Cơ cấu ổn định</span>
             </div>
-            <h4 className="dashboard-stat-value">12 / 45</h4>
+            <h4 className="dashboard-stat-value">0 / 0</h4>
             <p className="dashboard-stat-label">Chi / Nhánh</p>
             <p className="dashboard-stat-detail">Mạng lưới 12 Chi lớn và 45 Nhánh nhỏ phân bổ trên khắp toàn quốc và hải ngoại.</p>
           </div>
@@ -147,7 +147,7 @@ export const DashboardPage: React.FC = () => {
               </div>
               <span className="dashboard-stat-badge">Đã ủy quyền</span>
             </div>
-            <h4 className="dashboard-stat-value">8</h4>
+            <h4 className="dashboard-stat-value">0</h4>
             <p className="dashboard-stat-label">Phụ tá (Family Admin)</p>
             <p className="dashboard-stat-detail">Đội ngũ phụ tá đắc lực hỗ trợ Trưởng tộc số hóa thông tin từng cụm chi nhỏ.</p>
           </div>
@@ -171,7 +171,7 @@ export const DashboardPage: React.FC = () => {
             <div className="dashboard-task-edge-color"></div>
             <div className="dashboard-task-card-header">
               <div className="dashboard-task-icon">
-                15
+                0
               </div>
               <div>
                 <h4 className="dashboard-task-card-title">Yêu cầu chờ duyệt</h4>
@@ -179,7 +179,7 @@ export const DashboardPage: React.FC = () => {
               </div>
             </div>
             <p className="dashboard-task-card-desc">
-              Thành viên dòng họ đã gửi 15 yêu cầu sửa đổi hồ sơ cá nhân, bổ sung bằng cấp, và báo tử. Cần ngài duyệt để hiển thị chính thức lên phả đồ.
+              Không có yêu cầu sửa đổi hồ sơ nào đang chờ duyệt.
             </p>
             <button className="dashboard-task-card-action">
               Xử lý ngay <span className="text-lg">→</span>
@@ -193,7 +193,7 @@ export const DashboardPage: React.FC = () => {
             <div className="dashboard-task-edge-color"></div>
             <div className="dashboard-task-card-header">
               <div className="dashboard-task-icon">
-                2
+                0
               </div>
               <div>
                 <h4 className="dashboard-task-card-title">Lời mời Liên họ</h4>
@@ -201,7 +201,7 @@ export const DashboardPage: React.FC = () => {
               </div>
             </div>
             <p className="dashboard-task-card-desc">
-              Hội đồng Gia tộc họ Trần (Hà Nam) và họ Lê (Thanh Hóa) đã gửi lời mời giao lưu liên kết trên hệ thống phả hệ quốc gia.
+              Không có lời mời giao lưu liên kết họ tộc nào.
             </p>
             <button className="dashboard-task-card-action">
               Xem chi tiết thư mời <span className="text-lg">→</span>
@@ -215,7 +215,7 @@ export const DashboardPage: React.FC = () => {
             <div className="dashboard-task-edge-color"></div>
             <div className="dashboard-task-card-header">
               <div className="dashboard-task-icon">
-                5
+                0
               </div>
               <div>
                 <h4 className="dashboard-task-card-title">Cảnh báo AI</h4>
@@ -223,7 +223,7 @@ export const DashboardPage: React.FC = () => {
               </div>
             </div>
             <p className="dashboard-task-card-desc">
-              Engine AI phát hiện 5 hồ sơ nhân khẩu có dấu hiệu trùng lặp tên và năm sinh, cùng một số lỗi logic như năm sinh con trước năm sinh cha.
+              Không có hồ sơ nào có dấu hiệu trùng lặp hoặc lỗi logic.
             </p>
             <button className="dashboard-task-card-action">
               Chạy công cụ gộp <span className="text-lg">→</span>
@@ -285,10 +285,10 @@ export const DashboardPage: React.FC = () => {
               <div className="dashboard-fund-bg-glow-2"></div>
               <div className="dashboard-fund-content">
                 <p className="dashboard-fund-label">Báo Cáo Tổng Quỹ Khuyến Học & Xây Dựng</p>
-                <h3 className="dashboard-fund-amount">97,500,000 ₫</h3>
+                <h3 className="dashboard-fund-amount">0 ₫</h3>
                 <p className="dashboard-fund-desc">
-                  <span className="dashboard-fund-badge">↑ Tăng 12,000,000 ₫</span>
-                  So với quý trước nhờ sự đóng góp của anh em kiều bào.
+                  <span className="dashboard-fund-badge">Đang cập nhật</span>
+                  Chưa có dữ liệu đóng góp mới.
                 </p>
               </div>
               <div className="dashboard-fund-icon-wrapper">
@@ -322,27 +322,27 @@ export const DashboardPage: React.FC = () => {
                 <div className="dashboard-plan-usage-item">
                   <div className="dashboard-plan-usage-label">
                     <span>Hạn mức Nhân khẩu</span>
-                    <span>1,245 / 5,000</span>
+                    <span>0 / 0</span>
                   </div>
                   <div className="dashboard-plan-progress-bg">
-                    <div className="dashboard-plan-progress-fill w-25">
+                    <div className="dashboard-plan-progress-fill w-0">
                       <div className="dashboard-plan-progress-inner"></div>
                     </div>
                   </div>
-                  <p className="dashboard-plan-usage-text">Đã dùng 25%</p>
+                  <p className="dashboard-plan-usage-text">Đã dùng 0%</p>
                 </div>
                 
                 <div className="dashboard-plan-usage-item">
                   <div className="dashboard-plan-usage-label">
                     <span>Bộ nhớ Đám mây (Tư liệu)</span>
-                    <span>15GB / 50GB</span>
+                    <span>0GB / 0GB</span>
                   </div>
                   <div className="dashboard-plan-progress-bg">
-                    <div className="dashboard-plan-progress-fill w-30">
+                    <div className="dashboard-plan-progress-fill w-0">
                       <div className="dashboard-plan-progress-inner"></div>
                     </div>
                   </div>
-                  <p className="dashboard-plan-usage-text">Đã dùng 30%</p>
+                  <p className="dashboard-plan-usage-text">Đã dùng 0%</p>
                 </div>
               </div>
             </div>

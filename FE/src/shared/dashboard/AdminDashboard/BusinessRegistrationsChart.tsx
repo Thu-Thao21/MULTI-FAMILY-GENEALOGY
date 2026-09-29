@@ -9,8 +9,8 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
-import { businessRegistrationsData } from './mockChartData';
 
+const businessRegistrationsData: any[] = [];
 const BusinessRegistrationsChart: React.FC = () => {
   return (
     <div className="admin-chart-container">
@@ -84,8 +84,8 @@ const BusinessRegistrationsChart: React.FC = () => {
             <p className="stat-card-value">
               {businessRegistrationsData.reduce((acc, curr) => acc + curr.registrations, 0)}
             </p>
-            <span className="stat-card-trend trend-up">
-              +12.5% so với năm trước
+            <span className="stat-card-trend trend-neutral">
+              Chưa có dữ liệu
             </span>
           </div>
           
@@ -94,11 +94,8 @@ const BusinessRegistrationsChart: React.FC = () => {
             <p className="stat-card-value approved-value">
               {businessRegistrationsData.reduce((acc, curr) => acc + curr.approved, 0)}
             </p>
-            <span className="stat-card-trend trend-up">
-              Tỷ lệ duyệt đạt {
-                ((businessRegistrationsData.reduce((acc, curr) => acc + curr.approved, 0) / 
-                businessRegistrationsData.reduce((acc, curr) => acc + curr.registrations, 0)) * 100).toFixed(1)
-              }%
+            <span className="stat-card-trend trend-neutral">
+              Tỷ lệ duyệt đạt 0%
             </span>
           </div>
           
@@ -108,7 +105,7 @@ const BusinessRegistrationsChart: React.FC = () => {
               {businessRegistrationsData.reduce((acc, curr) => acc + curr.registrations - curr.approved, 0)}
             </p>
             <span className="stat-card-trend trend-neutral">
-              Cần xử lý trong tháng này
+              Chưa có dữ liệu
             </span>
           </div>
         </div>

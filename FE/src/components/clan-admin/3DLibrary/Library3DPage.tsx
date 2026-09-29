@@ -6,11 +6,7 @@ export const Library3DPage: React.FC = () => {
   const [selectedModel, setSelectedModel] = useState<any>(null);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
 
-  const libraryItems = [
-    { id: '1', type: '360', title: 'Toàn cảnh Nhà thờ họ Nguyễn Đại Tôn', date: '12/08/2026', views: 245, thumb: '🏛️' },
-    { id: '2', type: '3D', title: 'Mô hình Lăng Mộ Cụ Tổ', date: '01/09/2026', views: 180, thumb: '🗿' },
-    { id: '3', type: '360', title: 'Nội điện Không gian Thờ', date: '10/09/2026', views: 320, thumb: '✨' },
-  ];
+  const libraryItems: any[] = [];
 
   return (
     <div className="admin-account-container">
@@ -25,7 +21,7 @@ export const Library3DPage: React.FC = () => {
       <div className="library-list-container">
         <div className="library-toolbar">
           <div className="library-filters">
-            <button className="library-filter-btn-active">Tất cả (3)</button>
+            <button className="library-filter-btn-active">Tất cả (0)</button>
             <button className="library-filter-btn-inactive">Tour 360</button>
             <button className="library-filter-btn-inactive">Mô hình 3D</button>
           </div>

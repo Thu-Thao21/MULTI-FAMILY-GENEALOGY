@@ -7,8 +7,8 @@ export async function buildErgoTreeFromDB(
   focusMemberId?: string,
 ): Promise<{ rootNodes: ErgoTreeNode[]; allMembers: Member[] }> {
   try {
-    // Fetch all members directly from backend database API
-    const res = await fetchMembers({ familyId, limit: 100 });
+    // Fetch members with maximum limit for complete tree layout
+    const res = await fetchMembers({ familyId, limit: 1000 });
     const allMembers = Array.isArray(res?.items) ? res.items : [];
 
     if (allMembers.length === 0) {
@@ -19,12 +19,12 @@ export async function buildErgoTreeFromDB(
     const memberMap = new Map<string, Member>();
     allMembers.forEach((m) => memberMap.set(m.id, m));
 
-    // Helper to find true wives/spouses of a male member
+    // Helper to find true wives/spouses of a male member without hardcoded IDs
     const getSpousesOfMale = (m: Member): SpouseNode[] => {
       if (m.gender !== 'male') return [];
 
       const spouses: SpouseNode[] = [];
-      
+
       allMembers.forEach((w) => {
         if (w.gender !== 'female' || w.id === m.id) return;
 
@@ -41,17 +41,12 @@ export async function buildErgoTreeFromDB(
           (c) => (c as any).fatherId === m.id && (c as any).motherId === w.id
         );
 
-        // Check 2: Explicit spouse link or sample pair
+        // Check 2: Explicit spouse link properties
         const isExplicitSpouse =
           (w as any).spouseId === m.id ||
           (m as any).spouseId === w.id ||
           (w as any).husbandId === m.id ||
-          (m.id === 'mem_001' && w.id === 'mem_002') ||
-          (m.id === 'mem_003' && w.id === 'mem_004') ||
-          (m.id === 'mem_005' && w.id === 'mem_006') ||
-          (m.id === 'mem_008' && w.id === 'mem_009') ||
-          (m.id === 'mem_010' && w.id === 'mem_011') ||
-          (m.id === 'mem_013' && w.id === 'mem_014');
+          (m as any).wifeId === w.id;
 
         if (isMotherOfChildren || isExplicitSpouse) {
           spouses.push({
@@ -90,19 +85,22 @@ export async function buildErgoTreeFromDB(
       };
     };
 
-    // Build recursive children
-    const buildChildrenRecursive = (parentId: string): ErgoTreeNode[] => {
+    // Build recursive children with cycle detection
+    const buildChildrenRecursive = (parentId: string, visited: Set<string>): ErgoTreeNode[] => {
+      if (visited.has(parentId)) return [];
+      visited.add(parentId);
+
       const parentM = memberMap.get(parentId);
       if (!parentM) return [];
 
       let directChildren: Member[] = [];
 
       if (parentM.gender === 'male') {
-        // For a male parent, get all children where fatherId === parentId
         directChildren = allMembers.filter((m) => (m as any).fatherId === parentId);
       } else {
-        // For a female parent, only query motherId if her husband is not present in allMembers
-        const husbandExists = allMembers.some((m) => m.gender === 'male' && getSpousesOfMale(m).some((s) => s.id === parentId));
+        const husbandExists = allMembers.some(
+          (m) => m.gender === 'male' && getSpousesOfMale(m).some((s) => s.id === parentId)
+        );
         if (!husbandExists) {
           directChildren = allMembers.filter((m) => (m as any).motherId === parentId);
         }
@@ -110,7 +108,7 @@ export async function buildErgoTreeFromDB(
 
       return directChildren.map((c) => {
         const node = convertNode(c, c.id === focusMemberId);
-        node.children = buildChildrenRecursive(c.id);
+        node.children = buildChildrenRecursive(c.id, new Set(visited));
         return node;
       });
     };
@@ -125,7 +123,6 @@ export async function buildErgoTreeFromDB(
     }
 
     if (rootMembers.length === 0) {
-      // Find generation 1 male root ancestors
       rootMembers = allMembers.filter((m) => m.generation === 1 && m.gender === 'male');
       if (rootMembers.length === 0) {
         rootMembers = allMembers.filter((m) => m.generation === 1);
@@ -137,7 +134,7 @@ export async function buildErgoTreeFromDB(
 
     const rootNodes: ErgoTreeNode[] = rootMembers.map((r) => {
       const node = convertNode(r, r.id === focusMemberId);
-      node.children = buildChildrenRecursive(r.id);
+      node.children = buildChildrenRecursive(r.id, new Set());
       return node;
     });
 

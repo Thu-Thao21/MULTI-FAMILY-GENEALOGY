@@ -1,7 +1,6 @@
-
 import React from 'react';
-import ForgotPasswordForm from '../../components/auth/ForgotPasswordForm';
-import AuthLanding from '../../components/auth/AuthLanding';
+import ForgotPasswordForm from '../../components/common/auth/ForgotPasswordForm';
+import AuthLanding from '../../components/common/auth/AuthLanding';
 import loginBackground from '../../assets/nenan.png';
 
 export interface ForgotPasswordPageProps {

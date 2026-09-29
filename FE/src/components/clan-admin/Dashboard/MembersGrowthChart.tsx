@@ -11,16 +11,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
-const membersGrowthData = [
-  { month: 'T1', newMembers: 12, totalMembers: 1100 },
-  { month: 'T2', newMembers: 15, totalMembers: 1115 },
-  { month: 'T3', newMembers: 8,  totalMembers: 1123 },
-  { month: 'T4', newMembers: 25, totalMembers: 1148 },
-  { month: 'T5', newMembers: 18, totalMembers: 1166 },
-  { month: 'T6', newMembers: 30, totalMembers: 1196 },
-  { month: 'T7', newMembers: 45, totalMembers: 1241 },
-  { month: 'T8', newMembers: 4,  totalMembers: 1245 },
-];
+const membersGrowthData: any[] = [];
 
 const MembersGrowthChart: React.FC = () => {
   return (
@@ -84,30 +75,30 @@ const MembersGrowthChart: React.FC = () => {
           <div className="admin-chart-stat-card">
             <h4 className="stat-card-title">Tổng Nhân Khẩu</h4>
             <p className="stat-card-value">
-              {membersGrowthData[membersGrowthData.length - 1].totalMembers}
+              {membersGrowthData.length > 0 ? membersGrowthData[membersGrowthData.length - 1].totalMembers : 0}
             </p>
-            <span className="stat-card-trend trend-up">
-              +5.4% so với đầu năm
+            <span className="stat-card-trend trend-neutral">
+              Chưa có dữ liệu
             </span>
           </div>
           
           <div className="admin-chart-stat-card">
             <h4 className="stat-card-title">Thành viên mới (YTD)</h4>
             <p className="stat-card-value approved-value">
-              {membersGrowthData.reduce((acc, curr) => acc + curr.newMembers, 0)}
+              {membersGrowthData.reduce((acc, curr) => acc + (curr.newMembers || 0), 0)}
             </p>
-            <span className="stat-card-trend trend-up">
-              Tốc độ tăng trưởng ổn định
+            <span className="stat-card-trend trend-neutral">
+              Chưa có dữ liệu
             </span>
           </div>
           
           <div className="admin-chart-stat-card">
             <h4 className="stat-card-title">Tháng cao điểm</h4>
             <p className="stat-card-value pending-value">
-              T7
+              --
             </p>
             <span className="stat-card-trend trend-neutral">
-              Kịp dịp Tế Tổ mùa thu
+              Chưa có dữ liệu
             </span>
           </div>
         </div>

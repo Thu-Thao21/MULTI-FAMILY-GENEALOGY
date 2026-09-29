@@ -33,9 +33,10 @@ export async function fetchMembers(params?: {
 export async function fetchMemberDetail(memberId: string): Promise<MemberDetail | null> {
   try {
     const res = await apiClient.get(`/members/${memberId}`);
-    return res.data ?? null;
+    if (res.data) return res.data;
+    return null;
   } catch (err) {
-    console.error(`API fetchMemberDetail error for ${memberId}:`, err);
+    console.warn(`API fetchMemberDetail failed for ${memberId}`);
     return null;
   }
 }

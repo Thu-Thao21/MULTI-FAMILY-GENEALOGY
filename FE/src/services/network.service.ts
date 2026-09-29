@@ -4,9 +4,9 @@ import type { FamilyLinkRequest, FamilyNetwork, InLawMarriage } from '../types/n
 export async function fetchFamilyNetwork(category: string = 'all'): Promise<FamilyNetwork[]> {
   try {
     const res = await apiClient.get('/networks/families', { params: { category } });
-    return Array.isArray(res.data) ? res.data : Array.isArray(res.data?.items) ? res.data.items : [];
-  } catch (err) {
-    console.warn('API fetchFamilyNetwork error (DB empty or endpoint offline):', err);
+    const data = Array.isArray(res.data) ? res.data : Array.isArray(res.data?.items) ? res.data.items : [];
+    return data;
+  } catch {
     return [];
   }
 }
@@ -14,9 +14,9 @@ export async function fetchFamilyNetwork(category: string = 'all'): Promise<Fami
 export async function fetchInLawMarriages(): Promise<InLawMarriage[]> {
   try {
     const res = await apiClient.get('/networks/inlaw-marriages');
-    return Array.isArray(res.data) ? res.data : Array.isArray(res.data?.items) ? res.data.items : [];
-  } catch (err) {
-    console.warn('API fetchInLawMarriages error (DB empty or endpoint offline):', err);
+    const data = Array.isArray(res.data) ? res.data : Array.isArray(res.data?.items) ? res.data.items : [];
+    return data;
+  } catch {
     return [];
   }
 }
@@ -24,9 +24,9 @@ export async function fetchInLawMarriages(): Promise<InLawMarriage[]> {
 export async function fetchLinkRequests(): Promise<FamilyLinkRequest[]> {
   try {
     const res = await apiClient.get('/networks/link-requests');
-    return Array.isArray(res.data) ? res.data : Array.isArray(res.data?.items) ? res.data.items : [];
-  } catch (err) {
-    console.warn('API fetchLinkRequests error (DB empty or endpoint offline):', err);
+    const data = Array.isArray(res.data) ? res.data : Array.isArray(res.data?.items) ? res.data.items : [];
+    return data;
+  } catch {
     return [];
   }
 }
@@ -43,8 +43,7 @@ export async function sendLinkRequest(
       message,
     });
     return res.data;
-  } catch (err) {
-    console.warn('API sendLinkRequest error:', err);
-    return null;
+  } catch {
+    throw new Error('Failed to send link request');
   }
 }

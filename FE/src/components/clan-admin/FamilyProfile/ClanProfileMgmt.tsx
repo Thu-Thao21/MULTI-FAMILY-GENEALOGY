@@ -21,21 +21,15 @@ export const ClanProfileMgmt: React.FC = () => {
 
   const fetchProfile = async () => {
     setLoading(true);
-    // Mocking clan profile for Business Owner
-    setTimeout(() => {
-      setProfile({
-        id: 'clan_001',
-        name: 'Dòng họ Nguyễn (Quản lý)',
-        founder: 'Nguyễn Bặc',
-        origin: 'Gia Viễn, Ninh Bình',
-        history: 'Dòng họ Nguyễn tại Gia Viễn có lịch sử lâu đời, truyền thống hiếu học...',
-        branches: [
-          { id: 'b1', name: 'Chi Trưởng', head: 'Nguyễn Văn A', total_members: 120 },
-          { id: 'b2', name: 'Chi Thứ Nhất', head: 'Nguyễn Văn B', total_members: 85 },
-        ]
-      });
-      setLoading(false);
-    }, 500);
+    setProfile({
+      id: '',
+      name: 'Chưa cập nhật',
+      founder: '?',
+      origin: 'Chưa cập nhật',
+      history: 'Chưa có thông tin lịch sử.',
+      branches: []
+    });
+    setLoading(false);
   };
 
   useEffect(() => {

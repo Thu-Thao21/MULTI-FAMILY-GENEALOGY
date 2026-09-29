@@ -17,10 +17,7 @@ export const MemorialDaysPage: React.FC = () => {
   const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   
-  const data: MemorialDay[] = [
-    { id: '1', name: 'Giỗ Cụ Thủy Tổ Nguyễn Bặc', lunarDate: '15/08', solarDate: '26/09/2026', location: 'Nhà thờ họ Đại Tôn', status: 'upcoming' },
-    { id: '2', name: 'Giỗ Cụ Nguyễn Trãi', lunarDate: '16/08', solarDate: '27/09/2026', location: 'Từ đường Chi 1', status: 'upcoming' },
-  ];
+  const data: MemorialDay[] = [];
 
   const columns: Column<MemorialDay>[] = [
     { key: 'name', header: 'Ngày Giỗ', render: (item) => <strong className="memorial-strong-text">{item.name}</strong> },
@@ -107,15 +104,9 @@ export const MemorialDaysPage: React.FC = () => {
                 ))}
                 {Array.from({length: 30}).map((_, i) => {
                   const day = i + 1;
-                  const isGio = day === 15 || day === 16;
                   return (
-                    <div key={day} className={`memorial-calendar-day ${isGio ? 'is-event' : ''}`}>
-                      <span className={`memorial-calendar-date ${isGio ? 'is-event' : ''}`}>{day}</span>
-                      {isGio && (
-                        <div className="memorial-calendar-event">
-                          {day === 15 ? 'Giỗ Nguyễn Bặc' : 'Giỗ Nguyễn Trãi'}
-                        </div>
-                      )}
+                    <div key={day} className={`memorial-calendar-day`}>
+                      <span className={`memorial-calendar-date`}>{day}</span>
                     </div>
                   );
                 })}

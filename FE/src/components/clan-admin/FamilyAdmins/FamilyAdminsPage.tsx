@@ -17,10 +17,7 @@ export const FamilyAdminsPage: React.FC = () => {
   const [selectedAdmin, setSelectedAdmin] = useState<FamilyAdmin | null>(null);
   
   // Mock data
-  const data: FamilyAdmin[] = [
-    { id: '1', name: 'Nguyễn Văn Admin', email: 'admin.nguyen@email.com', phone: '0987654321', branch: 'Chi 1', status: 'active' },
-    { id: '2', name: 'Trần Thị Quản Lý', email: 'quanly@email.com', phone: '0123456789', branch: 'Nhánh 1.2', status: 'active' },
-  ];
+  const data: FamilyAdmin[] = [];
 
   const columns: Column<FamilyAdmin>[] = [
     { key: 'name', header: 'Họ và tên', render: (item) => <strong className="text-slate-800">{item.name}</strong> },

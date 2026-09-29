@@ -3,7 +3,7 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { TopBar } from '../dashboard/TopBar/TopBar';
 import { Sidebar } from '../dashboard/Sidebar/Sidebar';
 import { useAuth } from '../../hooks/useAuth';
-import trongDongBg from '../../assets/trong-dong-vector-1.jpg';
+import nenanImg from '../../assets/nenan.png';
 import './SystemAdminLayout.css';
 import { ROUTES } from '../../config/routes';
 
@@ -95,11 +95,28 @@ export const SystemAdminLayout: React.FC = () => {
           userRole="admin"
           variant="system"
         />
-        <main className="dashboard-main-content">
-          {activeTab === 'dashboard' && (
-            <div className="dashboard-bg-overlay" style={{ backgroundImage: `url(${trongDongBg})` }}></div>
-          )}
-          <Outlet />
+        <main
+          className="dashboard-main-content"
+          style={{ position: 'relative' }}
+        >
+          {/* Ảnh nền chìm (Watermark) */}
+          <div 
+            style={{
+              position: 'absolute',
+              inset: 0,
+              backgroundImage: `url(${nenanImg})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+              backgroundAttachment: 'fixed',
+              opacity: 0.15,
+              pointerEvents: 'none',
+              zIndex: 0
+            }}
+          />
+          <div className="main-content-inner" style={{ position: 'relative', zIndex: 1, height: '100%' }}>
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>

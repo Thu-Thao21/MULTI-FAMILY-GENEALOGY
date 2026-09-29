@@ -2,15 +2,18 @@ import './ClanAccountMgmt.css';
 import React, { useState } from 'react';
 import PageHeader from '../../../shared/Layout/PageHeader';
 
+interface Delegate {
+  id: string;
+  name: string;
+  role: string;
+  permissions: string[];
+}
+
 export const ClanAccountMgmt: React.FC = () => {
   const [privacyMode, setPrivacyMode] = useState<'public' | 'private'>('private');
   const [msg, setMsg] = useState('');
 
-  // Mocking delegated members
-  const [delegates, setDelegates] = useState([
-    { id: 'd1', name: 'Nguyễn Văn B', role: 'Trưởng Chi 1', permissions: ['Quản lý thành viên chi', 'Duyệt sửa đổi chi'] },
-    { id: 'd2', name: 'Nguyễn Thị C', role: 'Thủ Quỹ', permissions: ['Quản lý quỹ dòng họ'] }
-  ]);
+  const [delegates, setDelegates] = useState<Delegate[]>([]);
 
   const [isDelegateModalOpen, setIsDelegateModalOpen] = useState(false);
 

@@ -557,16 +557,15 @@
 
 
 
-. d a s h b o a r d - b a n n e r - r e l a t i v e 
- 
-   p o s i t i o n :   r e l a t i v e ;   z - i n d e x :   1 ;   
- 
- . w - 2 5 
- 
-   w i d t h :   2 5 % ;   
- 
- . w - 3 0 
- 
-   w i d t h :   3 0 % ;   
- 
- 
+.dashboard-banner-relative {
+  position: relative;
+  z-index: 1;
+}
+
+.w-25 {
+  width: 25%;
+}
+
+.w-30 {
+  width: 30%;
+}

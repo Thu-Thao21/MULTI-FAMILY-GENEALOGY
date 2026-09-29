@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="600" height="600">
+  <defs>
+    <filter id="crisp-shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="16" flood-color="#142840" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+
+  <!-- Outer Double Circle Ring -->
+  <circle cx="300" cy="300" r="284" fill="none" stroke="#142840" stroke-width="4.5"/>
+  <circle cx="300" cy="300" r="268" fill="none" stroke="#142840" stroke-width="9"/>
+  
+  <!-- Warm Cream Inner Badge Background -->
+  <circle cx="300" cy="300" r="263.5" fill="#f5f2eb"/>
+
+  <!-- Tech Circuit Tree Graphic -->
+  <g fill="none" stroke="#142840" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Base Platform -->
+    <path d="M 235 345 L 365 345" stroke-width="5"/>
+    
+    <!-- Central Trunk Lines & Circuit Nodes -->
+    <path d="M 290 345 L 290 285 L 300 270 L 300 195" stroke-width="7"/>
+    <path d="M 310 345 L 310 285 L 300 270" stroke-width="5"/>
+    <path d="M 300 345 L 300 270" stroke-width="6"/>
+    <circle cx="300" cy="345" r="4.5" fill="#142840" stroke="none"/>
+
+    <!-- Left Circuit Branches -->
+    <path d="M 300 290 L 250 250 L 250 205 L 210 175" stroke-width="4.5"/>
+    <path d="M 250 230 L 205 230 L 180 205" stroke-width="4"/>
+    <path d="M 300 255 L 225 195 L 225 155" stroke-width="4"/>
+    <path d="M 300 225 L 255 170 L 255 130" stroke-width="3.8"/>
+    <path d="M 300 195 L 275 150 L 275 118" stroke-width="3.5"/>
+
+    <!-- Right Circuit Branches -->
+    <path d="M 300 290 L 350 250 L 350 205 L 390 175" stroke-width="4.5"/>
+    <path d="M 350 230 L 395 230 L 420 205" stroke-width="4"/>
+    <path d="M 300 255 L 375 195 L 375 155" stroke-width="4"/>
+    <path d="M 300 225 L 345 170 L 345 130" stroke-width="3.8"/>
+    <path d="M 300 195 L 325 150 L 325 118" stroke-width="3.5"/>
+
+    <!-- Node Dots -->
+    <circle cx="250" cy="205" r="5" fill="#142840" stroke="none"/>
+    <circle cx="205" cy="230" r="5" fill="#142840" stroke="none"/>
+    <circle cx="225" cy="195" r="5" fill="#142840" stroke="none"/>
+    <circle cx="255" cy="170" r="4.5" fill="#142840" stroke="none"/>
+    <circle cx="275" cy="150" r="4.5" fill="#142840" stroke="none"/>
+
+    <circle cx="350" cy="205" r="5" fill="#142840" stroke="none"/>
+    <circle cx="395" cy="230" r="5" fill="#142840" stroke="none"/>
+    <circle cx="375" cy="195" r="5" fill="#142840" stroke="none"/>
+    <circle cx="345" cy="170" r="4.5" fill="#142840" stroke="none"/>
+    <circle cx="325" cy="150" r="4.5" fill="#142840" stroke="none"/>
+
+    <!-- Teardrop Leaves at Branch Tips -->
+    <!-- Left leaves -->
+    <path d="M 210 175 C 196 162, 196 142, 216 156 C 224 168, 218 180, 210 175 Z" fill="#142840" stroke="none"/>
+    <path d="M 180 205 C 166 192, 160 210, 178 214 Z" fill="#142840" stroke="none"/>
+    <path d="M 225 155 C 215 138, 230 135, 234 150 Z" fill="#142840" stroke="none"/>
+    <path d="M 255 130 C 245 112, 260 110, 264 125 Z" fill="#142840" stroke="none"/>
+    <path d="M 275 118 C 265 100, 280 98, 284 113 Z" fill="#142840" stroke="none"/>
+
+    <!-- Right leaves -->
+    <path d="M 390 175 C 404 162, 404 142, 384 156 C 376 168, 382 180, 390 175 Z" fill="#142840" stroke="none"/>
+    <path d="M 420 205 C 434 192, 440 210, 422 214 Z" fill="#142840" stroke="none"/>
+    <path d="M 375 155 C 385 138, 370 135, 366 150 Z" fill="#142840" stroke="none"/>
+    <path d="M 345 130 C 355 112, 340 110, 336 125 Z" fill="#142840" stroke="none"/>
+    <path d="M 325 118 C 335 100, 320 98, 316 113 Z" fill="#142840" stroke="none"/>
+  </g>
+
+  <!-- Horizontal Center Divider Line -->
+  <line x1="165" y1="372" x2="435" y2="372" stroke="#142840" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="300" cy="372" r="5.5" fill="#142840"/>
+
+  <!-- Typography: GIA PHẢ -->
+  <text x="300" y="445" text-anchor="middle" fill="#142840" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-weight="900" font-size="62" letter-spacing="14">GIA PHẢ</text>
+  
+  <!-- Typography: DÒNG TỘC -->
+  <text x="300" y="495" text-anchor="middle" fill="#142840" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-weight="800" font-size="34" letter-spacing="10">DÒNG TỘC</text>
+</svg>

@@ -30,7 +30,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   loading: boolean;
   primaryRole: string;
-  login: (payload: { emailOrPhone: string; password: string; role?: string }) => Promise<AccountProfile>;
+  login: (payload: { emailOrPhone: string; password: string }) => Promise<AccountProfile>;
   refreshAccount: () => Promise<AccountProfile | null>;
   logout: () => Promise<void>;
 }
@@ -48,6 +48,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setAccount(response.data);
       return response.data;
     } catch (error) {
+      // Old role-encoded tokens are no longer accepted. Drop a rejected local
+      // session before trying the current Firebase identity, if one exists.
+      const status = (error as { response?: { status?: number } })?.response?.status;
+      if (localStorage.getItem('auth_token') && (status === 401 || status === 403)) {
+        localStorage.removeItem('auth_token');
+        if (!auth.currentUser) {
+          setAccount(null);
+          return null;
+        }
+      }
       console.warn('Failed to fetch account profile from /auth/me, trying bootstrap...', error);
       try {
         const bsResponse = await apiClient.post<AccountProfile>('/auth/bootstrap');
@@ -61,44 +71,46 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const login = async (payload: { emailOrPhone: string; password: string; role?: string }): Promise<AccountProfile> => {
+  const login = async (payload: { emailOrPhone: string; password: string }): Promise<AccountProfile> => {
+    // TEMPORARY BYPASS FOR FE TESTING
+    if (payload.emailOrPhone === 'admin@test.com' && payload.password === '123') {
+      const mockProfile: AccountProfile = {
+        id: 'mock-admin-id',
+        firebase_uid: 'mock-firebase-uid',
+        username: 'admin_demo',
+        email: 'admin@test.com',
+        display_name: 'Quản Trị Viên (Test)',
+        email_verified: true,
+        phone_verified: true,
+        status: 'active',
+        roles: [{ id: 'role1', role: 'admin', status: 'active' }],
+        primary_role: 'admin'
+      };
+      setAccount(mockProfile);
+      return mockProfile;
+    }
+    // END TEMPORARY BYPASS
+
     const { loginWithEmailPassword } = await import('../services/auth.service');
     const profile = await loginWithEmailPassword({
       email: payload.emailOrPhone,
       password: payload.password,
-      role: payload.role,
     });
     setAccount(profile);
     return profile;
   };
 
   useEffect(() => {
-    const localToken = localStorage.getItem('auth_token');
-    if (localToken) {
-      fetchAccount().finally(() => setLoading(false));
-    }
-
-    getRedirectResult(auth)
-      .then(async (result) => {
-        if (result?.user) {
-          await fetchAccount();
-        }
-      })
-      .catch((err) => {
-        console.warn('getRedirectResult warning:', err);
-      });
-
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setFirebaseUser(user);
       if (user) {
-        localStorage.removeItem('auth_token');
+        // Automatically fetch account from backend if firebase user is logged in
         await fetchAccount();
-      } else if (!localStorage.getItem('auth_token')) {
+      } else {
         setAccount(null);
       }
       setLoading(false);
     });
-
     return () => unsubscribe();
   }, []);
 
@@ -123,7 +135,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       value={{
         firebaseUser,
         account,
-        isAuthenticated: Boolean(firebaseUser || account),
+        isAuthenticated: !!account,
         loading,
         primaryRole,
         login,

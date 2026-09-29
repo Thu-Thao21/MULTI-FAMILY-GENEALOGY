@@ -19,10 +19,7 @@ export const AncestorsPage: React.FC = () => {
   const [selectedAncestor, setSelectedAncestor] = useState<Ancestor | null>(null);
   
   // Mock data
-  const data: Ancestor[] = [
-    { id: '1', name: 'Nguyễn Bặc', generation: 1, title: 'Định Quốc Công', status: 'active' },
-    { id: '2', name: 'Nguyễn Trãi', generation: 5, birthYear: 1380, deathYear: 1442, title: 'Ức Trai', status: 'active' },
-  ];
+  const data: Ancestor[] = [];
 
   const columns: Column<Ancestor>[] = [
     { key: 'name', header: 'Tên Thuỷ tổ / Tiên tổ', render: (item) => (

@@ -21,13 +21,11 @@ export interface RegisterPayload {
   password: string;
   confirmPassword?: string;
   displayName?: string;
-  role?: 'member' | string;
 }
 
 export interface LoginPayload {
   email: string;
   password: string;
-  role?: 'member' | 'admin' | string;
 }
 
 function handleAuthError(err: any, providerName: string): string {
@@ -90,7 +88,14 @@ export async function registerWithEmailPassword(payload: RegisterPayload): Promi
       }
     } catch (err: any) {
       if (err.code === 'auth/email-already-in-use') {
-        throw new Error('Email này đã được sử dụng. Vui lòng đăng nhập hoặc sử dụng email khác.');
+        // A previous attempt may have created the Firebase user before the
+        // local account request failed. Verify the same password and continue
+        // so the backend registration can finish safely.
+        try {
+          await signInWithEmailAndPassword(auth, input, payload.password);
+        } catch {
+          throw new Error('Email này đã được sử dụng. Vui lòng đăng nhập hoặc sử dụng email khác.');
+        }
       }
       if (err.code === 'auth/invalid-email') {
         throw new Error('Định dạng email không hợp lệ.');
@@ -105,7 +110,6 @@ export async function registerWithEmailPassword(payload: RegisterPayload): Promi
       email_or_phone: input,
       display_name: payload.displayName || payload.username || input,
       password: payload.password,
-      role: payload.role || 'member',
     });
 
     const user = res.data?.user;
@@ -119,8 +123,8 @@ export async function registerWithEmailPassword(payload: RegisterPayload): Promi
       email_verified: isEmail,
       phone_verified: !isEmail,
       status: 'active',
-      roles: [{ id: 'r1', role: payload.role || 'member', status: 'active' }],
-      primary_role: payload.role || 'member',
+      roles: [{ id: 'r1', role: 'member', status: 'active' }],
+      primary_role: 'member',
     };
   } catch (err: any) {
     const msg = err.response?.data?.detail || err.message || 'Đăng ký thất bại. Vui lòng thử lại.';
@@ -138,12 +142,12 @@ export async function loginWithEmailPassword(payload: LoginPayload): Promise<Acc
     const res = await apiClient.post('/auth/login', {
       email_or_phone: payload.email.trim(),
       password: payload.password,
-      role: payload.role || 'member',
     });
     if (res.data && res.data.user) {
       if (res.data.token) {
         localStorage.setItem('auth_token', res.data.token);
       }
+      if (res.data.account) return res.data.account as AccountProfile;
       const u = res.data.user;
       return {
         id: u.id,
@@ -370,5 +374,3 @@ export async function resetPasswordWithOTP(
     throw new Error(msg);
   }
 }
-
-

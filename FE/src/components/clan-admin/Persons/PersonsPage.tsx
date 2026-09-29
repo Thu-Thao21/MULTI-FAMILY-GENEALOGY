@@ -19,11 +19,7 @@ export const PersonsPage: React.FC = () => {
   const [detailTab, setDetailTab] = useState<'overview' | 'relationships' | 'account' | 'history'>('overview');
   
   // Mock data
-  const data: Person[] = [
-    { id: '1', name: 'Nguyễn Văn Khoa', gender: 'Nam', dob: '15/08/1990', generation: 15, branch: 'Chi 1', status: 'alive' },
-    { id: '2', name: 'Nguyễn Thị Hoa', gender: 'Nữ', dob: '20/10/1985', generation: 15, branch: 'Nhánh 1.2', status: 'alive' },
-    { id: '3', name: 'Nguyễn Văn Cụ', gender: 'Nam', dob: '01/01/1920', generation: 13, branch: 'Đại Tôn', status: 'deceased' },
-  ];
+  const data: Person[] = [];
 
   const columns: Column<Person>[] = [
     { key: 'name', header: 'Họ và tên', render: (item) => <strong className="text-slate-800">{item.name}</strong> },

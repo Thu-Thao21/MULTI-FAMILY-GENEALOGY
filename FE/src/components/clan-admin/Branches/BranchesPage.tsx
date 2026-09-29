@@ -17,11 +17,7 @@ export const BranchesPage: React.FC = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   
   // Mock data
-  const data: Branch[] = [
-    { id: '1', name: 'Chi 1 (Đại Tôn)', leader: 'Nguyễn Trọng A', memberCount: 150, location: 'Hà Nội', level: 'chi' },
-    { id: '2', name: 'Nhánh 1.1', leader: 'Nguyễn Văn B', memberCount: 45, location: 'Hải Phòng', level: 'nhanh' },
-    { id: '3', name: 'Chi 2', leader: 'Nguyễn Đức C', memberCount: 80, location: 'Thanh Hóa', level: 'chi' },
-  ];
+  const data: Branch[] = [];
 
   const getLevelLabel = (level: string) => {
     switch(level) {

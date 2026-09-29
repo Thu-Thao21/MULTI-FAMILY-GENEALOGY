@@ -16,6 +16,11 @@ apiClient.interceptors.request.use(
     if (config.headers.Authorization) {
       return config;
     }
+    const authToken = localStorage.getItem('auth_token');
+    if (authToken) {
+      config.headers.Authorization = `Bearer ${authToken}`;
+      return config;
+    }
     const user = auth.currentUser;
     if (user) {
       try {
@@ -29,12 +34,6 @@ apiClient.interceptors.request.use(
         console.warn('Unable to get Firebase ID token:', e);
       }
     }
-    const authToken = localStorage.getItem('auth_token');
-    if (authToken) {
-      config.headers.Authorization = `Bearer ${authToken}`;
-      return config;
-    }
-
     return config;
   },
   (error: AxiosError) => Promise.reject(error)
