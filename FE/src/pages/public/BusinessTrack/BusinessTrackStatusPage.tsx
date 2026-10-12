@@ -1,58 +1,110 @@
-import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { useLocation, useSearchParams } from 'react-router-dom';
 import { PublicLayout } from '../../../components/guest/PublicLayout';
+import { useRetryCountdown } from '../../../hooks/useRetryCountdown';
+import {
+  formatDateTime,
+  RATE_LIMIT_DONE_MESSAGE,
+  rateLimitMessage,
+  readApiError,
+  trackBusinessRegistration,
+  withRequestId,
+  type RegistrationStatus,
+} from '../../../services/business.service';
 import './BusinessTrackStatusPage.css';
 
 export interface BusinessRequestStatus {
   code: string;
-  repName: string;
+  repName?: string;
   familyName: string;
-  tierName: string;
-  status: 'pending' | 'approved' | 'needs_info' | 'rejected';
+  tierName?: string;
+  status: 'pending' | 'approved' | 'needs_info' | 'rejected' | 'cancelled';
   submittedAt: string;
   updatedAt: string;
   adminNotes?: string;
 }
 
+const STATUS_TO_UI: Record<RegistrationStatus, BusinessRequestStatus['status']> = {
+  DRAFT: 'pending',
+  PENDING: 'pending',
+  APPROVED: 'approved',
+  NEED_SUPPLEMENT: 'needs_info',
+  REJECTED: 'rejected',
+  CANCELLED: 'cancelled',
+};
+
 export const BusinessTrackStatusPage: React.FC = () => {
   const [searchParams] = useSearchParams();
-  const urlCode = searchParams.get('code') || '';
+  const location = useLocation();
+  // Mã do trang đăng ký chuyển sang qua state của router (không đưa mã bí mật vào URL).
+  const stateCode = (location.state as { trackingCode?: unknown } | null)?.trackingCode;
+  const urlCode = typeof stateCode === 'string' ? stateCode : searchParams.get('code') || '';
 
   const [inputCode, setInputCode] = useState(urlCode);
   const [currentResult, setCurrentResult] = useState<BusinessRequestStatus | null>(null);
   const [searched, setSearched] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [lookupError, setLookupError] = useState('');
+  const lookingUpRef = useRef(false);
+  const autoLookedUpRef = useRef('');
+  const retry = useRetryCountdown();
 
   // Supplemental info form state for 'needs_info' status
   const [suppInfo, setSuppInfo] = useState('');
   const [suppSuccess, setSuppSuccess] = useState(false);
 
   useEffect(() => {
-    if (urlCode) {
-      handleLookup(urlCode);
+    if (urlCode && autoLookedUpRef.current !== urlCode) {
+      autoLookedUpRef.current = urlCode;
+      void handleLookup(urlCode);
     }
   }, [urlCode]);
 
-  const handleLookup = (codeToSearch?: string) => {
-    const code = codeToSearch || inputCode;
+  const handleLookup = async (codeToSearch?: string) => {
+    // Mã tra cứu là bí mật: gửi nguyên vẹn, không trim, không đổi hoa/thường.
+    const code = codeToSearch ?? inputCode;
     if (!code.trim()) return;
+    if (lookingUpRef.current || retry.isLocked) return;
 
-    setSearched(true);
-    // Simulate lookup API
-    if (code.toUpperCase().includes('BIZ')) {
+    lookingUpRef.current = true;
+    setIsLoading(true);
+    setLookupError('');
+    try {
+      const result = await trackBusinessRegistration(code);
       setCurrentResult({
-        code: code.toUpperCase(),
-        repName: 'Nguyễn Văn A',
-        familyName: 'Dòng Họ Nguyễn Chi 1',
-        tierName: 'Gói Chuyên Nghiệp (1.000 thành viên)',
-        status: 'pending',
-        submittedAt: '2026-09-12 10:00',
-        updatedAt: '2026-09-12 11:30',
-        adminNotes: 'Hồ sơ đang trong quá trình đối soát thông tin nhà thờ tổ.',
+        code,
+        familyName: result.clan_name,
+        status: STATUS_TO_UI[result.status] ?? 'pending',
+        submittedAt: formatDateTime(result.submitted_at),
+        updatedAt: formatDateTime(result.updated_at),
+        // public_reason chỉ có khi REJECTED (lý do từ chối công khai).
+        adminNotes: result.public_reason ?? undefined,
       });
-    } else {
+    } catch (err) {
+      const info = readApiError(err);
       setCurrentResult(null);
+      if (info.status === 404) {
+        // Mã sai: hiện thông báo không tìm thấy.
+        setLookupError('');
+      } else if (info.isNetworkError) {
+        setLookupError('Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối và thử lại.');
+      } else if (info.status === 422) {
+        setLookupError('Mã tra cứu không hợp lệ. Vui lòng kiểm tra lại mã đã được cấp.');
+      } else if (info.status === 429) {
+        if (info.retryAfterSeconds) retry.start(info.retryAfterSeconds);
+        setLookupError(info.retryAfterSeconds ? RATE_LIMIT_DONE_MESSAGE : rateLimitMessage(null));
+      } else {
+        setLookupError(withRequestId('Tra cứu thất bại. Vui lòng thử lại sau.', info));
+      }
+    } finally {
+      setSearched(true);
+      lookingUpRef.current = false;
+      setIsLoading(false);
     }
   };
+
+  // Khi đang bị giới hạn tần suất, hiện đếm ngược theo Retry-After.
+  const displayError = retry.isLocked ? rateLimitMessage(retry.secondsLeft) : lookupError;
 
   const handleSendSupplemental = (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,7 +128,7 @@ export const BusinessTrackStatusPage: React.FC = () => {
             className="track-search-form"
             onSubmit={(e) => {
               e.preventDefault();
-              handleLookup();
+              void handleLookup();
             }}
           >
             <input
@@ -87,7 +139,7 @@ export const BusinessTrackStatusPage: React.FC = () => {
               onChange={(e) => setInputCode(e.target.value)}
               required
             />
-            <button type="submit" className="track-btn">
+            <button type="submit" className="track-btn" disabled={isLoading || retry.isLocked}>
               Tra Cứu Ngay
             </button>
           </form>
@@ -95,7 +147,9 @@ export const BusinessTrackStatusPage: React.FC = () => {
 
         {searched && (
           <div className="track-result-section">
-            {!currentResult ? (
+            {displayError ? (
+              <div className="track-empty">{displayError}</div>
+            ) : !currentResult ? (
               <div className="track-empty">
                 ❌ Không tìm thấy yêu cầu đăng ký nào khớp với mã <strong>{inputCode}</strong>.
                 Vui lòng kiểm tra lại chính xác mã tra cứu đã cấp.
@@ -113,12 +167,13 @@ export const BusinessTrackStatusPage: React.FC = () => {
                     {currentResult.status === 'approved' && '✓ Đã chấp thuận'}
                     {currentResult.status === 'needs_info' && '⚠️ Cần bổ sung thông tin'}
                     {currentResult.status === 'rejected' && '✕ Từ chối'}
+                    {currentResult.status === 'cancelled' && '✕ Đã hủy'}
                   </span>
                 </div>
 
                 <div className="req-meta-grid">
-                  <div>👤 <strong>Người đại diện:</strong> {currentResult.repName}</div>
-                  <div>📦 <strong>Gói đăng ký:</strong> {currentResult.tierName}</div>
+                  {currentResult.repName && <div>👤 <strong>Người đại diện:</strong> {currentResult.repName}</div>}
+                  {currentResult.tierName && <div>📦 <strong>Gói đăng ký:</strong> {currentResult.tierName}</div>}
                   <div>📅 <strong>Thời điểm gửi:</strong> {currentResult.submittedAt}</div>
                   <div>🕒 <strong>Cập nhật lần cuối:</strong> {currentResult.updatedAt}</div>
                 </div>

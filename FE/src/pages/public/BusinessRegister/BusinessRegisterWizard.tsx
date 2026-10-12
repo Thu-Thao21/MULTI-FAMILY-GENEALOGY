@@ -1,13 +1,25 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { PublicLayout } from '../../../components/guest/PublicLayout';
 import { ROUTES } from '../../../config/routes';
+import { useRetryCountdown } from '../../../hooks/useRetryCountdown';
+import {
+  createBusinessRegistration,
+  fetchServicePlans,
+  formatPlanMemberLimit,
+  RATE_LIMIT_DONE_MESSAGE,
+  rateLimitMessage,
+  readApiError,
+  withRequestId,
+  type ServicePlan,
+} from '../../../services/business.service';
 import './BusinessRegisterWizard.css';
 
 export const BusinessRegisterWizard: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const initialTier = searchParams.get('tier') || 'tier-pro';
+  // ?tier=<plan_id> từ trang Bảng gói; không có gói mặc định.
+  const initialTier = searchParams.get('tier') || '';
 
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
 
@@ -15,6 +27,7 @@ export const BusinessRegisterWizard: React.FC = () => {
   const [repName, setRepName] = useState('');
   const [repEmail, setRepEmail] = useState('');
   const [repPhone, setRepPhone] = useState('');
+  // repRole, familyCode, familyDesc chỉ hiển thị trên giao diện, KHÔNG gửi lên BE (BE từ chối trường lạ bằng 422).
   const [repRole, setRepRole] = useState('Trưởng tộc');
 
   const [familyName, setFamilyName] = useState('');
@@ -22,12 +35,49 @@ export const BusinessRegisterWizard: React.FC = () => {
   const [familyOrigin, setFamilyOrigin] = useState('');
   const [familyDesc, setFamilyDesc] = useState('');
 
+  // plan_id của gói đã chọn
   const [selectedTier, setSelectedTier] = useState(initialTier);
+
+  // Gói dịch vụ từ GET /service-plans
+  const [plans, setPlans] = useState<ServicePlan[]>([]);
+  const [plansLoading, setPlansLoading] = useState(true);
+  const [plansError, setPlansError] = useState('');
 
   // Result state
   const [trackingCode, setTrackingCode] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const submittingRef = useRef(false);
+  const retry = useRetryCountdown();
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchServicePlans()
+      .then((page) => {
+        if (cancelled) return;
+        setPlans(page.items);
+        // Bỏ chọn nếu ?tier không phải một gói đang bán.
+        setSelectedTier((current) => (page.items.some((plan) => plan.plan_id === current) ? current : ''));
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        const info = readApiError(err);
+        setPlansError(
+          info.isNetworkError
+            ? 'Không thể kết nối đến máy chủ để tải danh sách gói dịch vụ. Vui lòng thử lại sau.'
+            : withRequestId('Không tải được danh sách gói dịch vụ. Vui lòng thử lại sau.', info)
+        );
+      })
+      .finally(() => {
+        if (!cancelled) setPlansLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const selectedPlan = plans.find((plan) => plan.plan_id === selectedTier) || null;
 
   const handleNextStep1 = (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,17 +100,62 @@ export const BusinessRegisterWizard: React.FC = () => {
   };
 
   const handleNextStep3 = () => {
+    if (!selectedPlan) {
+      setErrorMsg('Vui lòng chọn một gói dịch vụ.');
+      return;
+    }
+    setErrorMsg('');
     setStep(4);
   };
 
-  const handleSubmitRegistration = () => {
-    // Generate tracking code format BIZ-YYYYMMDD-XXXX
-    const code = `BIZ-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${Math.floor(
-      1000 + Math.random() * 9000
-    )}`;
-    setTrackingCode(code);
-    setIsSubmitted(true);
+  const handleSubmitRegistration = async () => {
+    if (submittingRef.current || retry.isLocked) return;
+    if (!selectedPlan) {
+      setErrorMsg('Vui lòng chọn một gói dịch vụ.');
+      setStep(3);
+      return;
+    }
+    submittingRef.current = true;
+    setIsSubmitting(true);
+    setErrorMsg('');
+    try {
+      // Chỉ gửi các trường BE nhận (BusinessRegistrationCreateRequest).
+      const result = await createBusinessRegistration({
+        representative_name: repName,
+        representative_email: repEmail,
+        representative_phone: repPhone.trim() || undefined,
+        clan_name: familyName,
+        origin_place: familyOrigin.trim() || undefined,
+        requested_plan_id: selectedPlan.plan_id,
+      });
+      setTrackingCode(result.tracking_code);
+      setIsSubmitted(true);
+    } catch (err) {
+      const info = readApiError(err);
+      if (info.isNetworkError) {
+        setErrorMsg('Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối và thử lại.');
+      } else if (info.status === 409 && info.code === 'DUPLICATE_RESOURCE') {
+        setErrorMsg(
+          'Đã có một hồ sơ đang chờ duyệt với cùng email và tên dòng họ. Vui lòng dùng mã tra cứu đã nhận để theo dõi, không cần gửi lại.'
+        );
+      } else if (info.status === 422) {
+        setErrorMsg(
+          'Thông tin đăng ký không hợp lệ. Vui lòng kiểm tra email, số điện thoại (6–30 ký tự gồm chữ số, dấu cách, + ( ) -), các trường bắt buộc và gói đã chọn.'
+        );
+      } else if (info.status === 429) {
+        if (info.retryAfterSeconds) retry.start(info.retryAfterSeconds);
+        setErrorMsg(info.retryAfterSeconds ? RATE_LIMIT_DONE_MESSAGE : rateLimitMessage(null));
+      } else {
+        setErrorMsg(withRequestId('Gửi đăng ký thất bại. Vui lòng thử lại sau.', info));
+      }
+    } finally {
+      submittingRef.current = false;
+      setIsSubmitting(false);
+    }
   };
+
+  // Khi đang bị giới hạn tần suất, hiện đếm ngược theo Retry-After.
+  const displayError = retry.isLocked ? rateLimitMessage(retry.secondsLeft) : errorMsg;
 
   return (
     <PublicLayout>
@@ -98,7 +193,7 @@ export const BusinessRegisterWizard: React.FC = () => {
           )}
         </div>
 
-        {errorMsg && <div className="wiz-error-alert">{errorMsg}</div>}
+        {displayError && <div className="wiz-error-alert">{displayError}</div>}
 
         {isSubmitted ? (
           /* Receipt Card after successful submission */
@@ -112,6 +207,7 @@ export const BusinessRegisterWizard: React.FC = () => {
             <div className="receipt-code-box">
               <span className="code-label">MÃ TRA CỨU THEO DÕI YÊU CẦU:</span>
               <strong className="code-value">{trackingCode}</strong>
+              <span className="code-label">Mã chỉ hiển thị một lần, hãy lưu lại.</span>
             </div>
 
             <div className="receipt-warning">
@@ -121,7 +217,7 @@ export const BusinessRegisterWizard: React.FC = () => {
             <div className="receipt-actions">
               <button
                 className="pub-btn-primary"
-                onClick={() => navigate(`${ROUTES.PUBLIC.BUSINESS_TRACK}?code=${trackingCode}`)}
+                onClick={() => navigate(ROUTES.PUBLIC.BUSINESS_TRACK, { state: { trackingCode } })}
               >
                 Mở Màn Hình Theo Dõi Trạng Thái ➔
               </button>
@@ -258,34 +354,24 @@ export const BusinessRegisterWizard: React.FC = () => {
               <div className="wiz-step-form">
                 <h3 className="step-title">Bước 3: Chọn gói dịch vụ Business</h3>
 
+                {plansLoading && <p className="tier-desc">Đang tải danh sách gói dịch vụ...</p>}
+                {!plansLoading && plansError && <div className="wiz-error-alert">{plansError}</div>}
+                {!plansLoading && !plansError && plans.length === 0 && (
+                  <p className="tier-desc">Hiện chưa có gói dịch vụ nào đang mở bán.</p>
+                )}
+
                 <div className="tier-select-grid">
-                  <div
-                    className={`tier-option-card ${selectedTier === 'tier-basic' ? 'selected' : ''}`}
-                    onClick={() => setSelectedTier('tier-basic')}
-                  >
-                    <h4>Gói Tiêu Chuẩn</h4>
-                    <span className="tier-limit">Tối đa 200 thành viên</span>
-                    <p className="tier-desc">Cơ bản cho chi họ nhỏ.</p>
-                  </div>
-
-                  <div
-                    className={`tier-option-card ${selectedTier === 'tier-pro' ? 'selected' : ''}`}
-                    onClick={() => setSelectedTier('tier-pro')}
-                  >
-                    <span className="rec-pill">Đề xuất</span>
-                    <h4>Gói Chuyên Nghiệp</h4>
-                    <span className="tier-limit">Tối đa 1.000 thành viên</span>
-                    <p className="tier-desc">Đầy đủ tính năng liên họ, AI & Quỹ.</p>
-                  </div>
-
-                  <div
-                    className={`tier-option-card ${selectedTier === 'tier-enterprise' ? 'selected' : ''}`}
-                    onClick={() => setSelectedTier('tier-enterprise')}
-                  >
-                    <h4>Gói Đại Tộc</h4>
-                    <span className="tier-limit">Không giới hạn</span>
-                    <p className="tier-desc">Dành cho dòng họ lớn nhiều chi nhánh.</p>
-                  </div>
+                  {plans.map((plan) => (
+                    <div
+                      key={plan.plan_id}
+                      className={`tier-option-card ${selectedTier === plan.plan_id ? 'selected' : ''}`}
+                      onClick={() => setSelectedTier(plan.plan_id)}
+                    >
+                      <h4>{plan.name}</h4>
+                      {formatPlanMemberLimit(plan) && <span className="tier-limit">{formatPlanMemberLimit(plan)}</span>}
+                      {plan.description && <p className="tier-desc">{plan.description}</p>}
+                    </div>
+                  ))}
                 </div>
 
                 <div className="wiz-action-row">
@@ -313,9 +399,8 @@ export const BusinessRegisterWizard: React.FC = () => {
 
                   <h4 style={{ marginTop: '12px' }}>3. Gói Đã Chọn:</h4>
                   <p style={{ fontWeight: 700, color: '#2563eb' }}>
-                    {selectedTier === 'tier-basic' && 'Gói Tiêu Chuẩn (200 thành viên)'}
-                    {selectedTier === 'tier-pro' && 'Gói Chuyên Nghiệp (1.000 thành viên)'}
-                    {selectedTier === 'tier-enterprise' && 'Gói Đại Tộc (Không giới hạn)'}
+                    {selectedPlan?.name}
+                    {selectedPlan && formatPlanMemberLimit(selectedPlan) && ` (${formatPlanMemberLimit(selectedPlan)})`}
                   </p>
                 </div>
 
@@ -326,7 +411,8 @@ export const BusinessRegisterWizard: React.FC = () => {
                   <button
                     type="button"
                     className="wiz-submit-btn"
-                    onClick={handleSubmitRegistration}
+                    onClick={() => void handleSubmitRegistration()}
+                    disabled={isSubmitting || retry.isLocked}
                   >
                     ✓ Gửi Đăng Ký Khởi Tạo Business
                   </button>

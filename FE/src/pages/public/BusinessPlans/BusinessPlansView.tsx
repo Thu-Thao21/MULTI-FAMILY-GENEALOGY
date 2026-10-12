@@ -1,69 +1,65 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PublicLayout } from '../../../components/guest/PublicLayout';
 import { ROUTES } from '../../../config/routes';
+import {
+  fetchServicePlans,
+  formatPlanFeatures,
+  formatPlanMemberLimit,
+  formatPlanStorage,
+  readApiError,
+  withRequestId,
+} from '../../../services/business.service';
 import './BusinessPlansView.css';
 
 export interface BusinessTier {
   id: string;
   name: string;
   badge?: string;
-  memberLimit: string;
-  storage: string;
-  pricePeriod: string;
+  memberLimit: string | null;
+  storage: string | null;
   features: string[];
-  recommended?: boolean;
 }
 
 export const BusinessPlansView: React.FC = () => {
   const navigate = useNavigate();
 
-  const tiers: BusinessTier[] = [
-    {
-      id: 'tier-basic',
-      name: 'Gói Dòng Họ Tiêu Chuẩn',
-      memberLimit: 'Tối đa 200 Thành viên',
-      storage: '10 GB Lưu trữ tư liệu',
-      pricePeriod: 'Gói khởi tạo cơ bản',
-      features: [
-        'Sơ đồ Cây gia phả trực hệ (Dọc/Ngang)',
-        'Quản lý danh sách thành viên & hồ sơ',
-        'Lịch ngày giỗ & Nhắc nhở qua App',
-        'Phòng thờ số 2D tưởng niệm',
-        'Phân quyền riêng tư PUBLIC / FAMILY',
-      ],
-    },
-    {
-      id: 'tier-pro',
-      name: 'Gói Dòng Họ Chuyên Nghiệp',
-      badge: 'Phổ biến nhất',
-      memberLimit: 'Tối đa 1.000 Thành viên',
-      storage: '50 GB Lưu trữ tư liệu cổ',
-      pricePeriod: 'Đầy đủ tính năng nâng cao',
-      features: [
-        'Tất cả tính năng của Gói Tiêu Chuẩn',
-        'Mạng lưới Liên họ (Nội/Ngoại/Thông gia)',
-        'Tra cứu quan hệ A → B & Xưng hô tự động',
-        'AI Assistant hỗ trợ hỏi đáp dòng họ',
-        'Quản lý quỹ & Lịch sử đóng góp',
-        'Xuất file PDF gia phả & Báo cáo',
-      ],
-    },
-    {
-      id: 'tier-enterprise',
-      name: 'Gói Đại Tộc Không Giới Hạn',
-      memberLimit: 'Không giới hạn thành viên',
-      storage: '500 GB Lưu trữ tư liệu',
-      pricePeriod: 'Dành cho các tộc họ lớn',
-      features: [
-        'Tất cả tính năng Gói Chuyên Nghiệp',
-        'Hỗ trợ nhiều Chi/Nhánh song song',
-        'Phòng thờ số không gian 3D nâng cao',
-        'Ưu tiên hỗ trợ kỹ thuật 24/7',
-        'Sao lưu dữ liệu định kỳ tự động',
-      ],
-    },
-  ];
+  // Gói dịch vụ lấy từ GET /service-plans; id của thẻ là plan_id.
+  const [tiers, setTiers] = useState<BusinessTier[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchServicePlans()
+      .then((page) => {
+        if (cancelled) return;
+        setTiers(
+          page.items.map((plan) => ({
+            id: plan.plan_id,
+            name: plan.name,
+            memberLimit: formatPlanMemberLimit(plan),
+            storage: formatPlanStorage(plan),
+            features: formatPlanFeatures(plan),
+          }))
+        );
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        const info = readApiError(err);
+        setLoadError(
+          info.isNetworkError
+            ? 'Không thể kết nối đến máy chủ để tải danh sách gói dịch vụ. Vui lòng thử lại sau.'
+            : withRequestId('Không tải được danh sách gói dịch vụ. Vui lòng thử lại sau.', info)
+        );
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return (
     <PublicLayout>
@@ -76,13 +72,19 @@ export const BusinessPlansView: React.FC = () => {
           </p>
         </div>
 
+        {loading && <div className="plans-note-card">Đang tải danh sách gói dịch vụ...</div>}
+        {!loading && loadError && <div className="plans-note-card">{loadError}</div>}
+        {!loading && !loadError && tiers.length === 0 && (
+          <div className="plans-note-card">Hiện chưa có gói dịch vụ nào đang mở bán.</div>
+        )}
+
         <div className="plans-cards-grid">
           {tiers.map((t) => (
             <div key={t.id} className="plan-card">
               {t.badge && <span className="plan-recom-badge">{t.badge}</span>}
               <h3 className="plan-name">{t.name}</h3>
-              <div className="plan-limit">{t.memberLimit}</div>
-              <div className="plan-storage">{t.storage}</div>
+              {t.memberLimit && <div className="plan-limit">{t.memberLimit}</div>}
+              {t.storage && <div className="plan-storage">{t.storage}</div>}
 
               <div className="plan-divider" />
 
