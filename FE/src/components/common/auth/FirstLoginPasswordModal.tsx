@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useAuth } from '../../../hooks/useAuth';
 import './FirstLoginPasswordModal.css';
 
 interface FirstLoginPasswordModalProps {
@@ -17,6 +18,7 @@ export const FirstLoginPasswordModal: React.FC<FirstLoginPasswordModalProps> = (
   const [confirmPassword, setConfirmPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const [loading, setLoading] = useState(false);
+  const { changePassword } = useAuth();
 
   if (!isOpen) return null;
 
@@ -43,13 +45,17 @@ export const FirstLoginPasswordModal: React.FC<FirstLoginPasswordModalProps> = (
 
     setLoading(true);
     try {
-      // Simulate API call for password change
-      await new Promise((res) => setTimeout(res, 800));
+      // POST /auth/change-password (xác thực lại Firebase bằng mật khẩu tạm để có recent_id_token).
+      // Thành công thì mọi phiên bị thu hồi: người dùng phải đăng nhập lại bằng mật khẩu mới.
+      await changePassword(currentPassword, newPassword);
       setLoading(false);
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
       onSuccess();
     } catch (err) {
       setLoading(false);
-      setErrorMsg('Đổi mật khẩu thất bại. Vui lòng kiểm tra lại mật khẩu hiện tại.');
+      setErrorMsg(err instanceof Error ? err.message : 'Đổi mật khẩu thất bại. Vui lòng kiểm tra lại mật khẩu hiện tại.');
     }
   };
 
