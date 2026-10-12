@@ -1,7 +1,11 @@
 import axios, { InternalAxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 import { auth } from '../config/firebase';
+import { API_HOST_CONFIG } from '../config/routes';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || '/api';
+const API_BASE_URL = API_HOST_CONFIG.BASE_URL;
+if (!API_BASE_URL) {
+  console.error('VITE_API_BASE_URL chưa được cấu hình: không thể gọi Backend API.');
+}
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,

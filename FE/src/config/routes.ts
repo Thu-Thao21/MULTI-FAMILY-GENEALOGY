@@ -2,8 +2,9 @@
  * Centralized Route Constants & Host Configuration for Frontend
  */
 
+// Base URL tuyệt đối của BE (ví dụ http://localhost:8001/api/v1), chỉ lấy từ VITE_API_BASE_URL.
 export const API_HOST_CONFIG = {
-  BASE_URL: import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || '/api',
+  BASE_URL: (import.meta.env.VITE_API_BASE_URL as string | undefined) || '',
   AUTH: '/auth',
   USERS: '/users',
   FAMILIES: '/families',
