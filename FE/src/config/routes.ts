@@ -3,7 +3,7 @@
  */
 
 export const API_HOST_CONFIG = {
-  BASE_URL: import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || '/api',
+  BASE_URL: import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8001',
   AUTH: '/auth',
   USERS: '/users',
   FAMILIES: '/families',

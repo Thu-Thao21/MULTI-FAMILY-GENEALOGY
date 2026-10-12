@@ -1,5 +1,23 @@
-import apiClient from '../api/axios';
-import type { Family, MemberDetail, MemberListResponse } from '../types/member';
+import { getFamily } from './familyService';
+import { getPerson, getPersons } from './genealogyService';
+import type { Family, Member, MemberDetail, MemberListResponse } from '../types/member';
+import type { PersonDto } from '../types/sprint2';
+
+function toMember(person: PersonDto): Member {
+  return {
+    id: person.id,
+    familyId: person.familyId,
+    fullName: person.fullName,
+    gender: person.gender,
+    birthDate: person.birthDate || undefined,
+    deathDate: person.deathDate || undefined,
+    isAlive: person.isLiving,
+    branch: person.branchId || undefined,
+    generation: person.generation,
+    avatarUrl: person.avatarUrl || undefined,
+    status: person.status,
+  };
+}
 
 export async function fetchMembers(params?: {
   familyId?: string;
@@ -7,47 +25,51 @@ export async function fetchMembers(params?: {
   page?: number;
   limit?: number;
 }): Promise<MemberListResponse> {
-  try {
-    const res = await apiClient.get('/members', {
-      params: {
-        family_id: params?.familyId,
-        search: params?.search,
-        page: params?.page || 1,
-        limit: params?.limit || 100,
-      },
-    });
-    const items = Array.isArray(res.data?.items) ? res.data.items : Array.isArray(res.data) ? res.data : [];
-    return {
-      items,
-      total: res.data?.total || items.length,
-      page: res.data?.page || 1,
-      limit: res.data?.limit || 100,
-      totalPages: res.data?.totalPages || 1,
-    };
-  } catch (err) {
-    console.error('API fetchMembers error:', err);
-    return { items: [], total: 0, page: 1, limit: 100, totalPages: 0 };
-  }
+  const familyId = params?.familyId || import.meta.env.VITE_DEV_FAMILY_ID?.trim();
+  if (!familyId) return { items: [], total: 0, page: 1, limit: params?.limit || 100, totalPages: 0 };
+
+  const limit = params?.limit || 100;
+  const page = params?.page || 1;
+  const persons = await getPersons(familyId, {
+    search: params?.search,
+    limit,
+    offset: (page - 1) * limit,
+  });
+  return {
+    items: persons.map(toMember),
+    total: persons.length,
+    page,
+    limit,
+    totalPages: persons.length < limit ? page : page + 1,
+  };
 }
 
-export async function fetchMemberDetail(memberId: string): Promise<MemberDetail | null> {
-  try {
-    const res = await apiClient.get(`/members/${memberId}`);
-    if (res.data) return res.data;
-    return null;
-  } catch (err) {
-    console.warn(`API fetchMemberDetail failed for ${memberId}`);
-    return null;
-  }
+export async function fetchMemberDetail(memberId: string, familyId?: string): Promise<MemberDetail | null> {
+  const resolvedFamilyId = familyId || import.meta.env.VITE_DEV_FAMILY_ID?.trim();
+  if (!resolvedFamilyId) return null;
+  const person = await getPerson(resolvedFamilyId, memberId);
+  return {
+    ...toMember(person),
+    displayOrder: 0,
+    galleryPhotos: [],
+    careerHistory: [],
+    isPrimary: false,
+    contacts: [],
+    lifeEvents: [],
+    media: [],
+    skills: [],
+  };
 }
 
 export async function fetchFamilies(): Promise<Family[]> {
-  try {
-    const res = await apiClient.get('/families');
-    const fams = Array.isArray(res.data) ? res.data : Array.isArray(res.data?.items) ? res.data.items : [];
-    return fams;
-  } catch (err) {
-    console.error('API fetchFamilies error:', err);
-    return [];
-  }
+  const familyId = import.meta.env.VITE_DEV_FAMILY_ID?.trim();
+  if (!familyId) return [];
+  const family = await getFamily(familyId);
+  return [{
+    id: family.id,
+    name: family.name,
+    code: family.clanCode,
+    status: family.status,
+    memberCount: 0,
+  }];
 }

@@ -131,7 +131,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ userName, onLogout }) => {
 
   const displayUserName = account?.display_name || account?.username || firebaseUser?.displayName || userName || 'Người dùng';
   const activeFamilyRoles = (account?.roles || []).filter(
-    (role) => role.status.toLowerCase() === 'active' && Boolean(role.family_id),
+    (role) => !role.revoked_at && Boolean(role.family_id),
   );
   const isAccountFamilyHead = activeFamilyRoles.some((role) => role.role.toLowerCase() === 'family_head');
   const isAccountFamilyManager = activeFamilyRoles.some(
@@ -273,9 +273,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ userName, onLogout }) => {
 
     // Profile & Member List
     if (activeTab === 'my-profile') {
+      if (!selectedMemberId) {
+        return <div className="profile-not-found-box">API GAP: Backend chưa trả liên kết current user → Person.</div>;
+      }
       return (
         <ProfileLayout
-          memberId={(account as any)?.person_id || selectedMemberId || 'mem_001'}
+          memberId={selectedMemberId}
           onBack={() => {
             setActiveTab('dashboard');
             navigate(ROUTES.USER.ROOT, { replace: false });
@@ -285,9 +288,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ userName, onLogout }) => {
     }
 
     if (activeTab === 'member-profile') {
+      if (!selectedMemberId) {
+        return <div className="profile-not-found-box">Hãy chọn một Person từ danh sách trước.</div>;
+      }
       return (
         <ProfileLayout
-          memberId={selectedMemberId || 'mem_001'}
+          memberId={selectedMemberId}
           onBack={() => {
             setSelectedMemberId(null);
             setActiveTab('member-list');

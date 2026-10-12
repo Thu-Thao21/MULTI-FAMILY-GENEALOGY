@@ -47,7 +47,6 @@ import ClanFamilyLinksMgmt from '../components/clan-admin/InterFamily/ClanFamily
 import ClanAccountMgmt from '../components/clan-admin/Settings/ClanAccountMgmt';
 import ClanAuditLogsMgmt from '../components/clan-admin/AuditLogs/ClanAuditLogsMgmt';
 import ClanDataBackupMgmt from '../components/clan-admin/Backup/ClanDataBackupMgmt';
-import { ProfilePage } from '../components/common/SharedPages';
 
 // Public & User Dashboard Imports
 import Dashboard from '../pages/dashboard/Dashboard';
@@ -64,29 +63,35 @@ import RegisterPage from '../pages/auth/Register';
 import ForgotPasswordPage from '../pages/auth/ForgotPassword';
 
 import { ProtectedRoute, RoleGuard } from './RouteGuards';
+import type { AccountProfile } from '../context/AuthContext';
 
 export type AuthView = 'login' | 'register' | 'forgot-password' | 'dashboard';
 
 interface AppRoutesProps {
   userName: string;
-  primaryRole: string;
-  isAuthenticated: boolean;
   onLogout: () => void;
 }
 
 const AppRoutes: React.FC<AppRoutesProps> = ({
   userName,
-  primaryRole,
-  isAuthenticated,
   onLogout,
 }) => {
   const navigate = useNavigate();
 
-  const handleAuthSuccess = () => {
-    if (primaryRole === 'admin') {
+  const handleAuthSuccess = (profile?: AccountProfile) => {
+    const activeRoles = (profile?.roles || [])
+      .filter((role) => !role.revoked_at)
+      .map((role) => role.role.toLowerCase());
+    const primaryRole = profile?.primary_role?.toLowerCase();
+    if (primaryRole === 'admin' || activeRoles.includes('admin')) {
       navigate('/admin');
+    } else if (
+      ['family_head', 'family_admin', 'owner', 'manager'].includes(primaryRole || '') ||
+      activeRoles.some((role) => ['family_head', 'family_admin', 'owner', 'manager'].includes(role))
+    ) {
+      navigate('/clan-admin');
     } else {
-      navigate('/login');
+      navigate('/user');
     }
   };
 
@@ -136,7 +141,11 @@ const AppRoutes: React.FC<AppRoutesProps> = ({
       {/* Protected User Dashboard Routes */}
       <Route
         path="/user/*"
-        element={<Dashboard userName={userName} onLogout={handleLogout} />}
+        element={
+          <ProtectedRoute>
+            <Dashboard userName={userName} onLogout={handleLogout} />
+          </ProtectedRoute>
+        }
       />
       
       {/* System Admin Routes */}
@@ -165,7 +174,13 @@ const AppRoutes: React.FC<AppRoutesProps> = ({
       </Route>
       
       {/* Clan Admin Routes */}
-      <Route path="/clan-admin" element={<ClanAdminLayout />}>
+      <Route path="/clan-admin" element={
+        <ProtectedRoute>
+          <RoleGuard allowedRoles={['admin', 'family_head', 'family_admin', 'owner', 'manager']}>
+            <ClanAdminLayout />
+          </RoleGuard>
+        </ProtectedRoute>
+      }>
           <Route index element={<Navigate to="dashboard" replace />} />
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="family-profile" element={<ClanProfileMgmt />} />
@@ -190,14 +205,14 @@ const AppRoutes: React.FC<AppRoutesProps> = ({
           <Route path="business" element={<BusinessPage />} />
           <Route path="privacy" element={<PrivacyPage />} />
           <Route path="settings" element={<ClanAccountMgmt />} />
-          <Route path="profile" element={<ProfilePage memberId="mem_001" onBack={() => navigate('/clan-admin/dashboard')} />} />
+          <Route path="profile" element={<Navigate to="/clan-admin/persons" replace />} />
           <Route path="backup" element={<ClanDataBackupMgmt />} />
           <Route path="audit-logs" element={<ClanAuditLogsMgmt />} />
       </Route>
 
       <Route
         path="*"
-        element={<Navigate to="/admin" replace />}
+        element={<Navigate to="/" replace />}
       />
     </Routes>
   );

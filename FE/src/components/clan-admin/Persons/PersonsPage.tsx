@@ -1,216 +1,258 @@
-import './PersonsPage.css';
-import React, { useState } from 'react';
-import PageHeader from '../../../shared/Layout/PageHeader';
-import DataTable, { type Column } from '../../../shared/DataTable/DataTable';
+import React, { useEffect, useMemo, useState } from 'react';
 
-interface Person {
-  id: string;
-  name: string;
-  gender: 'Nam' | 'Nữ';
-  dob: string;
-  generation: number;
-  branch: string;
-  status: 'alive' | 'deceased';
-}
+import { useFamily } from '../../../context/FamilyContext';
+import { getApiErrorMessage } from '../../../services/api';
+import { getBranches } from '../../../services/familyService';
+import {
+  createPerson,
+  getAncestors,
+  getDescendants,
+  getPerson,
+  getPersons,
+  updatePerson,
+} from '../../../services/genealogyService';
+import type { BranchDto, LineageDto, PersonDto, PersonWriteDto } from '../../../types/sprint2';
+import DataTable, { type Column } from '../../../shared/DataTable/DataTable';
+import './PersonsPage.css';
+
+const EMPTY_FORM: PersonWriteDto = {
+  fullName: '',
+  branchId: null,
+  gender: 'unknown',
+  birthDate: null,
+  deathDate: null,
+  isLiving: true,
+  status: 'ACTIVE',
+};
 
 export const PersonsPage: React.FC = () => {
+  const { currentFamilyId, error: familyError } = useFamily();
+  const [persons, setPersons] = useState<PersonDto[]>([]);
+  const [branches, setBranches] = useState<BranchDto[]>([]);
   const [search, setSearch] = useState('');
-  const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
+  const [branchId, setBranchId] = useState('');
+  const [livingFilter, setLivingFilter] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+  const [selectedPerson, setSelectedPerson] = useState<PersonDto | null>(null);
   const [detailTab, setDetailTab] = useState<'overview' | 'relationships' | 'account' | 'history'>('overview');
-  
-  // Mock data
-  const data: Person[] = [];
+  const [ancestors, setAncestors] = useState<LineageDto[]>([]);
+  const [descendants, setDescendants] = useState<LineageDto[]>([]);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editing, setEditing] = useState<PersonDto | null>(null);
+  const [form, setForm] = useState<PersonWriteDto>(EMPTY_FORM);
 
-  const columns: Column<Person>[] = [
-    { key: 'name', header: 'Họ và tên', render: (item) => <strong className="text-slate-800">{item.name}</strong> },
+  const loadPersons = async () => {
+    if (!currentFamilyId) return;
+    setLoading(true);
+    setError('');
+    try {
+      const data = await getPersons(currentFamilyId, {
+        search: search.trim() || undefined,
+        branchId: branchId || undefined,
+        isLiving: livingFilter === '' ? undefined : livingFilter === 'true',
+        limit: 500,
+      });
+      setPersons(data);
+    } catch (requestError) {
+      setError(getApiErrorMessage(requestError, 'Không tải được danh sách Person.'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!currentFamilyId) return;
+    getBranches(currentFamilyId).then(setBranches).catch(() => setBranches([]));
+  }, [currentFamilyId]);
+
+  useEffect(() => {
+    const timeout = window.setTimeout(() => void loadPersons(), 250);
+    return () => window.clearTimeout(timeout);
+  }, [currentFamilyId, search, branchId, livingFilter]);
+
+  useEffect(() => {
+    if (!currentFamilyId || !selectedPerson || detailTab !== 'relationships') return;
+    Promise.all([
+      getAncestors(currentFamilyId, selectedPerson.id),
+      getDescendants(currentFamilyId, selectedPerson.id),
+    ])
+      .then(([ancestorRows, descendantRows]) => {
+        setAncestors(ancestorRows);
+        setDescendants(descendantRows);
+      })
+      .catch((requestError) => setError(getApiErrorMessage(requestError)));
+  }, [currentFamilyId, selectedPerson?.id, detailTab]);
+
+  const branchNames = useMemo(
+    () => new Map(branches.map((branch) => [branch.id, branch.name])),
+    [branches],
+  );
+
+  const openDetail = async (person: PersonDto) => {
+    if (!currentFamilyId) return;
+    setError('');
+    try {
+      setSelectedPerson(await getPerson(currentFamilyId, person.id));
+      setDetailTab('overview');
+    } catch (requestError) {
+      setError(getApiErrorMessage(requestError));
+    }
+  };
+
+  const openCreate = () => {
+    setEditing(null);
+    setForm(EMPTY_FORM);
+    setIsFormOpen(true);
+  };
+
+  const openEdit = (person: PersonDto) => {
+    setEditing(person);
+    setForm({
+      fullName: person.fullName,
+      branchId: person.branchId || null,
+      gender: person.gender,
+      birthDate: person.birthDate || null,
+      deathDate: person.deathDate || null,
+      isLiving: person.isLiving,
+      status: person.status,
+    });
+    setIsFormOpen(true);
+  };
+
+  const save = async () => {
+    if (!currentFamilyId || !form.fullName?.trim()) return;
+    setSaving(true);
+    setError('');
+    try {
+      const payload: PersonWriteDto = { ...form, fullName: form.fullName.trim() };
+      const saved = editing
+        ? await updatePerson(currentFamilyId, editing.id, payload)
+        : await createPerson(currentFamilyId, payload);
+      setIsFormOpen(false);
+      setSelectedPerson(saved);
+      await loadPersons();
+    } catch (requestError) {
+      setError(getApiErrorMessage(requestError, 'Không lưu được Person.'));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const columns: Column<PersonDto>[] = [
+    { key: 'name', header: 'Họ và tên', render: (item) => <strong className="text-slate-800">{item.fullName}</strong> },
     { key: 'gender', header: 'Giới tính', render: (item) => item.gender },
-    { key: 'dob', header: 'Năm sinh', render: (item) => item.dob },
+    { key: 'birthDate', header: 'Ngày sinh', render: (item) => item.birthDate || '—' },
     { key: 'generation', header: 'Đời thứ', render: (item) => `Đời ${item.generation}` },
-    { key: 'branch', header: 'Thuộc Chi/Nhánh', render: (item) => item.branch },
-    { key: 'status', header: 'Trạng thái', render: (item) => (
-      <span className={`person-status-badge ${item.status === 'alive' ? 'status-alive' : 'status-deceased'}`}>
-        {item.status === 'alive' ? 'Còn sống' : 'Đã mất'}
-      </span>
-    )},
-    { key: 'actions', header: 'Thao tác', render: (item) => (
-      <div className="persons-actions">
-        <button 
-          className="persons-btn-detail"
-          onClick={() => setSelectedPerson(item)}
-        >
-          Chi tiết
-        </button>
-      </div>
-    )},
+    { key: 'branch', header: 'Thuộc Chi/Nhánh', render: (item) => item.branchId ? branchNames.get(item.branchId) || item.branchId : '—' },
+    {
+      key: 'status',
+      header: 'Trạng thái',
+      render: (item) => (
+        <span className={`person-status-badge ${item.isLiving ? 'status-alive' : 'status-deceased'}`}>
+          {item.isLiving ? 'Còn sống' : 'Đã mất'}
+        </span>
+      ),
+    },
+    { key: 'actions', header: 'Thao tác', render: (item) => <button className="persons-btn-detail" onClick={() => void openDetail(item)}>Chi tiết</button> },
   ];
 
-  const headerActions = (
-    <div className="persons-header-actions">
-      <button className="admin-btn-secondary">Import Excel</button>
-      <button className="persons-btn-merge admin-btn-primary bg-slate-800 hover:bg-slate-900 border-slate-800 text-white flex gap-2 items-center">
-        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><line x1="9" y1="3" x2="9" y2="21" /></svg>
-        Gộp trùng lặp
-      </button>
-      <button className="admin-btn-primary">
-        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-        Thêm Nhân khẩu
-      </button>
-    </div>
-  );
+  if (!currentFamilyId) {
+    return <div className="admin-account-container"><p>{familyError || 'Chưa chọn clan.'}</p></div>;
+  }
 
   return (
     <div className="admin-account-container">
-      
       <div className="admin-account-header">
         <div>
           <h2 className="admin-account-title">Quản lý Person (Nhân khẩu)</h2>
-          <p className="admin-account-subtitle">Danh sách toàn bộ nhân khẩu trong dòng họ.</p>
+          <p className="admin-account-subtitle">Tìm kiếm, tạo và cập nhật Person qua Backend Sprint 2.</p>
         </div>
-        <div className="admin-account-controls">
-          {headerActions}
+        <div className="persons-header-actions">
+          <button className="admin-btn-secondary" disabled title="API GAP: chưa có import endpoint">Import Excel</button>
+          <button className="admin-btn-primary" onClick={openCreate}>+ Thêm Nhân khẩu</button>
         </div>
       </div>
-      
+
+      {error && <div className="clan-profile-error">{error}</div>}
       <div className="persons-filter-bar">
-        <input 
-          type="text" 
-          placeholder="Tìm kiếm tên, CCCD..." 
-          className="persons-search-input form-input-admin flex-1"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        <select className="persons-branch-select form-input-admin w-48">
+        <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Tìm kiếm họ tên..." className="persons-search-input form-input-admin flex-1" />
+        <select value={branchId} onChange={(event) => setBranchId(event.target.value)} className="persons-branch-select form-input-admin w-48">
           <option value="">Tất cả Chi/Nhánh</option>
-          <option value="chi1">Chi 1</option>
+          {branches.map((branch) => <option key={branch.id} value={branch.id}>{branch.name}</option>)}
         </select>
-        <select className="persons-status-select form-input-admin w-48">
-          <option value="">Trạng thái</option>
-          <option value="alive">Còn sống</option>
+        <select value={livingFilter} onChange={(event) => setLivingFilter(event.target.value)} className="persons-status-select form-input-admin w-48">
+          <option value="">Tất cả trạng thái</option>
+          <option value="true">Còn sống</option>
+          <option value="false">Đã mất</option>
         </select>
       </div>
 
       <div className="persons-table-container">
-        <DataTable 
-          columns={columns} 
-          data={data} 
-          keyExtractor={(item) => item.id} 
-          emptyMessage="Không tìm thấy nhân khẩu nào."
-        />
+        <DataTable columns={columns} data={persons} isLoading={loading} keyExtractor={(item) => item.id} emptyMessage="Không tìm thấy nhân khẩu nào." />
       </div>
 
-      {/* Centered Modal for Person Detail */}
       {selectedPerson && (
         <div className="persons-modal-overlay">
-          <div className="persons-modal-backdrop" onClick={() => setSelectedPerson(null)}></div>
-          
+          <div className="persons-modal-backdrop" onClick={() => setSelectedPerson(null)} />
           <div className="persons-modal-content relative w-full max-w-4xl bg-white rounded-2xl shadow-2xl flex flex-col max-h-[95vh] animate-zoom-in overflow-hidden">
             <div className="persons-modal-header">
               <div className="persons-modal-header-left">
-                <div className="persons-modal-avatar">
-                  {selectedPerson.name.charAt(0)}
-                </div>
+                <div className="persons-modal-avatar">{selectedPerson.fullName.charAt(0)}</div>
                 <div>
-                  <h2 className="persons-modal-name">{selectedPerson.name}</h2>
-                  <p className="text-slate-500">Đời {selectedPerson.generation} • {selectedPerson.branch}</p>
+                  <h2 className="persons-modal-name">{selectedPerson.fullName}</h2>
+                  <p className="text-slate-500">Đời {selectedPerson.generation} • {selectedPerson.branchId ? branchNames.get(selectedPerson.branchId) || 'Chi chưa rõ' : 'Chưa phân chi'}</p>
                 </div>
               </div>
-              <button 
-                className="persons-modal-close"
-                onClick={() => setSelectedPerson(null)}
-              >
-                ✕
-              </button>
+              <button className="persons-modal-close" onClick={() => setSelectedPerson(null)}>✕</button>
             </div>
-
             <div className="persons-modal-tabs">
-              <button className={`person-tab-btn ${detailTab === 'overview' ? 'tab-active' : 'tab-inactive'}`} onClick={() => setDetailTab('overview')}>Tổng quan</button>
-              <button className={`person-tab-btn ${detailTab === 'relationships' ? 'tab-active' : 'tab-inactive'}`} onClick={() => setDetailTab('relationships')}>Quan hệ Gia đình</button>
-              <button className={`person-tab-btn ${detailTab === 'account' ? 'tab-active' : 'tab-inactive'}`} onClick={() => setDetailTab('account')}>Tài khoản & Phân quyền</button>
-              <button className={`person-tab-btn ${detailTab === 'history' ? 'tab-active' : 'tab-inactive'}`} onClick={() => setDetailTab('history')}>Lịch sử & Cập nhật</button>
+              {(['overview', 'relationships', 'account', 'history'] as const).map((tab) => (
+                <button key={tab} className={`person-tab-btn ${detailTab === tab ? 'tab-active' : 'tab-inactive'}`} onClick={() => setDetailTab(tab)}>
+                  {tab === 'overview' ? 'Tổng quan' : tab === 'relationships' ? 'Phả hệ' : tab === 'account' ? 'Tài khoản' : 'Lịch sử'}
+                </button>
+              ))}
             </div>
-
             <div className="persons-modal-body">
               {detailTab === 'overview' && (
-                <div className="space-y-6">
-                  <div className="persons-detail-section">
-                    <h3 className="persons-detail-title">Thông tin cơ bản</h3>
-                    <div className="persons-detail-grid">
-                      <div><span className="persons-detail-label">Ngày sinh</span><strong className="text-slate-800">{selectedPerson.dob}</strong></div>
-                      <div><span className="persons-detail-label">Giới tính</span><strong className="text-slate-800">{selectedPerson.gender}</strong></div>
-                      <div><span className="persons-detail-label">Tình trạng</span><strong className="text-slate-800">{selectedPerson.status === 'alive' ? 'Còn sống' : 'Đã mất'}</strong></div>
-                      <div><span className="persons-detail-label">Nơi ở hiện tại</span><strong className="text-slate-800">Hà Nội, Việt Nam</strong></div>
-                    </div>
-                    <div className="persons-detail-actions">
-                      <button className="admin-btn-primary" onClick={() => alert('Tính năng Chỉnh sửa Hồ sơ đang được phát triển.')}>Chỉnh sửa Hồ sơ</button>
-                      <button className="persons-btn-hide admin-btn-secondary border-blue-200 text-red-600 hover:bg-red-50" onClick={() => alert('Đã ẩn nhân khẩu này khỏi danh sách.')}>Ẩn Nhân khẩu (Hide)</button>
-                    </div>
+                <div className="persons-detail-section">
+                  <h3 className="persons-detail-title">Thông tin cơ bản</h3>
+                  <div className="persons-detail-grid">
+                    <div><span className="persons-detail-label">Ngày sinh</span><strong>{selectedPerson.birthDate || '—'}</strong></div>
+                    <div><span className="persons-detail-label">Ngày mất</span><strong>{selectedPerson.deathDate || '—'}</strong></div>
+                    <div><span className="persons-detail-label">Giới tính</span><strong>{selectedPerson.gender}</strong></div>
+                    <div><span className="persons-detail-label">Trạng thái</span><strong>{selectedPerson.status}</strong></div>
                   </div>
+                  <div className="persons-detail-actions"><button className="admin-btn-primary" onClick={() => openEdit(selectedPerson)}>Chỉnh sửa Hồ sơ</button></div>
                 </div>
               )}
-
               {detailTab === 'relationships' && (
                 <div className="space-y-4">
-                  <div className="persons-rel-row">
-                    <div>
-                      <span className="persons-rel-label">Cha mẹ</span>
-                      <p className="persons-rel-value">Nguyễn Văn Cha <span className="persons-rel-meta">(Đời {selectedPerson.generation - 1})</span></p>
-                    </div>
-                    <button className="persons-btn-edit-rel" onClick={() => alert('Đang mở form chỉnh sửa quan hệ...')}>Sửa</button>
-                  </div>
-                  
-                  <div className="persons-rel-row">
-                    <div className="persons-rel-label-group">
-                      <span className="persons-rel-label">Vợ / Chồng</span>
-                      <button className="persons-btn-add-spouse" onClick={() => alert('Đang mở form thêm vợ/chồng...')}>+ Thêm Vợ/Chồng</button>
-                    </div>
-                    <p className="persons-rel-empty">Chưa có thông tin</p>
-                  </div>
-
-                  <button 
-                    className="persons-btn-add-child"
-                    onClick={() => alert('Đang mở form thêm con cái...')}
-                  >
-                    + Thêm Con cái
-                  </button>
-                  
-                  <button 
-                    className="persons-btn-view-tree"
-                    onClick={() => window.location.href='/clan-admin/genealogy-tree'}
-                  >
-                    Xem vị trí trên Cây Gia phả
-                  </button>
+                  <div className="persons-rel-row"><div><span className="persons-rel-label">Tổ tiên</span>{ancestors.length ? ancestors.map((item) => <p key={item.person.id}>{item.person.fullName} (cách {item.depth} đời)</p>) : <p className="persons-rel-empty">Không có dữ liệu</p>}</div></div>
+                  <div className="persons-rel-row"><div><span className="persons-rel-label">Hậu duệ</span>{descendants.length ? descendants.map((item) => <p key={item.person.id}>{item.person.fullName} (cách {item.depth} đời)</p>) : <p className="persons-rel-empty">Không có dữ liệu</p>}</div></div>
                 </div>
               )}
-
-              {detailTab === 'account' && (
-                <div className="persons-account-section">
-                  <div className="persons-account-icon-wrap">
-                    <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0110 0v4" /></svg>
-                  </div>
-                  <h3 className="persons-account-title">Chưa liên kết Tài khoản</h3>
-                  <p className="persons-account-desc">Cấp tài khoản đăng nhập cho nhân khẩu này để họ có thể xem gia phả và nhận thông báo sự kiện.</p>
-                  
-                  <button className="admin-btn-primary" onClick={() => alert('Đã tạo tài khoản cho thành viên này!')}>Tạo Account (Sinh user/pass tự động)</button>
-                </div>
-              )}
-              
-              {detailTab === 'history' && (
-                <div className="persons-history-section">
-                  <div className="persons-history-item relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-                    <div className="persons-history-icon-wrap flex items-center justify-center w-10 h-10 rounded-full border border-white bg-slate-300 group-[.is-active]:bg-blue-600 text-slate-50 group-[.is-active]:text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2">
-                      <svg className="fill-current" viewBox="0 0 16 16" width="16" height="16"><path d="M8 0a8 8 0 1 0 8 8 8.009 8.009 0 0 0-8-8Zm0 12a4 4 0 1 1 0-8 4 4 0 0 1 0 8Z" /></svg>
-                    </div>
-                    <div className="persons-history-content">
-                      <div className="persons-history-header">
-                        <div className="persons-history-title">Thêm mới nhân khẩu</div>
-                        <time className="persons-history-time">11/09/2026</time>
-                      </div>
-                      <div className="persons-history-author">Tạo bởi: Admin Trưởng tộc</div>
-                    </div>
-                  </div>
-                </div>
-              )}
+              {detailTab === 'account' && <div className="persons-account-section"><p>API GAP: Sprint 2 chưa có endpoint liên kết Person với user.</p></div>}
+              {detailTab === 'history' && <div className="persons-history-section"><p>API GAP: Sprint 2 chưa có audit-history endpoint cho Person.</p></div>}
             </div>
+          </div>
+        </div>
+      )}
+
+      {isFormOpen && (
+        <div className="persons-modal-overlay">
+          <div className="persons-modal-backdrop" onClick={() => setIsFormOpen(false)} />
+          <div className="persons-modal-content relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl flex flex-col max-h-[95vh] overflow-hidden">
+            <div className="persons-modal-header"><h2>{editing ? 'Cập nhật Person' : 'Thêm Person'}</h2><button className="persons-modal-close" onClick={() => setIsFormOpen(false)}>✕</button></div>
+            <div className="persons-modal-body space-y-4">
+              <label className="form-group-admin"><span className="form-label-admin">Họ tên *</span><input className="form-input-admin" value={form.fullName || ''} onChange={(event) => setForm({ ...form, fullName: event.target.value })} /></label>
+              <label className="form-group-admin"><span className="form-label-admin">Giới tính</span><select className="form-input-admin" value={form.gender || 'unknown'} onChange={(event) => setForm({ ...form, gender: event.target.value })}><option value="unknown">Chưa rõ</option><option value="male">Nam</option><option value="female">Nữ</option><option value="other">Khác</option></select></label>
+              <label className="form-group-admin"><span className="form-label-admin">Chi/Nhánh</span><select className="form-input-admin" value={form.branchId || ''} onChange={(event) => setForm({ ...form, branchId: event.target.value || null })}><option value="">Chưa phân chi</option>{branches.map((branch) => <option key={branch.id} value={branch.id}>{branch.name}</option>)}</select></label>
+              <label className="form-group-admin"><span className="form-label-admin">Ngày sinh</span><input type="date" className="form-input-admin" value={form.birthDate || ''} onChange={(event) => setForm({ ...form, birthDate: event.target.value || null })} /></label>
+              <label className="form-group-admin"><span className="form-label-admin">Ngày mất</span><input type="date" className="form-input-admin" value={form.deathDate || ''} onChange={(event) => setForm({ ...form, deathDate: event.target.value || null, isLiving: !event.target.value })} /></label>
+            </div>
+            <div className="persons-detail-actions"><button className="admin-btn-secondary" onClick={() => setIsFormOpen(false)}>Huỷ</button><button className="admin-btn-primary" disabled={saving || !form.fullName?.trim()} onClick={() => void save()}>{saving ? 'Đang lưu...' : 'Lưu Person'}</button></div>
           </div>
         </div>
       )}

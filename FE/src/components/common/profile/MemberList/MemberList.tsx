@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { fetchFamilies, fetchMembers } from '../../../../services/member.service';
-import type { Family, Member } from '../../../../types/member';
+import { fetchMembers } from '../../../../services/member.service';
+import { useFamily } from '../../../../context/FamilyContext';
+import type { Member } from '../../../../types/member';
 import './MemberList.css';
 
 export interface MemberListProps {
@@ -9,27 +10,24 @@ export interface MemberListProps {
 
 export const MemberList: React.FC<MemberListProps> = ({ onSelectMember }) => {
   const [members, setMembers] = useState<Member[]>([]);
-  const [families, setFamilies] = useState<Family[]>([]);
-  const [selectedFamilyId, setSelectedFamilyId] = useState<string>('');
+  const { currentFamilyId, availableFamilies, setCurrentFamilyId, error: familyError } = useFamily();
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    fetchFamilies().then((data) => {
-      setFamilies(data);
-      if (data.length > 0) {
-        setSelectedFamilyId(data[0].id);
-      }
-    });
-  }, []);
-
-  useEffect(() => {
-    setLoading(true);
-    fetchMembers({ familyId: selectedFamilyId || undefined, search: searchTerm }).then((res) => {
-      setMembers(res.items);
+    if (!currentFamilyId) {
+      setMembers([]);
       setLoading(false);
-    });
-  }, [selectedFamilyId, searchTerm]);
+      return;
+    }
+    setLoading(true);
+    setError('');
+    fetchMembers({ familyId: currentFamilyId, search: searchTerm })
+      .then((res) => setMembers(res.items))
+      .catch((requestError) => setError(requestError instanceof Error ? requestError.message : 'Không tải được Person.'))
+      .finally(() => setLoading(false));
+  }, [currentFamilyId, searchTerm]);
 
   return (
     <div className="member-list-container">
@@ -52,13 +50,13 @@ export const MemberList: React.FC<MemberListProps> = ({ onSelectMember }) => {
 
           <select
             className="member-select-filter"
-            value={selectedFamilyId}
-            onChange={(e) => setSelectedFamilyId(e.target.value)}
+            value={currentFamilyId || ''}
+            onChange={(e) => setCurrentFamilyId(e.target.value)}
           >
-            <option value="">-- Tất cả dòng họ --</option>
-            {families.map((f) => (
+            <option value="">-- Chọn dòng họ --</option>
+            {availableFamilies.map((f) => (
               <option key={f.id} value={f.id}>
-                {f.name} ({f.memberCount} thành viên)
+                {f.name}
               </option>
             ))}
           </select>
@@ -66,7 +64,9 @@ export const MemberList: React.FC<MemberListProps> = ({ onSelectMember }) => {
       </div>
 
       <div className="member-table-card">
-        {loading ? (
+        {familyError || error ? (
+          <div className="member-table-prompt-empty">{familyError || error}</div>
+        ) : loading ? (
           <div className="member-table-prompt-loading">
              Đang tải danh sách thành viên từ cơ sở dữ liệu...
           </div>

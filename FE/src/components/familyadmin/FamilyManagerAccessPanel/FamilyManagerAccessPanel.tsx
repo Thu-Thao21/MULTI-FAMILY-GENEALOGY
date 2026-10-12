@@ -4,7 +4,7 @@ import type { AccountProfile } from '../../../context/AuthContext';
 import './FamilyManagerAccessPanel.css';
 
 const hasActiveManagerRole = (account: AccountProfile) => account.roles.some(
-  (role) => role.role.toLowerCase() === 'manager' && role.status.toLowerCase() === 'active' && Boolean(role.family_id),
+  (role) => role.role.toLowerCase() === 'manager' && !role.revoked_at && Boolean(role.family_id),
 );
 
 export const FamilyManagerAccessPanel: React.FC = () => {

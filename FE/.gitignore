@@ -8,6 +8,8 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
+node_modules.dataless-backup-*/
+node_modules.install-partial-*/
 dist
 dist-ssr
 *.local
@@ -22,3 +24,5 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+tsconfig.tsbuildinfo
+vite.config.ts.timestamp-*

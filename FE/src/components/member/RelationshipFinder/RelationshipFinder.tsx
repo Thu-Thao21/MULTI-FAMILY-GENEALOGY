@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { fetchMembers } from '../../../services/member.service';
+import { getAncestors, getDescendants } from '../../../services/genealogyService';
+import { useFamily } from '../../../context/FamilyContext';
 import type { Member } from '../../../types/member';
 import './RelationshipFinder.css';
 
 export const RelationshipFinder: React.FC = () => {
+  const { currentFamilyId } = useFamily();
   const [members, setMembers] = useState<Member[]>([]);
   const [personAId, setPersonAId] = useState<string>('');
   const [personBId, setPersonBId] = useState<string>('');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState<'finder' | 'lineage'>('finder');
 
   // Result state
@@ -25,16 +29,22 @@ export const RelationshipFinder: React.FC = () => {
   const [descendants, setDescendants] = useState<Member[]>([]);
 
   useEffect(() => {
-    fetchMembers({ limit: 500 }).then((res) => {
-      const items = res?.items || [];
-      setMembers(items);
-      if (items.length >= 2) {
-        setPersonAId(items[0].id);
-        setPersonBId(items[1].id);
-      }
+    if (!currentFamilyId) {
       setLoading(false);
-    });
-  }, []);
+      return;
+    }
+    fetchMembers({ familyId: currentFamilyId, limit: 500 })
+      .then((res) => {
+        const items = res?.items || [];
+        setMembers(items);
+        if (items.length >= 2) {
+          setPersonAId(items[0].id);
+          setPersonBId(items[1].id);
+        }
+      })
+      .catch((requestError) => setError(requestError instanceof Error ? requestError.message : 'Không tải được Person.'))
+      .finally(() => setLoading(false));
+  }, [currentFamilyId]);
 
   const calculateRelationship = () => {
     if (!personAId || !personBId) return;
@@ -108,19 +118,22 @@ export const RelationshipFinder: React.FC = () => {
     });
   };
 
-  const handleLineageLookup = () => {
-    if (!lineagePersonId) return;
-
-    const current = members.find((m) => m.id === lineagePersonId);
-    if (!current) return;
-
-    // Find ancestors (lower generation numbers)
-    const anc = members.filter((m) => (m.generation || 1) < (current.generation || 1));
-    // Find descendants (higher generation numbers)
-    const desc = members.filter((m) => (m.generation || 1) > (current.generation || 1));
-
-    setAncestors(anc);
-    setDescendants(desc);
+  const handleLineageLookup = async () => {
+    if (!lineagePersonId || !currentFamilyId) return;
+    setError('');
+    try {
+      const [ancestorRows, descendantRows] = await Promise.all([
+        getAncestors(currentFamilyId, lineagePersonId),
+        getDescendants(currentFamilyId, lineagePersonId),
+      ]);
+      const idsToMembers = (ids: string[]) => ids
+        .map((id) => members.find((member) => member.id === id))
+        .filter((member): member is Member => Boolean(member));
+      setAncestors(idsToMembers(ancestorRows.map((row) => row.person.id)));
+      setDescendants(idsToMembers(descendantRows.map((row) => row.person.id)));
+    } catch (requestError) {
+      setError(requestError instanceof Error ? requestError.message : 'Không tra cứu được phả hệ.');
+    }
   };
 
   return (
@@ -149,6 +162,8 @@ export const RelationshipFinder: React.FC = () => {
 
       {loading ? (
         <div className="rel-loading">Đang tải dữ liệu thành viên gia tộc...</div>
+      ) : error ? (
+        <div className="rel-loading">{error}</div>
       ) : activeTab === 'finder' ? (
         <div className="rel-finder-body">
           <div className="rel-select-card">

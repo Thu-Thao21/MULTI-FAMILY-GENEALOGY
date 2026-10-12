@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { loginWithGoogle, loginWithFacebook, registerWithEmailPassword } from '../../../../services/auth.service';
 import { ROUTES } from '../../../../config/routes';
+import type { AccountProfile } from '../../../../context/AuthContext';
 import './RegisterForm.css';
 
 export interface RegisterFormProps {
   onSwitchToLogin: () => void;
-  onSuccess: () => void;
+  onSuccess: (profile: AccountProfile) => void;
 }
 
 export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin, onSuccess }) => {
@@ -24,8 +25,8 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin, onS
   const handleGoogleLogin = async () => {
     setError('');
     try {
-      await loginWithGoogle();
-      onSuccess();
+      const profile = await loginWithGoogle();
+      if (profile) onSuccess(profile);
     } catch (err: any) {
       setError(err.message || 'Đăng nhập Google thất bại.');
     }
@@ -34,8 +35,8 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin, onS
   const handleFacebookLogin = async () => {
     setError('');
     try {
-      await loginWithFacebook();
-      onSuccess();
+      const profile = await loginWithFacebook();
+      if (profile) onSuccess(profile);
     } catch (err: any) {
       setError(err.message || 'Đăng nhập Facebook thất bại.');
     }
@@ -52,14 +53,14 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin, onS
     setIsSubmitting(true);
 
     try {
-      await registerWithEmailPassword({
+      const profile = await registerWithEmailPassword({
         username: formData.username,
         email: formData.emailOrPhone,
         password: formData.password,
         confirmPassword: formData.confirmPassword,
         displayName: formData.displayName,
       });
-      onSuccess();
+      onSuccess(profile);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Đăng ký thất bại.');
     } finally {
@@ -106,13 +107,13 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin, onS
         </div>
 
         <div className="register-form-group">
-          <label className="register-form-label">Email hoặc số điện thoại</label>
+          <label className="register-form-label">Email Firebase</label>
           <input
-            type="text"
+            type="email"
             name="emailOrPhone"
             value={formData.emailOrPhone}
             onChange={handleChange}
-            placeholder="email@example.com hoặc 0912345678"
+            placeholder="email@example.com"
             required
             className="register-form-input"
           />

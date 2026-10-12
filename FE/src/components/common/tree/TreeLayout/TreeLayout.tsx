@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { fetchFamilies } from '../../../../services/member.service';
 import { buildErgoTreeFromDB } from '../../../../services/tree.service';
-import type { Family, Member } from '../../../../types/member';
+import { getApiErrorMessage } from '../../../../services/api';
+import { useFamily } from '../../../../context/FamilyContext';
+import type { Member } from '../../../../types/member';
 import type { ErgoTreeNode, TreeContextMenuState, TreeViewMode } from '../../../../types/tree';
 import { ErgoTreeCanvas } from '../ErgoTreeCanvas';
 import { TreeContextMenu } from '../TreeContextMenu';
@@ -23,8 +24,13 @@ export const TreeLayout: React.FC<TreeLayoutProps> = ({
   initialFamilyId,
   onSelectMemberProfile,
 }) => {
-  const [families, setFamilies] = useState<Family[]>([]);
-  const [selectedFamilyId, setSelectedFamilyId] = useState<string>(initialFamilyId || '');
+  const {
+    currentFamilyId,
+    availableFamilies,
+    setCurrentFamilyId,
+    error: familyError,
+  } = useFamily();
+  const selectedFamilyId = initialFamilyId || currentFamilyId || '';
   const [allMembers, setAllMembers] = useState<Member[]>([]);
   const [treeNodes, setTreeNodes] = useState<ErgoTreeNode[]>([]);
   const [focusMemberId, setFocusMemberId] = useState<string | undefined>(initialFocusId);
@@ -33,6 +39,7 @@ export const TreeLayout: React.FC<TreeLayoutProps> = ({
   );
   const [zoomScale, setZoomScale] = useState<number>(1);
   const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState('');
 
   // Context menu state
   const [contextMenu, setContextMenu] = useState<TreeContextMenuState>({
@@ -51,21 +58,21 @@ export const TreeLayout: React.FC<TreeLayoutProps> = ({
   }, [initialMode]);
 
   useEffect(() => {
-    fetchFamilies().then((fams) => {
-      setFamilies(fams);
-      if (fams.length > 0 && !selectedFamilyId) {
-        setSelectedFamilyId(fams[0].id);
-      }
-    });
-  }, [selectedFamilyId]);
-
-  useEffect(() => {
-    setLoading(true);
-    buildErgoTreeFromDB(selectedFamilyId, focusMemberId).then(({ rootNodes, allMembers: mems }) => {
-      setTreeNodes(rootNodes);
-      setAllMembers(mems);
+    if (!selectedFamilyId) {
+      setTreeNodes([]);
+      setAllMembers([]);
       setLoading(false);
-    });
+      return;
+    }
+    setLoading(true);
+    setError('');
+    buildErgoTreeFromDB(selectedFamilyId, focusMemberId)
+      .then(({ rootNodes, allMembers: mems }) => {
+        setTreeNodes(rootNodes);
+        setAllMembers(mems);
+      })
+      .catch((requestError) => setError(getApiErrorMessage(requestError, 'Không tải được dữ liệu cây.')))
+      .finally(() => setLoading(false));
   }, [selectedFamilyId, focusMemberId]);
 
   const handleCardClick = (e: React.MouseEvent, node: ErgoTreeNode) => {
@@ -174,11 +181,11 @@ export const TreeLayout: React.FC<TreeLayoutProps> = ({
           <select
             className="tree-control-select"
             value={selectedFamilyId}
-            onChange={(e) => setSelectedFamilyId(e.target.value)}
+            onChange={(e) => setCurrentFamilyId(e.target.value)}
           >
-            {families.map((f) => (
+            {availableFamilies.map((f) => (
               <option key={f.id} value={f.id}>
-                {f.name} ({f.memberCount || allMembers.length} thành viên)
+                {f.name} ({allMembers.length} thành viên)
               </option>
             ))}
           </select>
@@ -228,7 +235,9 @@ export const TreeLayout: React.FC<TreeLayoutProps> = ({
       </div>
 
       {/* Canvas Area */}
-      {loading ? (
+      {error || familyError ? (
+        <div className="tree-canvas-prompt-empty">{error || familyError}</div>
+      ) : loading ? (
         <div className="tree-canvas-prompt-loading">
           Đang tính toán sơ đồ trực hệ gia phả...
         </div>

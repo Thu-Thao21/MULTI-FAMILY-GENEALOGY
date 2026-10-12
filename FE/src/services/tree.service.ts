@@ -1,146 +1,93 @@
-import { fetchMembers } from './member.service';
+import { getTreeData } from './genealogyService';
 import type { Member } from '../types/member';
 import type { ErgoTreeNode, SpouseNode } from '../types/tree';
+import type { TreeNodeDto } from '../types/sprint2';
+
+const PARENT_TYPES = new Set(['PARENT', 'FATHER', 'MOTHER', 'ADOPTIVE_PARENT', 'STEP_PARENT']);
+
+function toMember(node: TreeNodeDto, familyId: string): Member {
+  return {
+    id: node.id,
+    familyId,
+    fullName: node.fullName,
+    gender: node.gender,
+    isAlive: true,
+    branch: node.branchId || undefined,
+    generation: node.generation,
+    avatarUrl: node.avatarUrl || undefined,
+    status: node.status,
+  };
+}
 
 export async function buildErgoTreeFromDB(
-  familyId?: string,
+  familyId: string,
   focusMemberId?: string,
 ): Promise<{ rootNodes: ErgoTreeNode[]; allMembers: Member[] }> {
-  try {
-    // Fetch members with maximum limit for complete tree layout
-    const res = await fetchMembers({ familyId, limit: 1000 });
-    const allMembers = Array.isArray(res?.items) ? res.items : [];
+  if (!familyId) return { rootNodes: [], allMembers: [] };
 
-    if (allMembers.length === 0) {
-      return { rootNodes: [], allMembers: [] };
-    }
+  const tree = await getTreeData(familyId);
+  const nodeMap = new Map(tree.nodes.map((node) => [node.id, node]));
+  const childrenByParent = new Map<string, string[]>();
+  const incomingParent = new Set<string>();
+  const spousesByPerson = new Map<string, SpouseNode[]>();
 
-    // Create lookup map
-    const memberMap = new Map<string, Member>();
-    allMembers.forEach((m) => memberMap.set(m.id, m));
-
-    // Helper to find true wives/spouses of a male member without hardcoded IDs
-    const getSpousesOfMale = (m: Member): SpouseNode[] => {
-      if (m.gender !== 'male') return [];
-
-      const spouses: SpouseNode[] = [];
-
-      allMembers.forEach((w) => {
-        if (w.gender !== 'female' || w.id === m.id) return;
-
-        // Exclude sisters (share same father or mother)
-        const mFather = (m as any).fatherId;
-        const mMother = (m as any).motherId;
-        const wFather = (w as any).fatherId;
-        const wMother = (w as any).motherId;
-        if (mFather && wFather && mFather === wFather) return;
-        if (mMother && wMother && mMother === wMother) return;
-
-        // Check 1: Shared children in database
-        const isMotherOfChildren = allMembers.some(
-          (c) => (c as any).fatherId === m.id && (c as any).motherId === w.id
-        );
-
-        // Check 2: Explicit spouse link properties
-        const isExplicitSpouse =
-          (w as any).spouseId === m.id ||
-          (m as any).spouseId === w.id ||
-          (w as any).husbandId === m.id ||
-          (m as any).wifeId === w.id;
-
-        if (isMotherOfChildren || isExplicitSpouse) {
-          spouses.push({
-            id: w.id,
-            fullName: w.fullName,
-            gender: w.gender,
-            birthDate: w.birthDate,
-            avatarUrl: w.avatarUrl,
-            isAlive: w.isAlive,
-            occupation: w.occupation,
-          });
-        }
+  const addSpouse = (personId: string, spouseId: string) => {
+    const spouse = nodeMap.get(spouseId);
+    if (!spouse) return;
+    const rows = spousesByPerson.get(personId) || [];
+    if (!rows.some((row) => row.id === spouse.id)) {
+      rows.push({
+        id: spouse.id,
+        fullName: spouse.fullName,
+        gender: spouse.gender,
+        avatarUrl: spouse.avatarUrl || undefined,
+        isAlive: true,
       });
-
-      return spouses;
-    };
-
-    // Helper to convert Member to ErgoTreeNode
-    const convertNode = (m: Member, isFocus: boolean = false): ErgoTreeNode => {
-      const spouses = getSpousesOfMale(m);
-
-      return {
-        id: m.id,
-        fullName: m.fullName,
-        otherName: m.otherName,
-        gender: m.gender,
-        birthDate: m.birthDate,
-        avatarUrl: m.avatarUrl,
-        isAlive: m.isAlive,
-        generation: m.generation,
-        branch: m.branch,
-        occupation: m.occupation,
-        spouses,
-        children: [],
-        isFocusPerson: isFocus,
-      };
-    };
-
-    // Build recursive children with cycle detection
-    const buildChildrenRecursive = (parentId: string, visited: Set<string>): ErgoTreeNode[] => {
-      if (visited.has(parentId)) return [];
-      visited.add(parentId);
-
-      const parentM = memberMap.get(parentId);
-      if (!parentM) return [];
-
-      let directChildren: Member[] = [];
-
-      if (parentM.gender === 'male') {
-        directChildren = allMembers.filter((m) => (m as any).fatherId === parentId);
-      } else {
-        const husbandExists = allMembers.some(
-          (m) => m.gender === 'male' && getSpousesOfMale(m).some((s) => s.id === parentId)
-        );
-        if (!husbandExists) {
-          directChildren = allMembers.filter((m) => (m as any).motherId === parentId);
-        }
-      }
-
-      return directChildren.map((c) => {
-        const node = convertNode(c, c.id === focusMemberId);
-        node.children = buildChildrenRecursive(c.id, new Set(visited));
-        return node;
-      });
-    };
-
-    // Identify root ancestors
-    let rootMembers: Member[] = [];
-    if (focusMemberId) {
-      const focusM = memberMap.get(focusMemberId);
-      if (focusM) {
-        rootMembers = [focusM];
-      }
     }
+    spousesByPerson.set(personId, rows);
+  };
 
-    if (rootMembers.length === 0) {
-      rootMembers = allMembers.filter((m) => m.generation === 1 && m.gender === 'male');
-      if (rootMembers.length === 0) {
-        rootMembers = allMembers.filter((m) => m.generation === 1);
-      }
-      if (rootMembers.length === 0 && allMembers.length > 0) {
-        rootMembers = [allMembers[0]];
-      }
+  for (const edge of tree.edges) {
+    if (PARENT_TYPES.has(edge.relationshipType)) {
+      const children = childrenByParent.get(edge.fromMemberId) || [];
+      if (!children.includes(edge.toMemberId)) children.push(edge.toMemberId);
+      childrenByParent.set(edge.fromMemberId, children);
+      incomingParent.add(edge.toMemberId);
+    } else if (edge.relationshipType === 'SPOUSE') {
+      addSpouse(edge.fromMemberId, edge.toMemberId);
+      addSpouse(edge.toMemberId, edge.fromMemberId);
     }
-
-    const rootNodes: ErgoTreeNode[] = rootMembers.map((r) => {
-      const node = convertNode(r, r.id === focusMemberId);
-      node.children = buildChildrenRecursive(r.id, new Set());
-      return node;
-    });
-
-    return { rootNodes, allMembers };
-  } catch (err) {
-    console.error('API buildErgoTreeFromDB error:', err);
-    return { rootNodes: [], allMembers: [] };
   }
+
+  const buildNode = (personId: string, visited: Set<string>): ErgoTreeNode | null => {
+    const person = nodeMap.get(personId);
+    if (!person || visited.has(personId)) return null;
+    const nextVisited = new Set(visited).add(personId);
+    return {
+      id: person.id,
+      fullName: person.fullName,
+      gender: person.gender,
+      avatarUrl: person.avatarUrl || undefined,
+      isAlive: true,
+      generation: person.generation,
+      branch: person.branchId || undefined,
+      spouses: spousesByPerson.get(person.id) || [],
+      children: (childrenByParent.get(person.id) || [])
+        .map((childId) => buildNode(childId, nextVisited))
+        .filter((child): child is ErgoTreeNode => child !== null),
+      isFocusPerson: person.id === focusMemberId,
+    };
+  };
+
+  const rootIds = focusMemberId && nodeMap.has(focusMemberId)
+    ? [focusMemberId]
+    : tree.nodes.filter((node) => !incomingParent.has(node.id)).map((node) => node.id);
+  const fallbackIds = rootIds.length > 0 ? rootIds : tree.nodes.slice(0, 1).map((node) => node.id);
+
+  return {
+    rootNodes: fallbackIds
+      .map((rootId) => buildNode(rootId, new Set()))
+      .filter((node): node is ErgoTreeNode => node !== null),
+    allMembers: tree.nodes.map((node) => toMember(node, familyId)),
+  };
 }

@@ -6,6 +6,8 @@ import "./SystemAdminLayout.css";
 
 // Import ảnh nền
 import nenanImg from '../../assets/nenan.png';
+import { useAuth } from '../../hooks/useAuth';
+import { useFamily } from '../../context/FamilyContext';
 
 // Mapping router path to sidebar tab ids
 const ROUTE_TO_TAB: Record<string, string> = {
@@ -76,6 +78,8 @@ const TAB_TO_ROUTE: Record<string, string> = {
 export const ClanAdminLayout: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { account, logout } = useAuth();
+  const { currentFamily } = useFamily();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
@@ -96,8 +100,9 @@ export const ClanAdminLayout: React.FC = () => {
     }
   };
 
-  const handleLogout = () => {
-    console.log('Logout clicked');
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
   };
 
   if (location.pathname === '/') {
@@ -107,8 +112,8 @@ export const ClanAdminLayout: React.FC = () => {
   return (
     <div className="dashboard-page-container">
       <TopBar
-        userName="Trưởng tộc"
-        userRole="Admin"
+        userName={account?.display_name || account?.email || 'Người dùng'}
+        userRole={currentFamily?.name || account?.primary_role || 'Member'}
         onLogout={handleLogout}
         isSidebarCollapsed={isSidebarCollapsed}
         onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
@@ -120,7 +125,7 @@ export const ClanAdminLayout: React.FC = () => {
           activeTab={activeTab}
           onSelectTab={handleSelectTab}
           isCollapsed={isSidebarCollapsed}
-          userRole="Admin"
+          userRole={account?.primary_role || 'member'}
           variant="clan"
         />
 

@@ -11,7 +11,7 @@ const ForgotPasswordPage: React.FC<ForgotPasswordPageProps> = ({ onSwitchToLogin
   return (
     <AuthLanding
       title="Khôi phục tài khoản gia tộc"
-      subtitle="Xác thực OTP qua email hoặc số điện thoại để cài đặt mật khẩu mới an toàn."
+      subtitle="Nhận liên kết đặt lại mật khẩu an toàn trực tiếp từ Firebase Authentication."
       backgroundImage={loginBackground}
     >
       <ForgotPasswordForm onSwitchToLogin={onSwitchToLogin} />

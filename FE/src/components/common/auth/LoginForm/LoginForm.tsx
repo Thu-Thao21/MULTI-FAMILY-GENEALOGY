@@ -5,11 +5,12 @@ import { ROUTES } from '../../../../config/routes';
 import './LoginForm.css';
 
 import { loginWithGoogle, loginWithFacebook } from '../../../../services/auth.service';
+import type { AccountProfile } from '../../../../context/AuthContext';
 
 export interface LoginFormProps {
   onSwitchToRegister: () => void;
   onSwitchToForgotPassword?: () => void;
-  onSuccess: () => void;
+  onSuccess: (profile: AccountProfile) => void;
 }
 
 export const LoginForm: React.FC<LoginFormProps> = ({
@@ -34,11 +35,11 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     setIsSubmitting(true);
 
     try {
-      await login({
+      const profile = await login({
         emailOrPhone: formData.emailOrPhone,
         password: formData.password,
       });
-      onSuccess();
+      onSuccess(profile);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Đăng nhập thất bại.');
     } finally {
@@ -50,8 +51,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     setError('');
     setIsSubmitting(true);
     try {
-      await loginWithGoogle();
-      onSuccess();
+      const profile = await loginWithGoogle();
+      if (profile) onSuccess(profile);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Đăng nhập Google thất bại.');
     } finally {
@@ -63,8 +64,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     setError('');
     setIsSubmitting(true);
     try {
-      await loginWithFacebook();
-      onSuccess();
+      const profile = await loginWithFacebook();
+      if (profile) onSuccess(profile);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Đăng nhập Facebook thất bại.');
     } finally {
@@ -98,13 +99,13 @@ export const LoginForm: React.FC<LoginFormProps> = ({
 
       <form onSubmit={handleSubmit} className="login-form-body">
         <div className="login-form-group">
-          <label className="login-form-label">Email / SĐT</label>
+          <label className="login-form-label">Email Firebase</label>
           <input
-            type="text"
+            type="email"
             name="emailOrPhone"
             value={formData.emailOrPhone}
             onChange={handleChange}
-            placeholder="Email hoặc số điện thoại"
+            placeholder="email@example.com"
             required
             className="login-form-input"
           />

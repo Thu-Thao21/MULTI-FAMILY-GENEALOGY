@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { fetchMemberDetail } from '../../../../services/member.service';
 import type { MemberDetail } from '../../../../types/member';
+import { useFamily } from '../../../../context/FamilyContext';
 import { AccountTab } from '../AccountTab';
 import { BiographyTab } from '../BiographyTab';
 import { ContactTab } from '../ContactTab';
@@ -19,8 +20,10 @@ export interface ProfileLayoutProps {
 export type ProfileTabKey = 'personal' | 'biography' | 'contact' | 'photos' | 'contributions' | 'status' | 'account';
 
 export const ProfileLayout: React.FC<ProfileLayoutProps> = ({ memberId, onBack }) => {
+  const { currentFamilyId } = useFamily();
   const [member, setMember] = useState<MemberDetail | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState<ProfileTabKey>('personal');
   const tabsRef = useRef<HTMLDivElement>(null);
 
@@ -36,11 +39,12 @@ export const ProfileLayout: React.FC<ProfileLayoutProps> = ({ memberId, onBack }
 
   useEffect(() => {
     setLoading(true);
-    fetchMemberDetail(memberId).then((data) => {
-      setMember(data);
-      setLoading(false);
-    });
-  }, [memberId]);
+    setError('');
+    fetchMemberDetail(memberId, currentFamilyId || undefined)
+      .then(setMember)
+      .catch((requestError) => setError(requestError instanceof Error ? requestError.message : 'Không tải được Person.'))
+      .finally(() => setLoading(false));
+  }, [memberId, currentFamilyId]);
 
   if (loading) {
     return (
@@ -53,7 +57,7 @@ export const ProfileLayout: React.FC<ProfileLayoutProps> = ({ memberId, onBack }
   if (!member) {
     return (
       <div className="profile-not-found-box">
-        <p className="profile-not-found-text"> Không tìm thấy dữ liệu hồ sơ thành viên.</p>
+        <p className="profile-not-found-text">{error || 'Không tìm thấy dữ liệu hồ sơ thành viên.'}</p>
         {onBack && (
           <button className="profile-back-btn" onClick={onBack}>
             ← Quay lại danh sách

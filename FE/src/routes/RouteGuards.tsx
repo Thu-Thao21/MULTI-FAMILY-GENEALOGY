@@ -48,24 +48,15 @@ export const RoleGuard: React.FC<RoleGuardProps> = ({ allowedRoles, children }) 
 
   const primaryRole = (account.primary_role || '').toLowerCase();
   const activeRoles = (account.roles || [])
-    .filter((r) => r.status === 'active')
+    .filter((r) => !r.revoked_at)
     .map((r) => r.role.toLowerCase());
 
   const isAdmin = primaryRole === 'admin' || activeRoles.includes('admin');
-  const isRequireAdmin = allowedRoles.map((r) => r.toLowerCase()).includes('admin');
-
-  if (isRequireAdmin) {
-    if (!isAdmin) {
-      return <Navigate to="/user" replace />;
-    }
-  } else {
-    if (isAdmin) {
-      return <Navigate to="/admin" replace />;
-    }
-    const hasRole = allowedRoles.some((r) => activeRoles.includes(r.toLowerCase()) || primaryRole === r.toLowerCase());
-    if (!hasRole) {
-      return <Navigate to="/login" replace />;
-    }
+  const hasRole = allowedRoles.some(
+    (role) => activeRoles.includes(role.toLowerCase()) || primaryRole === role.toLowerCase(),
+  );
+  if (!isAdmin && !hasRole) {
+    return <Navigate to="/user" replace />;
   }
 
   return <>{children}</>;

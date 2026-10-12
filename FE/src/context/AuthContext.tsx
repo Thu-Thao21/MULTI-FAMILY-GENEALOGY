@@ -1,35 +1,43 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { onAuthStateChanged, signOut, getRedirectResult, type User as FirebaseUser } from 'firebase/auth';
+import { onAuthStateChanged, signOut, type User as FirebaseUser } from 'firebase/auth';
+
 import { auth } from '../config/firebase';
-import apiClient from '../api/axios';
+import apiClient, { getApiErrorMessage } from '../services/api';
+import { loginWithEmailPassword } from '../services/auth.service';
 
 export interface AccountRoleInfo {
   id: string;
+  account_id: string;
   role: string;
   family_id?: string | null;
-  status: string;
+  granted_at: string;
+  revoked_at?: string | null;
 }
 
 export interface AccountProfile {
   id: string;
-  firebase_uid: string;
+  firebase_uid?: string | null;
   username?: string | null;
-  email?: string | null;
+  email: string;
   phone_e164?: string | null;
-  display_name?: string | null;
+  display_name: string;
   email_verified: boolean;
   phone_verified: boolean;
+  first_login_required: boolean;
+  last_login_at?: string | null;
   status: string;
   roles: AccountRoleInfo[];
-  primary_role: 'admin' | 'member' | string;
+  primary_role: string;
 }
 
 interface AuthContextType {
   firebaseUser: FirebaseUser | null;
+  backendUser: AccountProfile | null;
   account: AccountProfile | null;
   isAuthenticated: boolean;
   loading: boolean;
   primaryRole: string;
+  roles: string[];
   login: (payload: { emailOrPhone: string; password: string }) => Promise<AccountProfile>;
   refreshAccount: () => Promise<AccountProfile | null>;
   logout: () => Promise<void>;
@@ -40,58 +48,20 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [account, setAccount] = useState<AccountProfile | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState(true);
 
   const fetchAccount = async (): Promise<AccountProfile | null> => {
     try {
-      const response = await apiClient.get<AccountProfile>('/auth/me');
+      const response = await apiClient.get<AccountProfile>('/api/auth/me');
       setAccount(response.data);
       return response.data;
     } catch (error) {
-      // Old role-encoded tokens are no longer accepted. Drop a rejected local
-      // session before trying the current Firebase identity, if one exists.
-      const status = (error as { response?: { status?: number } })?.response?.status;
-      if (localStorage.getItem('auth_token') && (status === 401 || status === 403)) {
-        localStorage.removeItem('auth_token');
-        if (!auth.currentUser) {
-          setAccount(null);
-          return null;
-        }
-      }
-      console.warn('Failed to fetch account profile from /auth/me, trying bootstrap...', error);
-      try {
-        const bsResponse = await apiClient.post<AccountProfile>('/auth/bootstrap');
-        setAccount(bsResponse.data);
-        return bsResponse.data;
-      } catch (bsErr) {
-        console.error('Failed to bootstrap account in AuthContext:', bsErr);
-        setAccount(null);
-        return null;
-      }
+      setAccount(null);
+      throw new Error(getApiErrorMessage(error, 'Không tải được hồ sơ người dùng từ Backend.'));
     }
   };
 
   const login = async (payload: { emailOrPhone: string; password: string }): Promise<AccountProfile> => {
-    // TEMPORARY BYPASS FOR FE TESTING
-    if (payload.emailOrPhone === 'admin@test.com' && payload.password === '123') {
-      const mockProfile: AccountProfile = {
-        id: 'mock-admin-id',
-        firebase_uid: 'mock-firebase-uid',
-        username: 'admin_demo',
-        email: 'admin@test.com',
-        display_name: 'Quản Trị Viên (Test)',
-        email_verified: true,
-        phone_verified: true,
-        status: 'active',
-        roles: [{ id: 'role1', role: 'admin', status: 'active' }],
-        primary_role: 'admin'
-      };
-      setAccount(mockProfile);
-      return mockProfile;
-    }
-    // END TEMPORARY BYPASS
-
-    const { loginWithEmailPassword } = await import('../services/auth.service');
     const profile = await loginWithEmailPassword({
       email: payload.emailOrPhone,
       password: payload.password,
@@ -104,40 +74,45 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setFirebaseUser(user);
       if (user) {
-        // Automatically fetch account from backend if firebase user is logged in
-        await fetchAccount();
+        try {
+          await fetchAccount();
+        } catch {
+          setAccount(null);
+        }
       } else {
         setAccount(null);
       }
       setLoading(false);
     });
-    return () => unsubscribe();
+    return unsubscribe;
   }, []);
 
   const logout = async () => {
     setLoading(true);
     try {
-      localStorage.removeItem('auth_token');
       await signOut(auth);
       setFirebaseUser(null);
       setAccount(null);
-    } catch (e) {
-      console.error('Logout error:', e);
     } finally {
       setLoading(false);
     }
   };
 
   const primaryRole = account?.primary_role || 'member';
+  const roles = (account?.roles || [])
+    .filter((assignment) => !assignment.revoked_at)
+    .map((assignment) => assignment.role.toLowerCase());
 
   return (
     <AuthContext.Provider
       value={{
         firebaseUser,
+        backendUser: account,
         account,
-        isAuthenticated: !!account,
+        isAuthenticated: Boolean(firebaseUser && account),
         loading,
         primaryRole,
+        roles,
         login,
         refreshAccount: fetchAccount,
         logout,
@@ -146,13 +121,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       {children}
     </AuthContext.Provider>
   );
-
 };
 
 export function useAuthContext() {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuthContext must be used within an AuthProvider');
-  }
+  if (!context) throw new Error('useAuthContext must be used within an AuthProvider');
   return context;
 }
