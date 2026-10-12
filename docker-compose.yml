@@ -5,6 +5,9 @@ services:
     build:
       context: ./FE
       dockerfile: Dockerfile
+      args:
+        # URL tuyệt đối của BE mới, được nhúng vào bản build Vite
+        - VITE_API_BASE_URL=${VITE_API_BASE_URL:-http://localhost:8001/api/v1}
     container_name: mfg_frontend
     ports:
       - "8080:80" # Truy cập ở http://localhost:8080
@@ -14,38 +17,8 @@ services:
     networks:
       - mfg_network
 
-  # Mẫu cho Backend sau này (nếu có)
-  # backend:
-  #   build:
-  #     context: ./BE
-  #     dockerfile: Dockerfile
-  #   container_name: mfg_backend
-  #   ports:
-  #     - "3000:3000"
-  #   restart: unless-stopped
-  #   env_file:
-  #     - ./BE/.env
-  #   networks:
-  #     - mfg_network
-
-  # Mẫu cho Database (PostgreSQL/MySQL) sau này (nếu có)
-  # db:
-  #   image: postgres:15-alpine
-  #   container_name: mfg_database
-  #   environment:
-  #     POSTGRES_USER: root
-  #     POSTGRES_PASSWORD: rootpassword
-  #     POSTGRES_DB: mfg_db
-  #   ports:
-  #     - "5432:5432"
-  #   volumes:
-  #     - pgdata:/var/lib/postgresql/data
-  #   networks:
-  #     - mfg_network
+# Backend (MFGMS-AI) nằm ở repo riêng; FE gọi BE bằng URL tuyệt đối VITE_API_BASE_URL.
 
 networks:
   mfg_network:
     driver: bridge
-
-volumes:
-  pgdata:

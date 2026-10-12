@@ -12,6 +12,11 @@ RUN npm install
 # Copy the rest of the application code
 COPY . .
 
+# Absolute URL of the new BE (e.g. http://localhost:8001/api/v1).
+# Vite inlines VITE_* variables at build time; .env is excluded by .dockerignore.
+ARG VITE_API_BASE_URL
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
+
 # Build the Vite project (outputs to /app/dist by default)
 RUN npm run build
 
