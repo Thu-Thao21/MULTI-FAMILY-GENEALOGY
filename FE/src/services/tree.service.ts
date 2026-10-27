@@ -93,17 +93,26 @@ export async function buildErgoTreeFromDB(
       const isCardFocus = m.id === focusMemberId;
       const spouses = getSpouses(m);
 
+      const localPrivacy = localStorage.getItem(`privacy_setting_${m.id}`);
+      const isPrivate = localPrivacy ? localPrivacy === 'private' : Boolean((m as any).isPrivate || (m as any).is_private);
+      const isUnconnected = Boolean((m as any).isUnconnected || (m as any).is_unconnected);
+
       return {
         id: m.id,
         fullName: m.fullName,
         otherName: m.otherName,
         gender: m.gender,
         birthDate: m.birthDate,
+        deathDate: (m as any).deathDate,
         avatarUrl: m.avatarUrl,
         isAlive: m.isAlive,
         generation: m.generation,
         branch: m.branch,
         occupation: m.occupation,
+        bio: (m as any).bio,
+        userId: (m as any).userId || (m as any).user_id,
+        isPrivate,
+        isUnconnected,
         spouses,
         children: [],
         isFocusPerson: isCardFocus,
@@ -179,9 +188,12 @@ export async function buildErgoTreeFromDB(
     }
 
     // Build recursive children with cycle detection for full tree
+    const visitedInTree = new Set<string>();
+
     const buildChildrenRecursive = (parentId: string, visited: Set<string>): ErgoTreeNode[] => {
       if (visited.has(parentId)) return [];
       visited.add(parentId);
+      visitedInTree.add(parentId);
 
       const parentM = memberMap.get(parentId);
       if (!parentM) return [];
@@ -200,25 +212,82 @@ export async function buildErgoTreeFromDB(
       }
 
       return directChildren.map((c) => {
+        visitedInTree.add(c.id);
         const node = convertNode(c);
         node.children = buildChildrenRecursive(c.id, new Set(visited));
         return node;
       });
     };
 
-    // Full Tree Network: Identify root ancestors
-    let rootMembers: Member[] = allMembers.filter((m) => m.generation === 1 && m.gender === 'male');
-    if (rootMembers.length === 0) {
-      rootMembers = allMembers.filter((m) => m.generation === 1);
+    // Full Tree Network: Identify root ancestors accurately
+    const validGens = allMembers
+      .map((m) => m.generation)
+      .filter((g): g is number => typeof g === 'number' && !isNaN(g));
+    const minGen = validGens.length > 0 ? Math.min(...validGens) : 1;
+
+    // 1. Ưu tiên những người ở thế hệ nhỏ nhất không có cha mẹ trong danh sách
+    let candidates = allMembers.filter((m) => {
+      const genMatch = (m.generation || 1) === minGen;
+      const noFather = !(m as any).fatherId || !memberMap.has((m as any).fatherId);
+      const noMother = !(m as any).motherId || !memberMap.has((m as any).motherId);
+      return genMatch && noFather && noMother;
+    });
+
+    if (candidates.length === 0) {
+      candidates = allMembers.filter((m) => {
+        const noFather = !(m as any).fatherId || !memberMap.has((m as any).fatherId);
+        const noMother = !(m as any).motherId || !memberMap.has((m as any).motherId);
+        return noFather && noMother;
+      });
     }
-    if (rootMembers.length === 0 && allMembers.length > 0) {
-      rootMembers = [allMembers[0]];
+
+    if (candidates.length === 0) {
+      candidates = allMembers.filter((m) => (m.generation || 1) === minGen);
+    }
+
+    // 2. Quy tắc gia phả: Trong cùng thế hệ gốc, người VỢ (nữ) đã được gắn vào spouse của CHỒNG (nam).
+    // Tuyệt đối không để người Vợ/Chồng trở thành một Root riêng độc lập gây ra hiện tượng 2 cây trùng lặp.
+    const maleCandidates = candidates.filter((c) => c.gender === 'male');
+    let rootMembers: Member[];
+
+    if (maleCandidates.length > 0) {
+      rootMembers = maleCandidates;
+    } else {
+      // Nếu thế hệ 1 chỉ có nữ, loại trừ những người là spouse của ứng viên khác
+      const spouseIds = new Set<string>();
+      candidates.forEach((c) => {
+        getSpouses(c).forEach((s) => spouseIds.add(s.id));
+      });
+      const uniqueFemaleRoots = candidates.filter((c) => !spouseIds.has(c.id));
+      rootMembers = uniqueFemaleRoots.length > 0 ? uniqueFemaleRoots : [candidates[0]];
     }
 
     const rootNodes: ErgoTreeNode[] = rootMembers.map((r) => {
+      visitedInTree.add(r.id);
+      getSpouses(r).forEach((s) => visitedInTree.add(s.id));
       const node = convertNode(r);
       node.children = buildChildrenRecursive(r.id, new Set());
       return node;
+    });
+
+    // 3. Tìm tất cả các thành viên chưa được kết nối vào cây phả hệ (Unconnected Members)
+    // Bao gồm các tài khoản thành viên mới vào họ chưa được nối phả hệ hoặc những người chưa có cha/mẹ/vợ/chồng/con
+    const unconnectedMembers = allMembers.filter((m) => {
+      if (visitedInTree.has(m.id)) return false;
+      const hasParents = Boolean((m as any).fatherId || (m as any).motherId);
+      const hasSpouses = getSpouses(m).length > 0;
+      const hasChildren = allMembers.some(
+        (c) => (c as any).fatherId === m.id || (c as any).motherId === m.id
+      );
+      return !hasParents && !hasSpouses && !hasChildren;
+    });
+
+    unconnectedMembers.forEach((um) => {
+      visitedInTree.add(um.id);
+      const unNode = convertNode(um);
+      unNode.isUnconnected = true;
+      unNode.focusRole = 'Chưa nối phả hệ';
+      rootNodes.push(unNode);
     });
 
     return { rootNodes, allMembers };

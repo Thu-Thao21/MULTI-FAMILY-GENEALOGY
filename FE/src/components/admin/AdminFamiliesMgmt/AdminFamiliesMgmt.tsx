@@ -44,10 +44,14 @@ export interface FamilyItem {
   status?: string;
 }
 
+export interface AdminFamiliesMgmtProps {
+  onViewTree?: (familyId: string) => void;
+}
+
 type ModalMode = 'detail' | 'add' | null;
 type ModalTab = 'detail' | 'edit';
 
-export const AdminFamiliesMgmt: React.FC = () => {
+export const AdminFamiliesMgmt: React.FC<AdminFamiliesMgmtProps> = ({ onViewTree }) => {
   const [families, setFamilies] = useState<FamilyItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -320,6 +324,20 @@ export const AdminFamiliesMgmt: React.FC = () => {
                 </div>
 
                 <div className="family-list-actions" onClick={(e) => e.stopPropagation()}>
+                  {onViewTree && (
+                    <button
+                      type="button"
+                      className="fam-btn fam-btn-view"
+                      style={{ color: '#0d9488', borderColor: '#0d9488' }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onViewTree(fam.id);
+                      }}
+                      title="Xem cây gia phả dòng họ này"
+                    >
+                      Xem Cây
+                    </button>
+                  )}
                   <button
                     type="button"
                     className="fam-btn fam-btn-view"

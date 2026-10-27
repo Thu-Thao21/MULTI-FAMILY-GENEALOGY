@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../../context/AuthContext';
+import { useClanContext } from '../../../context/ClanContext';
 import { fetchFamilies } from '../../../services/member.service';
 import { buildErgoTreeFromDB } from '../../../services/tree.service';
 import type { Family, Member } from '../../../types/member';
@@ -23,10 +24,21 @@ export const TreeLayout: React.FC<TreeLayoutProps> = ({
   familyId,
 }) => {
   const { account } = useAuth();
-  const isAdmin = account?.primary_role === 'admin';
-  const effectiveFamilyId = familyId || account?.clan_id || account?.memberships?.[0]?.clan_id;
+  const { activeClanId, activeClanName, activeMembership, availableClans, selectClan } = useClanContext();
+  const roleLower = (account?.primary_role || '').toLowerCase();
+  const isAdmin = roleLower === 'admin';
 
-  const [families, setFamilies] = useState<Family[]>([]);
+  const effectiveFamilyId = familyId || activeClanId || account?.clan_id || account?.memberships?.[0]?.clan_id;
+
+  // Xác định quyền quản lý cây DỰA TRÊN CHÍNH DÒNG HỌ ĐANG XEM, không dùng vai trò của dòng họ khác:
+  const currentMembership = availableClans.find((c) => c.clan_id === (effectiveFamilyId)) 
+    || (activeClanId === effectiveFamilyId ? activeMembership : null);
+  const clanRoles = currentMembership?.roles || [];
+  const isClanAdmin = clanRoles.includes('BUSINESS_OWNER');
+  const isFamilyAdmin = clanRoles.includes('FAMILY_ADMIN');
+  const canManageTree = isAdmin || isClanAdmin || isFamilyAdmin;
+
+  const [families, setFamilies] = useState<(Family & { lineageType?: string | null })[]>([]);
   const [selectedFamilyId, setSelectedFamilyId] = useState<string>(effectiveFamilyId || '');
   const [allMembers, setAllMembers] = useState<Member[]>([]);
   const [treeNodes, setTreeNodes] = useState<ErgoTreeNode[]>([]);
@@ -47,6 +59,13 @@ export const TreeLayout: React.FC<TreeLayoutProps> = ({
 
   // Toast state for action feedback
   const [isToastOpen, setIsToastOpen] = useState(false);
+
+  // Propose Edit Modal state for regular members
+  const [proposeModal, setProposeModal] = useState<{
+    isOpen: boolean;
+    node: ErgoTreeNode | null;
+    content: string;
+  }>({ isOpen: false, node: null, content: '' });
 
   // Tree Action Modals State (Edit, Delete, Add Child, Add Spouse, Relocate)
   const [actionModal, setActionModal] = useState<{
@@ -71,32 +90,76 @@ export const TreeLayout: React.FC<TreeLayoutProps> = ({
 
   useEffect(() => {
     fetchFamilies().then((fams) => {
-      const allowedFams = isAdmin
-        ? fams
-        : effectiveFamilyId
-        ? fams.filter((f) => f.id === effectiveFamilyId)
-        : fams;
+      let allowedFams: (Family & { lineageType?: string | null })[] = [];
+      if (isAdmin) {
+        allowedFams = fams;
+      } else if (availableClans && availableClans.length > 0) {
+        // Cho phép người dùng chọn tất cả các dòng họ mà họ tham gia (nội / ngoại)
+        const hasMaternal = availableClans.some((c) => c.lineage_type === 'MATERNAL');
+        allowedFams = availableClans.map((c) => {
+          const matched = fams.find((f) => String(f.id).toLowerCase() === String(c.clan_id).toLowerCase());
+          let inferredLineage = c.lineage_type;
+          // Nếu người dùng có dòng họ ngoại, dòng họ còn lại (nếu chưa gán nhãn) là bên nội
+          if (!inferredLineage && hasMaternal && availableClans.length > 1) {
+            inferredLineage = 'PATERNAL';
+          }
+          return {
+            id: c.clan_id,
+            name: c.clan_name,
+            code: matched?.code,
+            status: c.clan_status || 'ACTIVE',
+            memberCount: matched?.memberCount ?? 0,
+            lineageType: inferredLineage,
+          };
+        });
+      } else if (effectiveFamilyId) {
+        allowedFams = fams.filter((f) => String(f.id).toLowerCase() === String(effectiveFamilyId).toLowerCase());
+      } else {
+        allowedFams = fams;
+      }
+
       setFamilies(allowedFams.length > 0 ? allowedFams : fams);
-      if (effectiveFamilyId && fams.some((f) => f.id === effectiveFamilyId)) {
-        setSelectedFamilyId(effectiveFamilyId);
-      } else if (fams.length > 0) {
-        setSelectedFamilyId(fams[0].id);
+
+      const targetId = effectiveFamilyId || selectedFamilyId;
+      if (targetId && allowedFams.some((f) => String(f.id).toLowerCase() === String(targetId).toLowerCase())) {
+        setSelectedFamilyId(targetId);
+      } else if (allowedFams.length > 0) {
+        setSelectedFamilyId(allowedFams[0].id);
       }
     });
-  }, [effectiveFamilyId, isAdmin]);
+  }, [effectiveFamilyId, isAdmin, availableClans]);
+
+  // Đồng bộ selectedFamilyId và reset state khi người dùng đổi cây trên TopBar
+  useEffect(() => {
+    if (effectiveFamilyId && effectiveFamilyId !== selectedFamilyId) {
+      setSelectedFamilyId(effectiveFamilyId);
+      setFocusMemberId(undefined);
+      setContextMenu({ isOpen: false, x: 0, y: 0, member: null });
+      setActionModal({ type: null, node: null });
+    }
+  }, [effectiveFamilyId]);
 
   const requestCounterRef = React.useRef<number>(0);
   const allMembersCacheRef = React.useRef<Member[]>([]);
+  const lastFetchedFamilyIdRef = React.useRef<string>('');
 
   useEffect(() => {
     if (!selectedFamilyId) return;
     const currentReqId = ++requestCounterRef.current;
 
-    // Dùng cache members nếu có để chuyển đổi tức thì (0ms) giữa cây bình thường và người trung tâm
-    const cached = allMembersCacheRef.current.length > 0 ? allMembersCacheRef.current : undefined;
-    if (!cached) {
-      setLoading(true);
+    // Khi đổi sang gia tộc khác, xóa sạch cache thành viên của gia tộc cũ
+    const isDifferentFamily = selectedFamilyId !== lastFetchedFamilyIdRef.current;
+    if (isDifferentFamily) {
+      allMembersCacheRef.current = [];
+      lastFetchedFamilyIdRef.current = selectedFamilyId;
     }
+
+    // Chỉ dùng cached khi click vào người trung tâm TRONG CÙNG MỘT GIA TỘC
+    const cached = (!isDifferentFamily && allMembersCacheRef.current.length > 0)
+      ? allMembersCacheRef.current
+      : undefined;
+
+    setLoading(true);
 
     buildErgoTreeFromDB(selectedFamilyId, focusMemberId, cached)
       .then(({ rootNodes, allMembers: mems }) => {
@@ -219,6 +282,47 @@ export const TreeLayout: React.FC<TreeLayoutProps> = ({
     setActionModal({ type: 'relocate', node });
   };
 
+  const handleTogglePrivacy = (node: ErgoTreeNode) => {
+    const nextPrivate = !node.isPrivate;
+    localStorage.setItem(`privacy_setting_${node.id}`, nextPrivate ? 'private' : 'public');
+
+    // Update local tree nodes
+    setTreeNodes((prev) => {
+      const updatePrivacyRecursive = (list: ErgoTreeNode[]): ErgoTreeNode[] => {
+        return list.map((n) => {
+          const updatedChildren = n.children ? updatePrivacyRecursive(n.children) : [];
+          if (n.id === node.id) {
+            return { ...n, isPrivate: nextPrivate, children: updatedChildren };
+          }
+          return { ...n, children: updatedChildren };
+        });
+      };
+      return updatePrivacyRecursive(prev);
+    });
+
+    const msg = nextPrivate
+      ? `Đã chuyển thông tin '${node.fullName}' sang chế độ Riêng tư (Ẩn SĐT/Email với thành viên khác).`
+      : `Đã chuyển thông tin '${node.fullName}' sang chế độ Công khai trong dòng họ.`;
+    setSuccessToastMessage(msg);
+    setTimeout(() => setSuccessToastMessage(null), 4000);
+  };
+
+  const handleProposeEdit = (node: ErgoTreeNode) => {
+    setProposeModal({
+      isOpen: true,
+      node,
+      content: '',
+    });
+  };
+
+  const handleProposeSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!proposeModal.content.trim()) return;
+    setSuccessToastMessage(`Đã gửi đề xuất chỉnh sửa thông tin thành viên '${proposeModal.node?.fullName}' tới Trưởng tộc & Ban quản trị!`);
+    setProposeModal({ isOpen: false, node: null, content: '' });
+    setTimeout(() => setSuccessToastMessage(null), 4000);
+  };
+
   // Quick stats calculation
   const maleCount = allMembers.filter((m) => m.gender === 'male').length;
   const femaleCount = allMembers.filter((m) => m.gender === 'female').length;
@@ -309,15 +413,50 @@ export const TreeLayout: React.FC<TreeLayoutProps> = ({
 
           {/* Family Dropdown */}
           <select
-            className="tree-control-select"
+            className="tree-control-select tree-clan-select"
             value={selectedFamilyId}
-            onChange={(e) => setSelectedFamilyId(e.target.value)}
+            onChange={(e) => {
+              const newFamId = e.target.value;
+              setSelectedFamilyId(newFamId);
+              allMembersCacheRef.current = [];
+              setFocusMemberId(undefined);
+              setSelectedBranch(undefined);
+              setSelectedGeneration(undefined);
+              setLoading(true);
+              if (selectClan) {
+                selectClan(newFamId);
+              }
+            }}
+            title="Chọn dòng tộc hiển thị cây gia phả"
           >
-            {families.map((f) => (
-              <option key={f.id} value={f.id}>
-                {f.name} ({f.memberCount || allMembers.length} thành viên)
-              </option>
-            ))}
+            {families.map((f: any) => {
+              const count = f.memberCount !== undefined
+                ? f.memberCount
+                : f.id === selectedFamilyId
+                ? allMembers.length
+                : 0;
+
+              const mClan = availableClans.find(
+                (c) => String(c.clan_id).toLowerCase() === String(f.id).toLowerCase()
+              );
+              const hasMaternal = availableClans.some((c) => c.lineage_type === 'MATERNAL');
+              let lineage = f.lineageType || mClan?.lineage_type;
+              if (!lineage && hasMaternal && availableClans.length > 1) {
+                lineage = 'PATERNAL';
+              }
+
+              const lineageTag = lineage === 'PATERNAL'
+                ? ' [Bên nội]'
+                : lineage === 'MATERNAL'
+                ? ' [Bên ngoại]'
+                : '';
+
+              return (
+                <option key={f.id} value={f.id}>
+                  {f.name}{lineageTag} ({count} thành viên)
+                </option>
+              );
+            })}
           </select>
 
           {/* Branch Filter Dropdown (FR-BO-44) */}
@@ -413,7 +552,6 @@ export const TreeLayout: React.FC<TreeLayoutProps> = ({
         </div>
       </div>
 
-
       {/* Canvas Area */}
       {loading ? (
         <div className="tree-canvas-prompt-loading">
@@ -421,7 +559,16 @@ export const TreeLayout: React.FC<TreeLayoutProps> = ({
         </div>
       ) : displayedTreeNodes.length === 0 ? (
         <div className="tree-canvas-prompt-empty">
-          Chưa có dữ liệu cây gia phả phù hợp với điều kiện lọc.
+          {allMembers.length === 0 ? (
+            <div>
+              <p style={{ fontWeight: 600, color: '#475569' }}>Dòng họ này hiện chưa có thành viên nào trong cây gia phả (0 thành viên).</p>
+              <p style={{ fontSize: '0.85rem', color: '#64748b', marginTop: 6 }}>
+                Quý quản trị viên vui lòng chọn dòng họ có thành viên từ danh sách phía trên để xem sơ đồ gia phả.
+              </p>
+            </div>
+          ) : (
+            'Chưa có dữ liệu cây gia phả phù hợp với điều kiện lọc chi nhánh hoặc thế hệ.'
+          )}
         </div>
       ) : (
         <ErgoTreeCanvas
@@ -434,36 +581,127 @@ export const TreeLayout: React.FC<TreeLayoutProps> = ({
       )}
 
       {/* Popup Context Menu */}
-      <TreeContextMenu
-        isOpen={contextMenu.isOpen}
-        x={contextMenu.x}
-        y={contextMenu.y}
-        node={contextMenu.member as ErgoTreeNode}
-        focusMemberId={focusMemberId}
-        onClose={() => setContextMenu((prev) => ({ ...prev, isOpen: false }))}
-        onSelectFocus={handleSelectFocus}
-        onViewBio={handleViewBio}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-        onAddChild={handleAddChild}
-        onAddSpouse={handleAddSpouse}
-        onRelocate={handleRelocate}
-        onActionToast={handleActionToast}
-      />
+      {(() => {
+        const currentContextMenuNode = contextMenu.member as ErgoTreeNode | null;
+        const isContextMenuSelf = Boolean(
+          currentContextMenuNode && (
+            (currentContextMenuNode.userId && currentContextMenuNode.userId === account?.id) ||
+            ((account as any)?.person_id && currentContextMenuNode.id === (account as any).person_id) ||
+            (account?.display_name && currentContextMenuNode.fullName &&
+              currentContextMenuNode.fullName.trim().toLowerCase() === account.display_name.trim().toLowerCase()) ||
+            (account?.email && (currentContextMenuNode as any).email &&
+              (currentContextMenuNode as any).email.trim().toLowerCase() === account.email.trim().toLowerCase())
+          )
+        );
+
+        return (
+          <TreeContextMenu
+            isOpen={contextMenu.isOpen}
+            x={contextMenu.x}
+            y={contextMenu.y}
+            node={contextMenu.member as ErgoTreeNode}
+            focusMemberId={focusMemberId}
+            canManageTree={canManageTree}
+            isSelf={isContextMenuSelf}
+            onClose={() => setContextMenu((prev) => ({ ...prev, isOpen: false }))}
+            onSelectFocus={handleSelectFocus}
+            onViewBio={handleViewBio}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onAddChild={handleAddChild}
+            onAddSpouse={handleAddSpouse}
+            onRelocate={handleRelocate}
+            onTogglePrivacy={handleTogglePrivacy}
+            onProposeEdit={handleProposeEdit}
+            onActionToast={handleActionToast}
+          />
+        );
+      })()}
 
       {/* Tree Action Modals (Edit, Delete, Add Child, Add Spouse, Relocate) */}
-      <TreeActionModals
-        type={actionModal.type}
-        node={actionModal.node}
-        familyId={selectedFamilyId}
-        allMembers={allMembers}
-        onClose={() => setActionModal({ type: null, node: null })}
-        onSuccess={(msg) => {
-          setSuccessToastMessage(msg);
-          reloadTree();
-          setTimeout(() => setSuccessToastMessage(null), 4000);
-        }}
-      />
+      {(() => {
+        const currentActionNode = actionModal.node;
+        const isActionModalSelf = Boolean(
+          currentActionNode && (
+            (currentActionNode.userId && currentActionNode.userId === account?.id) ||
+            ((account as any)?.person_id && currentActionNode.id === (account as any).person_id) ||
+            (account?.display_name && currentActionNode.fullName &&
+              currentActionNode.fullName.trim().toLowerCase() === account.display_name.trim().toLowerCase()) ||
+            (account?.email && (currentActionNode as any).email &&
+              (currentActionNode as any).email.trim().toLowerCase() === account.email.trim().toLowerCase())
+          )
+        );
+
+        return (
+          <TreeActionModals
+            type={actionModal.type}
+            node={actionModal.node}
+            familyId={selectedFamilyId}
+            familyName={activeClanName || undefined}
+            allMembers={allMembers}
+            canManageTree={canManageTree}
+            isSelf={isActionModalSelf}
+            onClose={() => setActionModal({ type: null, node: null })}
+            onSuccess={(msg) => {
+              setSuccessToastMessage(msg);
+              reloadTree();
+              setTimeout(() => setSuccessToastMessage(null), 4000);
+            }}
+          />
+        );
+      })()}
+
+      {/* Propose Edit Modal for Regular Members */}
+      {proposeModal.isOpen && proposeModal.node && (
+        <div
+          className="tree-action-modal-backdrop"
+          onClick={() => setProposeModal({ isOpen: false, node: null, content: '' })}
+        >
+          <div className="tree-action-modal-card" onClick={(e) => e.stopPropagation()}>
+            <form onSubmit={handleProposeSubmit}>
+              <div className="tree-action-modal-header">
+                <h3 className="tree-action-modal-title">Gửi đề xuất chỉnh sửa thông tin</h3>
+                <button
+                  type="button"
+                  className="tree-action-modal-close-btn"
+                  onClick={() => setProposeModal({ isOpen: false, node: null, content: '' })}
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="tree-action-modal-body">
+                <p style={{ margin: '0 0 14px', fontSize: '13px', color: '#64748b' }}>
+                  Thành viên: <strong style={{ color: '#0f172a' }}>{proposeModal.node.fullName}</strong>
+                </p>
+                <div className="tree-action-form-group">
+                  <label className="tree-action-form-label">Nội dung đề xuất chỉnh sửa *</label>
+                  <textarea
+                    className="tree-action-form-input"
+                    rows={4}
+                    value={proposeModal.content}
+                    onChange={(e) => setProposeModal((prev) => ({ ...prev, content: e.target.value }))}
+                    placeholder="Mô tả các thông tin cần sửa đổi hoặc đính chính (ví dụ: ngày sinh, nơi an táng, mối quan hệ...)"
+                    required
+                    style={{ resize: 'vertical' }}
+                  />
+                </div>
+              </div>
+              <div className="tree-action-modal-footer">
+                <button
+                  type="button"
+                  className="tree-action-btn secondary"
+                  onClick={() => setProposeModal({ isOpen: false, node: null, content: '' })}
+                >
+                  Hủy
+                </button>
+                <button type="submit" className="tree-action-btn primary">
+                  Gửi đề xuất tới Ban quản trị
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Notification Toast */}
       <NotificationModal
