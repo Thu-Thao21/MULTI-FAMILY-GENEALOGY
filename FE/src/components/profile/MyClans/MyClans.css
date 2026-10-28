@@ -104,7 +104,7 @@
   border: 1px solid #e2e8f0;
   border-radius: 10px;
   padding: 18px 20px;
-  background: #fafafa;
+  background: #ffffff;
   transition: all 0.2s ease;
   position: relative;
   display: flex;
@@ -113,13 +113,21 @@
 
 .clan-card.active-clan {
   border-color: #2563eb;
-  background: #f8fafc;
-  box-shadow: 0 0 0 1px #2563eb, 0 4px 12px rgba(37, 99, 235, 0.12);
+  background: #eff6ff;
+  box-shadow: 0 0 0 1px #2563eb, 0 4px 14px rgba(37, 99, 235, 0.12);
 }
 
 .clan-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  border-color: #93c5fd;
+  background: #f8fbff;
+  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.12);
+}
+
+.clan-card.active-clan:hover {
+  border-color: #2563eb;
+  background: #eff6ff;
+  box-shadow: 0 0 0 1px #2563eb, 0 8px 24px rgba(37, 99, 235, 0.18);
 }
 
 .clan-card-header {
@@ -243,19 +251,21 @@
 .btn-switch-clan {
   padding: 6px 14px;
   background: #ffffff;
-  border: 1px solid #cbd5e1;
+  border: 1px solid #2563eb;
   border-radius: 6px;
-  color: #1e293b;
+  color: #2563eb;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.2s ease;
 }
 
 .btn-switch-clan:hover {
-  background: #f8fafc;
-  border-color: #94a3b8;
-  color: #0f172a;
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+  transform: translateY(-1px);
 }
 
 .btn-leave-clan {
