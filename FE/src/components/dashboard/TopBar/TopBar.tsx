@@ -304,7 +304,7 @@ export const TopBar: React.FC<TopBarProps> = ({
         </div>
       </div>
 
-      <ClanSelector isAdmin={userRole === 'Admin'} />
+      <ClanSelector isAdmin={userRole === 'Admin'} onNavigateTab={onNavigateTab} />
 
       <form className="topbar-search-container" onSubmit={handleSearchSubmit}>
         <input

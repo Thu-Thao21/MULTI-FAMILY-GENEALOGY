@@ -4,6 +4,7 @@ import './ClanSelector.css';
 
 interface ClanSelectorProps {
   isAdmin?: boolean;
+  onNavigateTab?: (tabId: string) => void;
 }
 
 function getRoleLabel(roles: string[] = []): string {
@@ -12,7 +13,13 @@ function getRoleLabel(roles: string[] = []): string {
   return 'Thành viên';
 }
 
-export const ClanSelector: React.FC<ClanSelectorProps> = ({ isAdmin = false }) => {
+function getRoleBadgeClass(roleLabel: string): string {
+  if (roleLabel === 'Trưởng tộc') return 'role-head';
+  if (roleLabel === 'Family Admin') return 'role-admin';
+  return 'role-member';
+}
+
+export const ClanSelector: React.FC<ClanSelectorProps> = ({ isAdmin = false, onNavigateTab }) => {
   const {
     activeClanId,
     activeClanName,
@@ -73,37 +80,28 @@ export const ClanSelector: React.FC<ClanSelectorProps> = ({ isAdmin = false }) =
   if (availableClans.length === 0) {
     return (
       <div className="clan-selector-container">
-        <div className="clan-selector-badge empty">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <circle cx="12" cy="12" r="10" />
-            <line x1="12" y1="8" x2="12" y2="12" />
-            <line x1="12" y1="16" x2="12.01" y2="16" />
-          </svg>
-          <span>Chưa tham gia dòng họ</span>
-        </div>
+        <button
+          type="button"
+          className="clan-selector-trigger empty"
+          onClick={() => {
+            if (onNavigateTab) onNavigateTab('my-clans');
+          }}
+          title="Nhấn để tham gia dòng họ"
+        >
+          <div className="clan-selector-icon-badge">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+          </div>
+          <span className="clan-name-text">Chưa tham gia dòng họ</span>
+          <span className="clan-role-pill role-action">+ Gia nhập</span>
+        </button>
       </div>
     );
   }
 
-  // Chỉ có một cây hợp lệ -> hiển thị thông tin tĩnh, không cần dropdown
-  if (availableClans.length === 1) {
-    const singleClan = availableClans[0];
-    const roleLabel = getRoleLabel(singleClan.roles);
-    return (
-      <div className="clan-selector-container">
-        <div className="clan-selector-badge single" title={`${singleClan.clan_name} — ${roleLabel}`}>
-          <svg className="clan-selector-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-          </svg>
-          <span className="clan-name-text">{singleClan.clan_name}</span>
-          <span className="clan-role-separator">—</span>
-          <span className="clan-role-text">{roleLabel}</span>
-        </div>
-      </div>
-    );
-  }
-
-  // Nhiều cây hợp lệ -> hiển thị dropdown chọn cây
+  // Luôn hiển thị trigger có thể ấn mở Dropdown để xem và đổi dòng họ
   return (
     <div className="clan-selector-container" ref={dropdownRef}>
       <button
@@ -114,26 +112,33 @@ export const ClanSelector: React.FC<ClanSelectorProps> = ({ isAdmin = false }) =
         aria-expanded={isOpen}
         aria-haspopup="listbox"
         aria-label="Chọn dòng họ đang thao tác"
-        title={`${activeClanName || 'Chọn dòng họ'} — ${activeClanRoleLabel || 'Thành viên'}`}
+        title={`${activeClanName || 'Chọn dòng họ'} — ${activeClanRoleLabel || 'Thành viên'} (Nhấn để chuyển dòng họ)`}
         data-testid="clan-selector-trigger"
       >
         <div className="clan-selector-trigger-inner">
-          <svg className="clan-selector-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-          </svg>
+          <div className="clan-selector-icon-badge">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+            </svg>
+          </div>
           <div className="clan-selector-trigger-labels">
             <span className="clan-name-text">{activeClanName || 'Chọn dòng họ'}</span>
-            <span className="clan-role-separator">—</span>
-            <span className="clan-role-text">{activeClanRoleLabel || 'Thành viên'}</span>
+            <span className={`clan-role-pill ${getRoleBadgeClass(activeClanRoleLabel || 'Thành viên')}`}>
+              {activeClanRoleLabel || 'Thành viên'}
+            </span>
           </div>
         </div>
-        <span className={`clan-selector-arrow ${isOpen ? 'open' : ''}`}>▼</span>
+        <span className={`clan-selector-arrow ${isOpen ? 'open' : ''}`}>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+        </span>
       </button>
 
       {isOpen && (
         <div className="clan-selector-dropdown" role="listbox" data-testid="clan-selector-dropdown">
           <div className="clan-selector-dropdown-header">
-            <span>DÒNG HỌ ĐANG THAM GIA ({availableClans.length})</span>
+            <span>DÒNG HỌ THAM GIA ({availableClans.length})</span>
           </div>
           <div className="clan-selector-list">
             {availableClans.map((clan) => {
@@ -155,8 +160,10 @@ export const ClanSelector: React.FC<ClanSelectorProps> = ({ isAdmin = false }) =
                   data-testid={`clan-item-${clan.clan_id}`}
                 >
                   <div className="clan-item-content">
-                    <div className="clan-item-name">{clan.clan_name}</div>
-                    <div className="clan-item-role">{roleText}</div>
+                    <div className="clan-item-header">
+                      <span className="clan-item-name">{clan.clan_name}</span>
+                      <span className={`clan-role-pill ${getRoleBadgeClass(roleText)}`}>{roleText}</span>
+                    </div>
                   </div>
                   {isSelected && (
                     <span className="clan-item-checkmark" title="Đang chọn">
@@ -168,6 +175,26 @@ export const ClanSelector: React.FC<ClanSelectorProps> = ({ isAdmin = false }) =
                 </button>
               );
             })}
+          </div>
+
+          <div className="clan-selector-dropdown-footer">
+            <button
+              type="button"
+              className="clan-selector-action-btn"
+              onClick={() => {
+                setIsOpen(false);
+                if (onNavigateTab) {
+                  onNavigateTab('my-clans');
+                }
+              }}
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="16" />
+                <line x1="8" y1="12" x2="16" y2="12" />
+              </svg>
+              <span>+ Gia nhập thêm dòng họ khác</span>
+            </button>
           </div>
         </div>
       )}
