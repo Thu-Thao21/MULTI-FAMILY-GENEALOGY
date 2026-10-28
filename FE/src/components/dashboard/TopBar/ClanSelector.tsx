@@ -142,7 +142,7 @@ export const ClanSelector: React.FC<ClanSelectorProps> = ({ isAdmin = false, onN
           </div>
           <div className="clan-selector-list">
             {availableClans.map((clan) => {
-              const isSelected = clan.clan_id === activeClanId;
+              const isSelected = String(clan.clan_id).toLowerCase() === String(activeClanId || '').toLowerCase();
               const roleText = getRoleLabel(clan.roles);
 
               return (

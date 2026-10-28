@@ -32,7 +32,7 @@ const ROLE_DISPLAY_NAMES: Record<string, string> = {
 };
 
 export const ClanProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { account, loading: authLoading } = useAuthContext();
+  const { account, loading: authLoading, refreshAccount } = useAuthContext();
 
   const [activeClanId, setActiveClanId] = useState<string | null>(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
@@ -79,10 +79,16 @@ export const ClanProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Membership tương ứng với clan đang chọn
   const activeMembership = useMemo(() => {
     if (!activeClanId) return null;
-    return availableClans.find(
-      (c) => String(c.clan_id).toLowerCase() === String(activeClanId).toLowerCase()
-    ) || null;
-  }, [activeClanId, availableClans]);
+    return (
+      availableClans.find(
+        (c) => String(c.clan_id).toLowerCase() === String(activeClanId).toLowerCase()
+      ) ||
+      allMemberships.find(
+        (c) => String(c.clan_id).toLowerCase() === String(activeClanId).toLowerCase()
+      ) ||
+      null
+    );
+  }, [activeClanId, availableClans, allMemberships]);
 
   const activeClanName = activeMembership?.clan_name || null;
 
@@ -111,12 +117,19 @@ export const ClanProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (!clanId) return false;
       if (String(clanId).toLowerCase() === String(activeClanId || '').toLowerCase()) return true;
 
-      const targetClan = availableClans.find(
-        (c) => String(c.clan_id).toLowerCase() === String(clanId).toLowerCase()
-      );
+      const targetClan =
+        availableClans.find(
+          (c) => String(c.clan_id).toLowerCase() === String(clanId).toLowerCase()
+        ) ||
+        allMemberships.find(
+          (c) => String(c.clan_id).toLowerCase() === String(clanId).toLowerCase()
+        );
+
       if (!targetClan) {
-        console.warn(`Clan ${clanId} không hợp lệ hoặc đã bị vô hiệu hóa.`);
-        return false;
+        console.warn(`Clan ${clanId} không tìm thấy trong danh sách đã tải, tự động đồng bộ tài khoản.`);
+        if (refreshAccount) {
+          refreshAccount();
+        }
       }
 
       if (hasUnsavedChanges && !bypassUnsavedCheck) {
@@ -131,21 +144,27 @@ export const ClanProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsPendingSwitch(false);
       setPendingClanId(null);
 
-      if (account?.id && typeof window !== 'undefined') {
-        window.sessionStorage.setItem(`mfgms_active_clan_${account.id}`, clanId);
+      if (typeof window !== 'undefined') {
+        if (account?.id) {
+          window.sessionStorage.setItem(`mfgms_active_clan_${account.id}`, clanId);
+        }
+        window.sessionStorage.setItem('mfgms_active_clan', clanId);
       }
       return true;
     },
-    [activeClanId, availableClans, hasUnsavedChanges, account?.id]
+    [activeClanId, availableClans, allMemberships, hasUnsavedChanges, account?.id, refreshAccount]
   );
 
   const handleSetActiveClanId = useCallback((clanId: string | null) => {
-    if (clanId) {
-      selectClan(clanId);
-    } else {
-      setActiveClanId(null);
+    setActiveClanId(clanId);
+    setClanSwitchCount((prev) => prev + 1);
+    if (clanId && typeof window !== 'undefined') {
+      if (account?.id) {
+        window.sessionStorage.setItem(`mfgms_active_clan_${account.id}`, clanId);
+      }
+      window.sessionStorage.setItem('mfgms_active_clan', clanId);
     }
-  }, [selectClan]);
+  }, [account?.id]);
 
   const confirmPendingSwitch = useCallback(() => {
     if (pendingClanId) {

@@ -68,6 +68,9 @@ export const MyClans: React.FC = () => {
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
+      if (refreshAccount) {
+        await refreshAccount();
+      }
       const data = await getMyClansSummary();
       setJoinedClans(data.joined_clans || []);
       setMyRequests(data.my_requests || []);
@@ -77,17 +80,23 @@ export const MyClans: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [refreshAccount]);
 
   const handleSwitchClan = useCallback(
     (clanId: string, clanName: string) => {
-      const ok = selectClan ? selectClan(clanId) : false;
+      let ok = false;
+      if (selectClan) {
+        ok = selectClan(clanId);
+      }
+      if (!ok && setActiveClanId) {
+        setActiveClanId(clanId);
+        ok = true;
+      }
       if (ok) {
         setNotice({ text: `Đã chuyển sang thao tác tại "${clanName}".`, error: false });
         setTimeout(() => setNotice(null), 3000);
-      } else if (setActiveClanId) {
-        setActiveClanId(clanId);
-        setNotice({ text: `Đã chuyển sang thao tác tại "${clanName}".`, error: false });
+      } else {
+        setNotice({ text: `Không thể chuyển sang "${clanName}". Vui lòng thử lại.`, error: true });
         setTimeout(() => setNotice(null), 3000);
       }
     },
