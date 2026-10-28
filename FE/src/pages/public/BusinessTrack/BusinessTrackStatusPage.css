@@ -159,12 +159,17 @@
 .supp-submit-btn {
   align-self: flex-end;
   padding: 10px 20px;
-  background: #ea580c;
+  background: #2563eb;
   color: #ffffff;
   border: none;
   border-radius: 10px;
   font-weight: 700;
   cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.supp-submit-btn:hover {
+  background: #1d4ed8;
 }
 
 .supp-success {
