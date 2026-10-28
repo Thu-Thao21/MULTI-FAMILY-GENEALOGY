@@ -1,4 +1,4 @@
-/* ClanSelector.css - Styling cho Bộ chọn dòng họ trên TopBar (Tone màu trung tính, sắc nét, không dùng màu xanh) */
+/* ClanSelector.css - Phong cách Tinh khôi Màu Trắng (Pure White Theme) */
 
 .clan-selector-container {
   position: relative;
@@ -15,17 +15,19 @@
   align-items: center;
   gap: 8px;
   padding: 6px 14px;
-  background: #f1f5f9;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
   border-radius: 9999px;
   font-size: 13px;
   color: #64748b;
   white-space: nowrap;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .clan-selector-spinner {
   width: 14px;
   height: 14px;
-  border: 2px solid #cbd5e1;
+  border: 2px solid #e2e8f0;
   border-top-color: #0f172a;
   border-radius: 50%;
   animation: clan-spinner-spin 0.8s linear infinite;
@@ -37,7 +39,7 @@
   }
 }
 
-/* Nút Trigger chọn dòng họ - Nổi bật, đường nét sắc sảo, tone đen/xám than cao cấp */
+/* Nút Trigger chọn dòng họ - Nền trắng tinh khôi, viền xám sáng tinh tế, bóng mềm mại */
 .clan-selector-trigger {
   display: inline-flex;
   align-items: center;
@@ -45,8 +47,8 @@
   padding: 5px 14px 5px 6px;
   border-radius: 9999px;
   background: #ffffff;
-  border: 1.5px solid #1e293b;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+  border: 1.5px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.03);
   font-family: inherit;
   font-size: 13px;
   box-sizing: border-box;
@@ -58,30 +60,29 @@
 }
 
 .clan-selector-trigger:hover {
-  background: #fafafa;
-  border-color: #000000;
+  background: #ffffff;
+  border-color: #cbd5e1;
   transform: translateY(-1px);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.14), 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
 }
 
 .clan-selector-trigger.active,
 .clan-selector-trigger:focus-visible {
-  border-color: #000000;
+  border-color: #94a3b8;
   background: #ffffff;
-  box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.16), 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 0 3px rgba(148, 163, 184, 0.2), 0 4px 12px rgba(0, 0, 0, 0.06);
 }
 
 .clan-selector-trigger.empty {
-  border: 1.5px dashed #64748b;
-  background: #f8fafc;
-}
-
-.clan-selector-trigger.empty:hover {
-  border-color: #0f172a;
+  border: 1.5px dashed #cbd5e1;
   background: #ffffff;
 }
 
-/* Biểu tượng dòng họ tròn nổi bật - Tone Charcoal/Đen tuyền sang trọng */
+.clan-selector-trigger.empty:hover {
+  border-color: #94a3b8;
+}
+
+/* Biểu tượng dòng họ tròn - Nền trắng tinh khiết, viền mảnh, icon sắc nét */
 .clan-selector-icon-badge {
   display: flex;
   align-items: center;
@@ -89,9 +90,10 @@
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: #0f172a;
-  color: #ffffff;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25);
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  color: #1e293b;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
   flex-shrink: 0;
 }
 
@@ -115,12 +117,12 @@
   min-width: 0;
 }
 
-/* Tên dòng họ - Đậm, sắc nét */
+/* Tên dòng họ - Màu chữ than đậm rõ ràng, không bị chói */
 .clan-name-text {
   font-weight: 700;
   font-size: 13.5px;
   color: #0f172a;
-  max-width: 240px;
+  max-width: 250px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -129,11 +131,11 @@
   letter-spacing: -0.01em;
 }
 
-/* Phù hiệu Vai trò - Không dùng màu xanh */
+/* Phù hiệu Vai trò - Nền trắng, viền thanh lịch */
 .clan-role-pill {
   display: inline-flex;
   align-items: center;
-  padding: 2.5px 9px;
+  padding: 2.5px 10px;
   border-radius: 9999px;
   font-size: 11.5px;
   font-weight: 600;
@@ -141,37 +143,38 @@
   white-space: nowrap;
   flex-shrink: 0;
   line-height: 1.2;
+  background: #ffffff;
+  color: #334155;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
 }
 
-/* Trưởng tộc: Vàng kim sang trọng */
+/* Trưởng tộc */
 .clan-role-pill.role-head {
-  background: #fef3c7;
-  color: #92400e;
+  background: #ffffff;
+  color: #b45309;
   border: 1px solid #fde68a;
-  box-shadow: 0 1px 2px rgba(146, 64, 14, 0.1);
 }
 
-/* Family Admin: Xám than / Slate sắc sảo */
+/* Family Admin */
 .clan-role-pill.role-admin {
-  background: #f1f5f9;
+  background: #ffffff;
   color: #0f172a;
   border: 1px solid #cbd5e1;
   font-weight: 700;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
-/* Thành viên: Trắng viền xám nhã nhặn */
+/* Thành viên */
 .clan-role-pill.role-member {
   background: #ffffff;
-  color: #475569;
+  color: #64748b;
   border: 1px solid #e2e8f0;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 .clan-role-pill.role-action {
-  background: #0f172a;
-  color: #ffffff;
-  border: 1px solid #0f172a;
+  background: #ffffff;
+  color: #0f172a;
+  border: 1px solid #cbd5e1;
 }
 
 /* Mũi tên Dropdown */
@@ -179,7 +182,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #475569;
+  color: #64748b;
   transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   flex-shrink: 0;
   margin-left: 2px;
@@ -190,7 +193,7 @@
   color: #0f172a;
 }
 
-/* Dropdown Menu */
+/* Dropdown Menu - Nền trắng tinh khiết, bóng mềm mại */
 .clan-selector-dropdown {
   position: absolute;
   top: calc(100% + 8px);
@@ -198,9 +201,9 @@
   min-width: 320px;
   max-width: 400px;
   background: #ffffff;
-  border: 1.5px solid #cbd5e1;
+  border: 1px solid #e2e8f0;
   border-radius: 14px;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.14), 0 4px 10px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08), 0 4px 10px rgba(0, 0, 0, 0.03);
   z-index: 1000;
   overflow: hidden;
   animation: clan-dropdown-fade 0.18s cubic-bezier(0.16, 1, 0.3, 1);
@@ -221,17 +224,18 @@
   padding: 11px 16px 9px;
   font-size: 11px;
   font-weight: 700;
-  color: #475569;
+  color: #64748b;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  border-bottom: 1px solid #e2e8f0;
-  background: #f8fafc;
+  border-bottom: 1px solid #f1f5f9;
+  background: #ffffff;
 }
 
 .clan-selector-list {
   padding: 6px;
   max-height: 290px;
   overflow-y: auto;
+  background: #ffffff;
 }
 
 .clan-selector-item {
@@ -241,7 +245,7 @@
   width: 100%;
   padding: 10px 12px;
   border: 1px solid transparent;
-  background: transparent;
+  background: #ffffff;
   border-radius: 10px;
   cursor: pointer;
   text-align: left;
@@ -251,14 +255,14 @@
 
 .clan-selector-item:hover,
 .clan-selector-item:focus-visible {
-  background: #f1f5f9;
-  border-color: #cbd5e1;
+  background: #f8fafc;
+  border-color: #e2e8f0;
   outline: none;
 }
 
 .clan-selector-item.selected {
   background: #f8fafc;
-  border-color: #94a3b8;
+  border-color: #cbd5e1;
 }
 
 .clan-selector-item.selected .clan-item-name {
@@ -303,8 +307,8 @@
 /* Footer Action trong Dropdown: Gia nhập dòng họ khác */
 .clan-selector-dropdown-footer {
   padding: 8px;
-  border-top: 1px solid #e2e8f0;
-  background: #f8fafc;
+  border-top: 1px solid #f1f5f9;
+  background: #ffffff;
 }
 
 .clan-selector-action-btn {
@@ -315,7 +319,7 @@
   width: 100%;
   padding: 9px 14px;
   border-radius: 8px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid #e2e8f0;
   background: #ffffff;
   color: #0f172a;
   font-size: 13px;
@@ -326,9 +330,8 @@
 }
 
 .clan-selector-action-btn:hover {
-  background: #0f172a;
-  color: #ffffff;
-  border-color: #0f172a;
+  background: #f8fafc;
+  border-color: #cbd5e1;
 }
 
 /* Responsive */
