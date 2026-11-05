@@ -446,7 +446,7 @@ export const AdminMembersMgmt: React.FC = () => {
                         </span>
                       </td>
                       <td data-label="Đời / Chi">
-                        <strong className="family-table-primary">Đời thứ {member.generation}</strong>
+                        <strong className="family-table-primary">Đời {member.generation}</strong>
                         <span className="family-branch-badge">{member.branch || 'Chưa phân chi'}</span>
                       </td>
                       <td data-label="Quan hệ">
@@ -585,7 +585,7 @@ export const AdminMembersMgmt: React.FC = () => {
                       <p className="family-detail-sub">
                         {selectedMember.other_name
                           ? `Tên tự/biệt danh: ${selectedMember.other_name}`
-                          : `Đời thứ ${selectedMember.generation} • ${selectedMember.branch || 'Chi chính'}`}
+                          : `Đời ${selectedMember.generation} • ${selectedMember.branch || 'Chi chính'}`}
                       </p>
                       <div className="family-badge-row">
                         <span className={`family-pill family-pill-${selectedMember.status}`}>
@@ -627,7 +627,7 @@ export const AdminMembersMgmt: React.FC = () => {
 
                     <div className="family-detail-item">
                       <span className="family-detail-label">Thế hệ</span>
-                      <strong className="family-detail-val">Đời thứ {selectedMember.generation}</strong>
+                      <strong className="family-detail-val">Đời {selectedMember.generation}</strong>
                     </div>
 
                     <div className="family-detail-item">

@@ -1,3 +1,4 @@
+﻿import { LoadingState } from '../../../shared/Feedback/LoadingState';
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../../hooks/useAuth';
 import { fetchMemberDetail } from '../../../services/member.service';
@@ -65,9 +66,10 @@ export const ProfileLayout: React.FC<ProfileLayoutProps> = ({ memberId, onBack }
 
   if (loading) {
     return (
-      <div className="profile-loading-box">
-        Đang tải thông tin chi tiết hồ sơ thành viên từ cơ sở dữ liệu...
-      </div>
+      <LoadingState
+        message="Đang tải thông tin chi tiết hồ sơ thành viên..."
+        subMessage="Hệ thống đang truy xuất dữ liệu phả ký, thế hệ và lý lịch từ máy chủ gia tộc."
+      />
     );
   }
 
@@ -118,26 +120,17 @@ export const ProfileLayout: React.FC<ProfileLayoutProps> = ({ memberId, onBack }
           <div className="profile-header-info">
             <h1 className="profile-name">
               {member.fullName}
-              <span className="profile-generation-badge">Đời thứ {member.generation}</span>
+              <span className="profile-generation-badge">Đời {member.generation}</span>
               {isSelf && (
                 <span
-                  style={{
-                    fontSize: '11px',
-                    marginLeft: '8px',
-                    background: '#dbeafe',
-                    color: '#1d4ed8',
-                    padding: '2px 8px',
-                    borderRadius: '6px',
-                    fontWeight: 700,
-                  }}
-                >
+                  className="profile-self-badge">
                   Hồ sơ của bạn
                 </span>
               )}
             </h1>
 
             <div className="profile-subtext">
-              <span>{member.familyName || 'Dòng tộc Họ Võ'}</span>
+              <span>{member.familyName || account?.clan_name || 'Dòng họ'}</span>
               {member.branch && <span>• {member.branch}</span>}
               {member.subBranch && <span>• {member.subBranch}</span>}
             </div>
@@ -157,7 +150,7 @@ export const ProfileLayout: React.FC<ProfileLayoutProps> = ({ memberId, onBack }
             {/* Privacy Control Bar */}
             <div className="profile-privacy-control-box">
               <div className="profile-privacy-status-group">
-                <span style={{ fontSize: '12.5px', fontWeight: 600, color: '#475569' }}>
+                <span className="profile-privacy-label">
                   Quyền riêng tư hồ sơ:
                 </span>
                 <span className={`profile-privacy-badge ${isPrivate ? 'private' : 'public'}`}>

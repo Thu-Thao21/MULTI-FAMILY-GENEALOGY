@@ -1,4 +1,4 @@
-.profile-back-btn {
+﻿.profile-back-btn {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -39,26 +39,38 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  padding: 10px 16px;
-  margin-top: 14px;
-  gap: 12px;
+  background: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 14px;
+  padding: 12px 20px;
+  margin-top: 18px;
+  gap: 14px;
   flex-wrap: wrap;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+  z-index: 1;
+  position: relative;
 }
 
 .profile-privacy-status-group {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.profile-privacy-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1e293b;
 }
 
 .profile-privacy-badge {
   font-size: 12px;
   font-weight: 700;
-  padding: 3px 8px;
+  padding: 4px 10px;
   border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
 }
 
 .profile-privacy-badge.private {
@@ -68,24 +80,26 @@
 }
 
 .profile-privacy-badge.public {
-  background: #f0fdf4;
-  color: #15803d;
-  border: 1px solid #bbf7d0;
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
 }
 
 .profile-privacy-toggle-btn {
-  padding: 6px 14px;
-  font-size: 12.5px;
+  padding: 7px 16px;
+  font-size: 13px;
   font-weight: 600;
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.2s ease;
   border: 1px solid #cbd5e1;
-  background: #ffffff;
+  background: #f8fafc;
   color: #1e293b;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 .profile-privacy-toggle-btn:hover {
   background: #f1f5f9;
   border-color: #94a3b8;
+  color: #0f172a;
 }

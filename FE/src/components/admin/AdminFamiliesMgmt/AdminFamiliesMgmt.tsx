@@ -338,8 +338,7 @@ export const AdminFamiliesMgmt: React.FC<AdminFamiliesMgmtProps> = ({ onViewTree
                   {onViewTree && (
                     <button
                       type="button"
-                      className="fam-btn fam-btn-view"
-                      style={{ color: '#0d9488', borderColor: '#0d9488' }}
+                      className="fam-btn fam-btn-view fam-btn-tree"
                       onClick={(e) => {
                         e.stopPropagation();
                         onViewTree(fam.id);

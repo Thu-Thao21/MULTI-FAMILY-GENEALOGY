@@ -140,3 +140,199 @@ textarea {
     padding: 16px;
   }
 }
+
+/* ==========================================================================
+   Global Neutral Elevated Badges & Action Buttons (Sửa & Thành viên)
+   ========================================================================== */
+.role-member,
+.acc-role-member,
+.topbar-user-role-badge.member,
+.role-badge-pill:not(.leader):not(.fa),
+.clan-role-pill {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08), 0 1px 2px rgba(15, 23, 42, 0.04) !important;
+  font-weight: 600 !important;
+}
+
+.btn-tbl-edit,
+.btn-tbl-action.btn-tbl-edit,
+.s6a-link-button:not(.danger-text):not(.success-text) {
+  color: #0f172a !important;
+  background-color: #ffffff !important;
+  border: 1px solid #d1d5db !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08), 0 1px 2px rgba(15, 23, 42, 0.04) !important;
+  font-weight: 600 !important;
+  transition: all 0.16s ease !important;
+}
+
+.btn-tbl-edit:hover,
+.btn-tbl-action.btn-tbl-edit:hover,
+.s6a-link-button:not(.danger-text):not(.success-text):hover:not(:disabled) {
+  background-color: #f8fafc !important;
+  border-color: #94a3b8 !important;
+  color: #000000 !important;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.12) !important;
+  transform: translateY(-1px) !important;
+}
+
+.btn-tbl-edit:active,
+.btn-tbl-action.btn-tbl-edit:active,
+.s6a-link-button:not(.danger-text):not(.success-text):active:not(:disabled) {
+  transform: translateY(0) !important;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06) !important;
+}
+/* Universal Neutral Elevated Action Buttons for Tables & Lists */
+.fam-btn-view,
+.fam-btn-tree,
+.fam-btn-detail,
+.fam-btn-edit,
+.links-btn-action.view {
+  color: #0f172a !important;
+  background: #ffffff !important;
+  border: 1px solid #d1d5db !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08) !important;
+  font-weight: 600 !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.fam-btn-view:hover,
+.fam-btn-tree:hover,
+.fam-btn-detail:hover,
+.fam-btn-edit:hover,
+.links-btn-action.view:hover {
+  color: #000000 !important;
+  background: #ffffff !important;
+  border-color: #94a3b8 !important;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.12) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Universal Neutral Elevated Generation Badges & Gender Text */
+.gen-pill,
+.gen-pill.gen-1,
+.gen-pill.gen-2,
+.gen-pill.gen-3,
+.gen-pill.gen-4,
+.member-badge-generation,
+.fa-gen-chip,
+.rel-item-gen-pill,
+.rel-item-gen-pill.purple,
+.dlm-member-tag.male,
+.dlm-member-tag.female {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border: 1px solid #d1d5db !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08) !important;
+  font-weight: 600 !important;
+  white-space: nowrap !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 8px !important;
+  transition: all 0.16s ease !important;
+}
+
+.gen-pill:hover,
+.member-badge-generation:hover,
+.fa-gen-chip:hover,
+.rel-item-gen-pill:hover {
+  background: #ffffff !important;
+  border-color: #94a3b8 !important;
+  color: #000000 !important;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.12) !important;
+  transform: translateY(-1px) !important;
+}
+
+.gender-text,
+.gender-text.male,
+.gender-text.female,
+.member-gender-text,
+.member-gender-pill,
+.member-gender-pill.male,
+.member-gender-pill.female {
+  color: #0f172a !important;
+  font-weight: 600 !important;
+  white-space: nowrap !important;
+}
+
+.member-btn-view,
+.member-view-profile-btn {
+  white-space: nowrap !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border: 1px solid #d1d5db !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08) !important;
+  font-weight: 600 !important;
+  border-radius: 8px !important;
+  transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.member-btn-view:hover,
+.member-view-profile-btn:hover {
+  background: #ffffff !important;
+  border-color: #94a3b8 !important;
+  color: #000000 !important;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.12) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Universal Neutral Elevated Notification Cards & Badges */
+.notif-feed-item.unread {
+  background: #ffffff !important;
+  border: 1px solid #d1d5db !important;
+  border-left: 1px solid #d1d5db !important;
+  box-shadow: 0 4px 18px rgba(15, 23, 42, 0.08) !important;
+}
+
+.notif-feed-item.unread:hover {
+  background: #ffffff !important;
+  border-color: #94a3b8 !important;
+  box-shadow: 0 8px 26px rgba(15, 23, 42, 0.12) !important;
+  transform: translateY(-2px) !important;
+}
+
+.notif-feed-item.read {
+  background: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
+  border-left: 1px solid #e2e8f0 !important;
+  box-shadow: none !important;
+  opacity: 0.82 !important;
+}
+
+.notif-feed-item.read:hover {
+  background: #f1f5f9 !important;
+  opacity: 1 !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.notif-feed-item .cat-tag,
+.notif-feed-item .cat-event,
+.notif-feed-item .cat-memorial,
+.notif-feed-item .cat-fund,
+.notif-feed-item .cat-proposal,
+.notif-feed-item .cat-system,
+.notif-feed-item .cat-security,
+.notif-feed-item .cat-ai {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05) !important;
+  font-weight: 600 !important;
+}
+
+.notif-feed-item.unread .status-dot {
+  background: #0f172a !important;
+  box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.12) !important;
+}
+
+.notif-feed-item.read .status-dot {
+  background: #cbd5e1 !important;
+  box-shadow: none !important;
+}

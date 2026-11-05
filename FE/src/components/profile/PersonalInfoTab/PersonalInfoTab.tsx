@@ -45,7 +45,7 @@ export const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({ member }) => {
 
           <div className="profile-info-item">
             <span className="profile-info-label">Thế hệ (Đời)</span>
-            <span className="profile-info-value">Đời thứ {member.generation}</span>
+            <span className="profile-info-value">Đời {member.generation}</span>
           </div>
 
           <div className="profile-info-item">

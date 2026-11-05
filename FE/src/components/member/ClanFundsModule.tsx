@@ -187,7 +187,7 @@ export const ClanFundsModule: React.FC<ClanFundsModuleProps> = ({ canManage = fa
           <div className="fund-table-heading">
             <div>
               <h2>Sổ cái thu chi & Danh sách quyên góp</h2>
-              <span>Chi tiết người đóng góp, mục đích cần chi và trạng thái xác nhận</span>
+              <span>Nhấp vào bất kỳ dòng nào để xem chi tiết, đối soát hoặc chỉnh sửa</span>
             </div>
             <button type="button" onClick={() => { setSearch(''); setTypeFilter('all'); setStatusFilter('all'); setFromDate(''); setToDate(''); setSort('newest'); }}>
               Đặt lại bộ lọc
@@ -224,58 +224,39 @@ export const ClanFundsModule: React.FC<ClanFundsModuleProps> = ({ canManage = fa
             <table className="fund-table">
               <thead>
                 <tr>
-                  <th>Mã</th>
-                  <th>Phân loại</th>
+                  <th style={{ width: '110px' }}>Mã</th>
+                  <th style={{ width: '150px' }}>Phân loại</th>
                   <th>Nội dung mục đích</th>
                   <th>Người góp / Người nhận</th>
-                  <th>Ngày</th>
-                  <th>Số tiền</th>
-                  <th>Trạng thái</th>
-                  <th>Thao tác</th>
+                  <th style={{ width: '120px' }}>Ngày</th>
+                  <th style={{ width: '150px', textAlign: 'right' }}>Số tiền</th>
+                  <th style={{ width: '130px', textAlign: 'center' }}>Trạng thái</th>
                 </tr>
               </thead>
               <tbody>
                 {visible.map((item) => (
-                  <tr key={item.id}>
-                    <td><strong>{item.id}</strong></td>
+                  <tr
+                    key={item.id}
+                    className="fund-row-clickable"
+                    onClick={() => setSelected(item)}
+                    title="Nhấp vào dòng để xem chi tiết"
+                  >
+                    <td><span className="fund-item-code">{item.id}</span></td>
                     <td>
                       <span className={`fund-type-badge ${item.type}`}>
                         {item.type === 'income' ? 'Thu / Quyên góp' : 'Khoản chi'}
                       </span>
                     </td>
-                    <td><strong>{item.description}</strong></td>
-                    <td>{item.party}</td>
-                    <td>{item.date}</td>
-                    <td className={`fund-amount-val ${item.type}`}>
+                    <td><span className="fund-item-desc">{item.description}</span></td>
+                    <td><span className="fund-item-party">{item.party}</span></td>
+                    <td><span className="fund-item-date">{item.date}</span></td>
+                    <td className={`fund-amount-val ${item.type}`} style={{ textAlign: 'right' }}>
                       {item.type === 'income' ? '+' : '−'}{formatVnd(item.amount)}
                     </td>
-                    <td>
+                    <td style={{ textAlign: 'center' }}>
                       <span className={`fund-status-badge ${item.status}`}>
                         {statusLabels[item.status]}
                       </span>
-                    </td>
-                    <td>
-                      <div className="fund-actions">
-                        {item.status === 'pending' && (
-                          <button
-                            type="button"
-                            className="fund-btn-approve"
-                            title="Xác nhận vào sổ quỹ"
-                            onClick={() => {
-                              setTransactions((cur) => cur.map((t) => t.id === item.id ? { ...t, status: 'confirmed' } : t));
-                              setToast(`Đã duyệt xác nhận khoản đóng góp ${item.id}`);
-                            }}
-                          >
-                            Duyệt
-                          </button>
-                        )}
-                        <button type="button" onClick={() => setSelected(item)} title="Xem chi tiết">
-                          Chi tiết
-                        </button>
-                        <button type="button" onClick={() => openForm(item)} title="Chỉnh sửa">
-                          Sửa
-                        </button>
-                      </div>
                     </td>
                   </tr>
                 ))}
@@ -376,9 +357,23 @@ export const ClanFundsModule: React.FC<ClanFundsModuleProps> = ({ canManage = fa
               <>
                 <button type="button" className="feature-button secondary" onClick={() => setSelected(null)}>Đóng</button>
                 {selected.status === 'pending' && (
-                  <button type="button" className="feature-button danger" onClick={() => setConfirmTarget({ item: selected, action: 'cancel' })}>Hủy giao dịch</button>
+                  <>
+                    <button
+                      type="button"
+                      className="feature-button primary"
+                      style={{ background: '#2449bd', color: '#ffffff' }}
+                      onClick={() => {
+                        setTransactions((cur) => cur.map((t) => t.id === selected.id ? { ...t, status: 'confirmed' } : t));
+                        setToast(`Đã duyệt xác nhận khoản đóng góp ${selected.id}`);
+                        setSelected(null);
+                      }}
+                    >
+                      Duyệt vào sổ quỹ
+                    </button>
+                    <button type="button" className="feature-button danger" onClick={() => setConfirmTarget({ item: selected, action: 'cancel' })}>Hủy giao dịch</button>
+                  </>
                 )}
-                <button type="button" className="feature-button primary" onClick={() => openForm(selected)}>Chỉnh sửa</button>
+                <button type="button" className="feature-button primary" onClick={() => { const item = selected; setSelected(null); openForm(item); }}>Chỉnh sửa</button>
               </>
             }
           >
@@ -555,7 +550,7 @@ export const ClanFundsModule: React.FC<ClanFundsModuleProps> = ({ canManage = fa
             <tbody>
               {publicDonations.map((item) => (
                 <tr key={item.id}>
-                  <td><strong>{item.party}</strong></td>
+                  <td><span className="fund-item-party">{item.party}</span></td>
                   <td>{item.description}</td>
                   <td>{item.date}</td>
                   <td className="honor-amount">{formatVnd(item.amount)}</td>

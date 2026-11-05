@@ -489,30 +489,40 @@
   transform: translateY(0);
 }
 
-.fam-btn-view {
-  background: #eff6ff;
-  color: #1d4ed8;
-  border: 1px solid #bfdbfe;
-  font-weight: 700;
+.fam-btn-view,
+.fam-btn-tree,
+.fam-btn-detail {
+  background: #ffffff;
+  color: #0f172a;
+  border: 1px solid #d1d5db;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+  font-weight: 600;
 }
 
-.fam-btn-view:hover {
-  background: #2563eb;
-  border-color: #2563eb;
-  color: #ffffff;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.28);
+.fam-btn-view:hover,
+.fam-btn-tree:hover,
+.fam-btn-detail:hover {
+  background: #ffffff;
+  border-color: #94a3b8;
+  color: #000000;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.12);
+  transform: translateY(-1px);
 }
 
 .fam-btn-edit {
   background: #ffffff;
-  color: #334155;
-  border: 1px solid #cbd5e1;
+  color: #0f172a;
+  border: 1px solid #d1d5db;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+  font-weight: 600;
 }
 
 .fam-btn-edit:hover {
-  background: #f8fafc;
+  background: #ffffff;
   border-color: #94a3b8;
-  color: #0f172a;
+  color: #000000;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.12);
+  transform: translateY(-1px);
 }
 
 .fam-btn-delete {
