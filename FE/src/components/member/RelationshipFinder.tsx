@@ -631,7 +631,7 @@ export const RelationshipFinder: React.FC<RelationshipFinderProps> = ({
             {/* Person A */}
             <div className="rel-person-picker-card">
               <div className="rel-picker-header">
-                <span className="rel-badge-step a">Person thứ nhất</span>
+                <span className="rel-badge-step a">Người thứ nhất</span>
                 {myPerson && personAId === myPerson.id && (
                   <span className="rel-me-badge">Chính bạn</span>
                 )}
@@ -640,7 +640,7 @@ export const RelationshipFinder: React.FC<RelationshipFinderProps> = ({
               <div className="rel-search-input-wrap">
                 <input
                   type="text"
-                  placeholder="Tìm nhanh theo tên Person thứ nhất..."
+                  placeholder="Tìm nhanh theo tên người thứ nhất..."
                   value={searchFilterA}
                   onChange={(e) => setSearchFilterA(e.target.value)}
                   className="rel-search-box"
@@ -651,9 +651,9 @@ export const RelationshipFinder: React.FC<RelationshipFinderProps> = ({
                 className="rel-dropdown-select"
                 value={personAId}
                 onChange={(e) => handleSelectPersonA(e.target.value)}
-                aria-label="Chọn Person thứ nhất"
+                aria-label="Chọn người thứ nhất"
               >
-                <option value="">Chọn Person thứ nhất</option>
+                <option value="">Chọn người thứ nhất</option>
                 {filteredMembersA.map((m) => {
                   const isMe = Boolean(myPerson && m.id === myPerson.id);
                   return (
@@ -689,7 +689,7 @@ export const RelationshipFinder: React.FC<RelationshipFinderProps> = ({
                 type="button"
                 className="rel-swap-big-btn"
                 onClick={handleSwap}
-                title="Đổi vị trí giữa Person thứ nhất và Person thứ hai"
+                title="Đổi vị trí giữa Người thứ nhất và Người thứ hai"
                 aria-label="Hoán đổi vị trí"
               >
                 ⇄
@@ -699,13 +699,13 @@ export const RelationshipFinder: React.FC<RelationshipFinderProps> = ({
             {/* Person B */}
             <div className="rel-person-picker-card">
               <div className="rel-picker-header">
-                <span className="rel-badge-step b">Person thứ hai</span>
+                <span className="rel-badge-step b">Người thứ hai</span>
               </div>
 
               <div className="rel-search-input-wrap">
                 <input
                   type="text"
-                  placeholder="Tìm nhanh theo tên Person thứ hai..."
+                  placeholder="Tìm nhanh theo tên người thứ hai..."
                   value={searchFilterB}
                   onChange={(e) => setSearchFilterB(e.target.value)}
                   className="rel-search-box"
@@ -716,9 +716,9 @@ export const RelationshipFinder: React.FC<RelationshipFinderProps> = ({
                 className="rel-dropdown-select"
                 value={personBId}
                 onChange={(e) => handleSelectPersonB(e.target.value)}
-                aria-label="Chọn Person thứ hai"
+                aria-label="Chọn người thứ hai"
               >
-                <option value="">Chọn Person thứ hai</option>
+                <option value="">Chọn người thứ hai</option>
                 {filteredMembersB.map((m) => (
                   <option key={m.id} value={m.id}>
                     {m.fullName} (Đời {m.generation || 1} • {m.gender === 'female' ? 'Nữ' : 'Nam'})
@@ -800,7 +800,7 @@ export const RelationshipFinder: React.FC<RelationshipFinderProps> = ({
               <div className="rel-dialogue-grid">
                 <div className="rel-dialogue-card a-to-b">
                   <div className="rel-dialogue-speaker">
-                    <span className="rel-speaker-tag">Person thứ nhất gọi Person thứ hai</span>
+                    <span className="rel-speaker-tag">Người thứ nhất gọi Người thứ hai</span>
                     <strong className="rel-speaker-name">
                       {pA?.fullName} ➔ {pB?.fullName}
                     </strong>
@@ -814,7 +814,7 @@ export const RelationshipFinder: React.FC<RelationshipFinderProps> = ({
 
                 <div className="rel-dialogue-card b-to-a">
                   <div className="rel-dialogue-speaker">
-                    <span className="rel-speaker-tag">Person thứ hai gọi Person thứ nhất</span>
+                    <span className="rel-speaker-tag">Người thứ hai gọi Người thứ nhất</span>
                     <strong className="rel-speaker-name">
                       {pB?.fullName} ➔ {pA?.fullName}
                     </strong>
