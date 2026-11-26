@@ -1,4 +1,4 @@
-﻿import { LoadingState } from '../../shared/Feedback/LoadingState';
+import { LoadingState } from '../../shared/Feedback/LoadingState';
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useClanContext } from '../../context/ClanContext';

@@ -46,7 +46,7 @@ export const MyClans: React.FC = () => {
   const [selectedClan, setSelectedClan] = useState<PublicClanItem | null>(null);
 
   // Step 2: Form Data
-  const [lineageType, setLineageType] = useState<'PATERNAL' | 'MATERNAL' | 'SPOUSAL'>('PATERNAL');
+  const [lineageType, setLineageType] = useState<'PATERNAL' | 'MATERNAL'>('PATERNAL');
   const [fullName, setFullName] = useState(account?.display_name || account?.username || '');
   const [birthDate, setBirthDate] = useState('');
   const [relativeName, setRelativeName] = useState('');
@@ -347,7 +347,7 @@ export const MyClans: React.FC = () => {
         </div>
 
         {joinedClans.length === 0 ? (
-          <p style={{ color: '#64748b', fontStyle: 'italic', margin: '8px 0' }}>
+          <p className="my-clans-empty-hint">
             Bạn chưa tham gia dòng tộc nào. Hãy nhấn "Gia nhập dòng tộc" để gửi yêu cầu tham gia cây gia phả bên nội hoặc bên ngoại.
           </p>
         ) : (
@@ -376,7 +376,7 @@ export const MyClans: React.FC = () => {
                       </div>
                       <div className="meta-row">
                         <span className="meta-label">Trạng thái:</span>
-                        <span style={{ color: clan.membership_status === 'ACTIVE' ? '#166534' : '#2449bd', fontWeight: 600 }}>
+                        <span className={clan.membership_status === 'ACTIVE' ? 'clan-status-active' : 'clan-status-other'}>
                           {clan.membership_status === 'ACTIVE' ? 'Đang hoạt động' : clan.membership_status}
                         </span>
                       </div>
@@ -389,10 +389,10 @@ export const MyClans: React.FC = () => {
                         <span className="active-dot" /> Đang thao tác cây này
                       </span>
                     ) : (
-                      <span style={{ fontSize: '12.5px', color: '#64748b' }}>Đã tham gia</span>
+                      <span className="clan-joined-text">Đã tham gia</span>
                     )}
 
-                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <div className="clan-card-actions-right">
                       {!isActive && clan.membership_status === 'ACTIVE' && (
                         <button
                           type="button"
@@ -430,7 +430,7 @@ export const MyClans: React.FC = () => {
         </div>
 
         {myRequests.length === 0 ? (
-          <p style={{ color: '#64748b', fontStyle: 'italic', margin: '8px 0' }}>
+          <p className="my-clans-empty-hint">
             Chưa có yêu cầu gia nhập nào được gửi đi.
           </p>
         ) : (
@@ -444,7 +444,7 @@ export const MyClans: React.FC = () => {
                   <th>Ngày gửi</th>
                   <th>Trạng thái</th>
                   <th>Phản hồi người duyệt</th>
-                  <th style={{ textAlign: 'right' }}>Thao tác</th>
+                  <th className="table-th-right">Thao tác</th>
                 </tr>
               </thead>
               <tbody>
@@ -452,28 +452,28 @@ export const MyClans: React.FC = () => {
                   <tr key={req.request_id}>
                     <td>
                       <strong>{req.clan_name}</strong>
-                      <div style={{ fontSize: '11.5px', color: '#64748b' }}>Mã: {req.clan_code}</div>
+                      <div className="clan-code-sub">Mã: {req.clan_code}</div>
                     </td>
                     <td>{getLineageBadge(req.lineage_type)}</td>
                     <td>
                       <div>{req.relative_name}</div>
-                      <small style={{ color: '#64748b' }}>Quan hệ: {req.relative_relation}</small>
+                      <small className="clan-relation-sub">Quan hệ: {req.relative_relation}</small>
                     </td>
                     <td>{new Date(req.created_at).toLocaleDateString('vi-VN')}</td>
                     <td>
                       <span className={`status-badge ${req.status}`}>{getStatusLabel(req.status)}</span>
                     </td>
-                    <td style={{ maxWidth: '240px' }}>
+                    <td className="table-review-note-cell">
                       {req.review_note ? (
-                        <div style={{ fontSize: '13px', color: '#334155', fontStyle: 'italic' }}>
+                        <div className="table-review-note-text">
                           "{req.review_note}"
                         </div>
                       ) : (
-                        <span style={{ color: '#94a3b8' }}>—</span>
+                        <span className="table-dash-muted">—</span>
                       )}
                     </td>
-                    <td style={{ textAlign: 'right' }}>
-                      <div className="req-actions" style={{ justifyContent: 'flex-end' }}>
+                    <td className="table-td-right">
+                      <div className="req-actions req-actions-right">
                         <button
                           type="button"
                           className="btn-action-sm"
@@ -556,13 +556,13 @@ export const MyClans: React.FC = () => {
                   </div>
 
                   {searching ? (
-                    <div style={{ textAlign: 'center', padding: '24px', color: '#64748b' }}>Đang tìm kiếm...</div>
+                    <div className="wizard-search-loading">Đang tìm kiếm...</div>
                   ) : searchResults.length === 0 ? (
-                    <div style={{ textAlign: 'center', padding: '28px 16px', background: '#f8fafc', borderRadius: '8px' }}>
-                      <p style={{ margin: '0 0 6px 0', color: '#475569', fontWeight: 500 }}>
+                    <div className="wizard-search-empty">
+                      <p className="wizard-search-empty-text">
                         {searchQuery.trim() ? `Không tìm thấy dòng họ nào khớp với từ khóa "${searchQuery}".` : 'Nhập từ khóa để tra cứu dòng họ.'}
                       </p>
-                      <small style={{ color: '#94a3b8' }}>
+                      <small className="wizard-search-empty-hint">
                         Lưu ý: Các dòng họ riêng tư không nằm trong danh sách tra cứu công khai.
                       </small>
                     </div>
@@ -576,15 +576,15 @@ export const MyClans: React.FC = () => {
                               Mã: <strong>{clan.code}</strong> {clan.origin_place ? `· Địa phương: ${clan.origin_place}` : ''} · Quy mô: {clan.member_count} thành viên
                             </p>
                             {clan.description && (
-                              <p style={{ color: '#64748b', fontSize: '12px', marginTop: '2px' }}>{clan.description}</p>
+                              <p className="clan-search-desc">{clan.description}</p>
                             )}
                           </div>
 
                           <div>
                             {clan.is_joined ? (
-                              <span style={{ fontSize: '12.5px', color: '#166534', fontWeight: 600 }}>Đã tham gia</span>
+                              <span className="clan-search-joined">Đã tham gia</span>
                             ) : clan.active_request_id ? (
-                              <span style={{ fontSize: '12.5px', color: '#b45309', fontWeight: 600 }}>Đã gửi yêu cầu</span>
+                              <span className="clan-search-requested">Đã gửi yêu cầu</span>
                             ) : (
                               <button
                                 type="button"
@@ -605,9 +605,9 @@ export const MyClans: React.FC = () => {
               {/* STEP 2: KHAI THÔNG TIN */}
               {wizardStep === 2 && selectedClan && (
                 <form id="join-request-step2-form" onSubmit={handleStep2Next}>
-                  <div style={{ background: '#f8fafc', padding: '12px 16px', borderRadius: '8px', marginBottom: '18px', border: '1px solid #e2e8f0' }}>
-                    <div style={{ fontSize: '12.5px', color: '#64748b' }}>Dòng họ đích xin gia nhập:</div>
-                    <strong style={{ fontSize: '16px', color: '#0f172a' }}>{selectedClan.name}</strong> ({selectedClan.code})
+                  <div className="wizard-selected-clan-box">
+                    <div className="wizard-selected-clan-label">Dòng họ đích xin gia nhập:</div>
+                    <strong className="wizard-selected-clan-name">{selectedClan.name}</strong> ({selectedClan.code})
                   </div>
 
                   <div className="form-group-clan">
@@ -625,7 +625,7 @@ export const MyClans: React.FC = () => {
                         />
                         <div>
                           <strong>Bên nội</strong>
-                          <div style={{ fontSize: '12px', color: '#64748b' }}>Họ theo bên Cha</div>
+                          <div className="lineage-radio-desc">Họ theo bên Cha</div>
                         </div>
                       </div>
 
@@ -641,29 +641,13 @@ export const MyClans: React.FC = () => {
                         />
                         <div>
                           <strong>Bên ngoại</strong>
-                          <div style={{ fontSize: '12px', color: '#64748b' }}>Họ theo bên Mẹ</div>
-                        </div>
-                      </div>
-
-                      <div
-                        className={`lineage-radio-card ${lineageType === 'SPOUSAL' ? 'selected' : ''}`}
-                        onClick={() => setLineageType('SPOUSAL')}
-                      >
-                        <input
-                          type="radio"
-                          name="lineageType"
-                          checked={lineageType === 'SPOUSAL'}
-                          onChange={() => setLineageType('SPOUSAL')}
-                        />
-                        <div>
-                          <strong>Bên vợ / Bên chồng</strong>
-                          <div style={{ fontSize: '12px', color: '#64748b' }}>Họ theo hôn phối (Dâu/Rể)</div>
+                          <div className="lineage-radio-desc">Họ theo bên Mẹ</div>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                  <div className="form-row-2col">
                     <div className="form-group-clan">
                       <label>Họ và tên của bạn *</label>
                       <input
@@ -685,7 +669,7 @@ export const MyClans: React.FC = () => {
                     </div>
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                  <div className="form-row-2col">
                     <div className="form-group-clan">
                       <label>Tên người thân trong dòng họ này *</label>
                       <input
@@ -735,13 +719,13 @@ export const MyClans: React.FC = () => {
                     />
                   </div>
 
-                  <div className="form-group-clan" style={{ marginTop: '12px' }}>
-                    <label style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', cursor: 'pointer', fontWeight: 500 }}>
+                  <div className="form-group-clan form-group-consent">
+                    <label className="form-consent-label">
                       <input
                         type="checkbox"
                         checked={consentGiven}
                         onChange={(e) => setConsentGiven(e.target.checked)}
-                        style={{ marginTop: '3px' }}
+                        className="form-consent-checkbox"
                       />
                       <span>
                         Tôi xác nhận các thông tin trên là chính xác và đồng ý chuyển thông tin này tới Quản trị viên/Trưởng tộc của dòng họ để phục vụ việc xét duyệt.
@@ -769,14 +753,14 @@ export const MyClans: React.FC = () => {
                       <dd>{relativeName} — {relativeRelation === 'Khác' ? relationDescription : relativeRelation}</dd>
 
                       <dt>Thông tin giải thích xác minh:</dt>
-                      <dd style={{ whiteSpace: 'pre-wrap' }}>{verificationNotes}</dd>
+                      <dd className="review-notes-dd">{verificationNotes}</dd>
 
                       <dt>Quyền sau khi được chấp thuận:</dt>
-                      <dd style={{ color: '#0369a1', fontWeight: 600 }}>Thành viên (Member) của {selectedClan.name}</dd>
+                      <dd className="review-role-badge">Thành viên (Member) của {selectedClan.name}</dd>
                     </dl>
                   </div>
 
-                  <div style={{ marginTop: '14px', fontSize: '13px', background: '#eff6ff', padding: '10px 14px', borderRadius: '8px', border: '1px solid #bfdbfe', color: '#1e40af' }}>
+                  <div className="review-info-alert">
                     <strong>Lưu ý:</strong> Sau khi gửi, yêu cầu sẽ chuyển sang trạng thái <em>Chờ xác minh</em>. Người duyệt của dòng họ đích sẽ kiểm tra thông tin và liên kết hồ sơ Person trước khi chính thức chấp thuận.
                   </div>
                 </div>
@@ -856,30 +840,30 @@ export const MyClans: React.FC = () => {
                   <dd>{viewingRequest.relative_name} ({viewingRequest.relative_relation})</dd>
 
                   <dt>Lời khai xác minh:</dt>
-                  <dd style={{ whiteSpace: 'pre-wrap' }}>{viewingRequest.verification_notes}</dd>
+                  <dd className="review-notes-dd">{viewingRequest.verification_notes}</dd>
 
                   {viewingRequest.review_note && (
                     <>
-                      <dt style={{ color: '#b91c1c' }}>Phản hồi từ người duyệt:</dt>
-                      <dd style={{ color: '#b91c1c', fontWeight: 600 }}>{viewingRequest.review_note}</dd>
+                      <dt className="review-note-reviewer-dt">Phản hồi từ người duyệt:</dt>
+                      <dd className="review-note-reviewer-dd">{viewingRequest.review_note}</dd>
                     </>
                   )}
 
                   {viewingRequest.linked_person_name && (
                     <>
-                      <dt style={{ color: '#166534' }}>Hồ sơ Person được liên kết:</dt>
-                      <dd style={{ color: '#166534', fontWeight: 600 }}>{viewingRequest.linked_person_name}</dd>
+                      <dt className="review-linked-person-dt">Hồ sơ Person được liên kết:</dt>
+                      <dd className="review-linked-person-dd">{viewingRequest.linked_person_name}</dd>
                     </>
                   )}
                 </dl>
               </div>
 
               {viewingRequest.history && viewingRequest.history.length > 0 && (
-                <div style={{ marginTop: '16px' }}>
-                  <h4 style={{ fontSize: '14px', margin: '0 0 8px 0', color: '#334155' }}>Lịch sử xử lý:</h4>
-                  <ul style={{ paddingLeft: '20px', margin: 0, fontSize: '12.5px', color: '#64748b' }}>
+                <div className="history-section">
+                  <h4 className="history-title">Lịch sử xử lý:</h4>
+                  <ul className="history-list">
                     {viewingRequest.history.map((h, idx) => (
-                      <li key={idx} style={{ marginBottom: '4px' }}>
+                      <li key={idx} className="history-item">
                         <strong>{getStatusLabel(h.event)}</strong> — <time>{new Date(h.at).toLocaleString('vi-VN')}</time>
                         {h.note && ` (${h.note})`}
                       </li>
@@ -911,7 +895,7 @@ export const MyClans: React.FC = () => {
             </div>
             <form onSubmit={handleSubmitSupplement}>
               <div className="modal-body-clan">
-                <div style={{ background: '#fef2f2', border: '1px solid #fecaca', padding: '12px', borderRadius: '8px', marginBottom: '16px', color: '#991b1b', fontSize: '13.5px' }}>
+                <div className="supplement-alert-box">
                   <strong>Yêu cầu từ người duyệt:</strong> {supplementingRequest.review_note || 'Vui lòng bổ sung thêm thông tin xác minh.'}
                 </div>
 
@@ -967,11 +951,11 @@ export const MyClans: React.FC = () => {
         <div className="modal-backdrop-clan" onClick={() => !isLeaving && setLeavingClan(null)}>
           <div className="modal-dialog-clan modal-leave-clan" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header-clan">
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <h3 style={{ color: '#0f172a', margin: 0, fontSize: '17px', fontWeight: 700 }}>
+              <div className="modal-leave-header-title-wrap">
+                <h3 className="modal-leave-title">
                   Xác nhận rời khỏi dòng họ
                 </h3>
-                <span style={{ fontSize: '11px', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', background: '#fee2e2', color: '#991b1b', textTransform: 'uppercase' }}>
+                <span className="modal-leave-badge">
                   Cảnh báo
                 </span>
               </div>
@@ -984,32 +968,32 @@ export const MyClans: React.FC = () => {
                 ×
               </button>
             </div>
-            <div className="modal-body-clan" style={{ background: '#ffffff' }}>
-              <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '14px 16px', marginBottom: '16px' }}>
-                <div style={{ fontSize: '11.5px', color: '#64748b', marginBottom: '4px', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.05em' }}>
+            <div className="modal-body-clan modal-leave-body-white">
+              <div className="modal-leave-clan-box">
+                <div className="modal-leave-clan-label">
                   Dòng họ rời đi
                 </div>
-                <div style={{ fontSize: '15.5px', fontWeight: 700, color: '#0f172a' }}>
+                <div className="modal-leave-clan-name">
                   {leavingClan.clan_name}
                 </div>
-                <div style={{ fontSize: '12.5px', color: '#475569', marginTop: '3px' }}>
-                  Mã định danh: <span style={{ fontFamily: 'monospace', fontWeight: 600, color: '#0f172a' }}>{leavingClan.clan_code}</span>
+                <div className="modal-leave-clan-code">
+                  Mã định danh: <span className="modal-leave-code-val">{leavingClan.clan_code}</span>
                 </div>
               </div>
 
-              <div style={{ marginBottom: '16px' }}>
-                <p style={{ fontSize: '13.5px', fontWeight: 600, color: '#0f172a', margin: '0 0 8px' }}>
+              <div className="modal-leave-changes-wrap">
+                <p className="modal-leave-changes-title">
                   Các thay đổi sau khi bạn rời dòng họ:
                 </p>
-                <ul style={{ fontSize: '13.5px', color: '#334155', paddingLeft: '20px', margin: 0, lineHeight: '1.7' }}>
+                <ul className="modal-leave-changes-list">
                   <li>Hồ sơ của bạn sẽ không còn xuất hiện trong Cây gia phả của dòng họ này.</li>
                   <li>Toàn bộ vai trò và quyền truy cập dữ liệu nội bộ sẽ bị thu hồi ngay lập tức.</li>
                   <li>Nếu vào nhầm, bạn có thể gửi lại yêu cầu xin gia nhập bất cứ lúc nào.</li>
                 </ul>
               </div>
 
-              <div style={{ background: '#fffbeb', border: '1px solid #fef3c7', borderRadius: '8px', padding: '12px 14px' }}>
-                <p style={{ fontSize: '12.5px', color: '#92400e', margin: 0, lineHeight: '1.5' }}>
+              <div className="modal-leave-warning-box">
+                <p className="modal-leave-warning-text">
                   <strong>Lưu ý:</strong> Nếu bạn đang là Trưởng tộc duy nhất, hệ thống sẽ yêu cầu bạn chuyển giao quyền quản trị trước khi rời dòng họ.
                 </p>
               </div>

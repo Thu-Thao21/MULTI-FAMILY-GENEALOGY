@@ -1,4 +1,4 @@
-﻿/* MyClans.css - Styling for Dòng tộc của tôi - Signature Royal Blue Theme */
+/* MyClans.css - Styling for Dòng tộc của tôi - Signature Royal Blue Theme */
 
 .my-clans-container {
   max-width: 1240px;
@@ -790,4 +790,316 @@
   font-weight: bold;
   color: inherit;
   font-size: 16px;
+}
+
+/* Helper / Extracted Classes from inline styles */
+.my-clans-empty-hint {
+  color: #64748b;
+  font-style: italic;
+  margin: 8px 0;
+}
+
+.clan-status-active {
+  color: #166534;
+  font-weight: 600;
+}
+
+.clan-status-other {
+  color: #2449bd;
+  font-weight: 600;
+}
+
+.clan-joined-text {
+  font-size: 12.5px;
+  color: #64748b;
+}
+
+.clan-card-actions-right {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.table-th-right {
+  text-align: right;
+}
+
+.clan-code-sub {
+  font-size: 11.5px;
+  color: #64748b;
+}
+
+.clan-relation-sub {
+  color: #64748b;
+}
+
+.table-review-note-cell {
+  max-width: 240px;
+}
+
+.table-review-note-text {
+  font-size: 13px;
+  color: #334155;
+  font-style: italic;
+}
+
+.table-dash-muted {
+  color: #94a3b8;
+}
+
+.table-td-right {
+  text-align: right;
+}
+
+.req-actions-right {
+  justify-content: flex-end;
+}
+
+.wizard-search-loading {
+  text-align: center;
+  padding: 24px;
+  color: #64748b;
+}
+
+.wizard-search-empty {
+  text-align: center;
+  padding: 28px 16px;
+  background: #f8fafc;
+  border-radius: 8px;
+}
+
+.wizard-search-empty-text {
+  margin: 0 0 6px 0;
+  color: #475569;
+  font-weight: 500;
+}
+
+.wizard-search-empty-hint {
+  color: #94a3b8;
+}
+
+.clan-search-desc {
+  color: #64748b;
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+.clan-search-joined {
+  font-size: 12.5px;
+  color: #166534;
+  font-weight: 600;
+}
+
+.clan-search-requested {
+  font-size: 12.5px;
+  color: #b45309;
+  font-weight: 600;
+}
+
+.wizard-selected-clan-box {
+  background: #f8fafc;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 18px;
+  border: 1px solid #e2e8f0;
+}
+
+.wizard-selected-clan-label {
+  font-size: 12.5px;
+  color: #64748b;
+}
+
+.wizard-selected-clan-name {
+  font-size: 16px;
+  color: #0f172a;
+}
+
+.lineage-radio-desc {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.form-row-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.form-group-consent {
+  margin-top: 12px;
+}
+
+.form-consent-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.form-consent-checkbox {
+  margin-top: 3px;
+}
+
+.review-notes-dd {
+  white-space: pre-wrap;
+}
+
+.review-role-badge {
+  color: #0369a1;
+  font-weight: 600;
+}
+
+.review-info-alert {
+  margin-top: 14px;
+  font-size: 13px;
+  background: #eff6ff;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid #bfdbfe;
+  color: #1e40af;
+}
+
+.review-note-reviewer-dt,
+.review-note-reviewer-dd {
+  color: #b91c1c;
+}
+
+.review-note-reviewer-dd {
+  font-weight: 600;
+}
+
+.review-linked-person-dt,
+.review-linked-person-dd {
+  color: #166534;
+}
+
+.review-linked-person-dd {
+  font-weight: 600;
+}
+
+.history-section {
+  margin-top: 16px;
+}
+
+.history-title {
+  font-size: 14px;
+  margin: 0 0 8px 0;
+  color: #334155;
+}
+
+.history-list {
+  padding-left: 20px;
+  margin: 0;
+  font-size: 12.5px;
+  color: #64748b;
+}
+
+.history-item {
+  margin-bottom: 4px;
+}
+
+.supplement-alert-box {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  color: #991b1b;
+  font-size: 13.5px;
+}
+
+.modal-leave-header-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.modal-leave-title {
+  color: #0f172a;
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.modal-leave-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: #fee2e2;
+  color: #991b1b;
+  text-transform: uppercase;
+}
+
+.modal-leave-body-white {
+  background: #ffffff;
+}
+
+.modal-leave-clan-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+}
+
+.modal-leave-clan-label {
+  font-size: 11.5px;
+  color: #64748b;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.modal-leave-clan-name {
+  font-size: 15.5px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.modal-leave-clan-code {
+  font-size: 12.5px;
+  color: #475569;
+  margin-top: 3px;
+}
+
+.modal-leave-code-val {
+  font-family: monospace;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.modal-leave-changes-wrap {
+  margin-bottom: 16px;
+}
+
+.modal-leave-changes-title {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #0f172a;
+  margin: 0 0 8px;
+}
+
+.modal-leave-changes-list {
+  font-size: 13.5px;
+  color: #334155;
+  padding-left: 20px;
+  margin: 0;
+  line-height: 1.7;
+}
+
+.modal-leave-warning-box {
+  background: #fffbeb;
+  border: 1px solid #fef3c7;
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+
+.modal-leave-warning-text {
+  font-size: 12.5px;
+  color: #92400e;
+  margin: 0;
+  line-height: 1.5;
 }

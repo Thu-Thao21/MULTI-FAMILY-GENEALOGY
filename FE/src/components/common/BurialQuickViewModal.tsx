@@ -27,13 +27,13 @@ export const BurialQuickViewModal: React.FC<BurialQuickViewModalProps> = ({
   clanId,
   onViewFullProfile,
 }) => {
-  const { userRole } = useAuth();
+  const { primaryRole, account } = useAuth();
   const [burial, setBurial] = useState<PersonBurial | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [isEditOpen, setIsEditOpen] = useState<boolean>(false);
   const [isProposalOpen, setIsProposalOpen] = useState<boolean>(false);
 
-  const roleLower = (userRole || '').toLowerCase();
+  const roleLower = (primaryRole || account?.primary_role || '').toLowerCase();
   const canManage = [
     'admin', 'trưởng tộc', 'chủ dòng họ', 'clan admin', 'clan_admin', 
     'family_head', 'family admin', 'family_admin', 'manager'

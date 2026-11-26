@@ -15,14 +15,14 @@ export interface StatusTabProps {
 }
 
 export const StatusTab: React.FC<StatusTabProps> = ({ member }) => {
-  const { userRole } = useAuth();
+  const { primaryRole, account } = useAuth();
   const [burial, setBurial] = useState<PersonBurial | null>(null);
   const [loadingBurial, setLoadingBurial] = useState<boolean>(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
   const [isProposalModalOpen, setIsProposalModalOpen] = useState<boolean>(false);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
 
-  const roleLower = (userRole || '').toLowerCase();
+  const roleLower = (primaryRole || account?.primary_role || '').toLowerCase();
   const canManage = [
     'admin', 'trưởng tộc', 'chủ dòng họ', 'clan admin', 'clan_admin', 
     'family_head', 'family admin', 'family_admin', 'manager'
