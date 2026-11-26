@@ -54,6 +54,8 @@ export const MyClans: React.FC = () => {
   const [relationDescription, setRelationDescription] = useState('');
   const [verificationNotes, setVerificationNotes] = useState('');
   const [consentGiven, setConsentGiven] = useState(false);
+  const [consentError, setConsentError] = useState(false);
+  const [step2Error, setStep2Error] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // View Details Modal
@@ -166,6 +168,8 @@ export const MyClans: React.FC = () => {
     setRelationDescription('');
     setVerificationNotes('');
     setConsentGiven(false);
+    setConsentError(false);
+    setStep2Error(null);
     setShowJoinModal(true);
   };
 
@@ -179,21 +183,26 @@ export const MyClans: React.FC = () => {
       return;
     }
     setSelectedClan(clan);
+    setConsentError(false);
+    setStep2Error(null);
     setWizardStep(2);
   };
 
   const handleStep2Next = (e: React.FormEvent) => {
     e.preventDefault();
+    setStep2Error(null);
+    setConsentError(false);
+
     if (!fullName.trim() || !relativeName.trim() || !verificationNotes.trim()) {
-      alert('Vui lòng điền đầy đủ các thông tin bắt buộc.');
+      setStep2Error('Vui lòng điền đầy đủ các thông tin bắt buộc (*).');
       return;
     }
     if (relativeRelation === 'Khác' && !relationDescription.trim()) {
-      alert('Vui lòng mô tả quan hệ cụ thể khi chọn "Khác".');
+      setStep2Error('Vui lòng mô tả quan hệ cụ thể khi chọn "Khác".');
       return;
     }
     if (!consentGiven) {
-      alert('Bạn phải đồng ý gửi thông tin xác minh tới Quản trị viên dòng họ.');
+      setConsentError(true);
       return;
     }
     setWizardStep(3);
@@ -605,6 +614,17 @@ export const MyClans: React.FC = () => {
               {/* STEP 2: KHAI THÔNG TIN */}
               {wizardStep === 2 && selectedClan && (
                 <form id="join-request-step2-form" onSubmit={handleStep2Next}>
+                  {step2Error && (
+                    <div className="wizard-step-error-banner" role="alert">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" y1="8" x2="12" y2="12" />
+                        <line x1="12" y1="16" x2="12.01" y2="16" />
+                      </svg>
+                      <span>{step2Error}</span>
+                    </div>
+                  )}
+
                   <div className="wizard-selected-clan-box">
                     <div className="wizard-selected-clan-label">Dòng họ đích xin gia nhập:</div>
                     <strong className="wizard-selected-clan-name">{selectedClan.name}</strong> ({selectedClan.code})
@@ -719,18 +739,35 @@ export const MyClans: React.FC = () => {
                     />
                   </div>
 
-                  <div className="form-group-clan form-group-consent">
+                  <div className={`form-group-clan form-group-consent ${consentError ? 'has-error' : ''}`}>
                     <label className="form-consent-label">
                       <input
                         type="checkbox"
                         checked={consentGiven}
-                        onChange={(e) => setConsentGiven(e.target.checked)}
+                        onChange={(e) => {
+                          setConsentGiven(e.target.checked);
+                          if (e.target.checked) {
+                            setConsentError(false);
+                            if (step2Error?.includes('đồng ý')) setStep2Error(null);
+                          }
+                        }}
                         className="form-consent-checkbox"
                       />
                       <span>
                         Tôi xác nhận các thông tin trên là chính xác và đồng ý chuyển thông tin này tới Quản trị viên/Trưởng tộc của dòng họ để phục vụ việc xét duyệt.
                       </span>
                     </label>
+
+                    {consentError && (
+                      <div className="form-consent-error-alert" role="alert">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                          <circle cx="12" cy="12" r="10" />
+                          <line x1="12" y1="8" x2="12" y2="12" />
+                          <line x1="12" y1="16" x2="12.01" y2="16" />
+                        </svg>
+                        <span>Bạn phải đồng ý gửi thông tin xác minh tới Quản trị viên dòng họ để tiếp tục.</span>
+                      </div>
+                    )}
                   </div>
                 </form>
               )}
