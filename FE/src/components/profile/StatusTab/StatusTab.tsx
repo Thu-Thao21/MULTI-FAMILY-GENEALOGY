@@ -1,4 +1,4 @@
-﻿import { LoadingState } from '../../../shared/Feedback/LoadingState';
+import { LoadingState } from '../../../shared/Feedback/LoadingState';
 import React, { useEffect, useState } from 'react';
 import type { MemberDetail } from '../../../types/member';
 import type { PersonBurial } from '../../../types/location';
@@ -285,7 +285,7 @@ export const StatusTab: React.FC<StatusTabProps> = ({ member }) => {
         <LocationProposalModal
           isOpen={isProposalModalOpen}
           onClose={() => setIsProposalModalOpen(false)}
-          clanId={member.familyId}
+          clanId={member.familyId || ''}
           targetType="PERSON_BURIAL"
           personId={member.id}
           personName={member.fullName}

@@ -507,6 +507,7 @@ export const RelationshipFinder: React.FC<RelationshipFinderProps> = ({
         setAncestors(
           ancRes.map((item) => ({
             id: item.person.id,
+            familyId: effectiveFamilyId,
             fullName: item.person.fullName,
             gender: item.person.gender as any,
             generation: item.person.generation,
@@ -522,6 +523,7 @@ export const RelationshipFinder: React.FC<RelationshipFinderProps> = ({
         setDescendants(
           descRes.map((item) => ({
             id: item.person.id,
+            familyId: effectiveFamilyId,
             fullName: item.person.fullName,
             gender: item.person.gender as any,
             generation: item.person.generation,

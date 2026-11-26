@@ -33,7 +33,7 @@ export interface SkillItem {
 
 export interface Member {
   id: string;
-  familyId: string;
+  familyId?: string;
   fullName: string;
   otherName?: string;
   gender: string;
@@ -48,6 +48,9 @@ export interface Member {
   avatarUrl?: string;
   status: string;
   userId?: string;
+  fatherId?: string | null;
+  motherId?: string | null;
+  spouseId?: string | null;
 }
 
 export type MemberItem = Member;
