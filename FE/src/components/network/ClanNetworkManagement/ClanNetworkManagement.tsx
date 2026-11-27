@@ -804,19 +804,6 @@ export const ClanNetworkManagement: React.FC<ClanNetworkManagementProps> = ({ cl
                               )}
                               <button
                                 type="button"
-                                onClick={() => setViewingHybridLinkId(link.id)}
-                                className="cnm-btn-tree-link"
-                              >
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                  <circle cx="12" cy="5" r="3" />
-                                  <circle cx="5" cy="19" r="3" />
-                                  <circle cx="19" cy="19" r="3" />
-                                  <path d="M5 16l7-8 7 8" />
-                                </svg>
-                                Xem cay lien ho
-                              </button>
-                              <button
-                                type="button"
                                 onClick={() => handleOpenPolicyModal(link)}
                                 className="cnm-btn-policy"
                               >
@@ -1000,22 +987,6 @@ export const ClanNetworkManagement: React.FC<ClanNetworkManagementProps> = ({ cl
                                             {/* Action to revoke verified pair */}
                                             {m.status === 'VERIFIED' && (
                                               <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                                                <button
-                                                  type="button"
-                                                  onClick={() => setViewingHybridLinkId(link.id)}
-                                                  style={{
-                                                    background: '#f5f3ff',
-                                                    border: '1px solid #ddd6fe',
-                                                    color: '#6d28d9',
-                                                    padding: '3px 8px',
-                                                    borderRadius: '6px',
-                                                    fontSize: '11.5px',
-                                                    fontWeight: 600,
-                                                    cursor: 'pointer',
-                                                  }}
-                                                >
-                                                  Xem cay lien ho
-                                                </button>
                                                 <button
                                                   type="button"
                                                   onClick={() => { setRevokingMapping(m); setRevokeReason(''); }}

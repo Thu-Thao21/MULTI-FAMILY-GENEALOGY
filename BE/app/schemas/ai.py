@@ -288,5 +288,9 @@ class AISmartExcelCommitResponse(BaseModel):
     created_persons: int
     created_relationships: int
     created_branches: int
+    created_accounts: int = 0
+    skipped_accounts: int = 0
+    accounts_excel_base64: Optional[str] = None
+    accounts_excel_filename: Optional[str] = None
     message: str
 

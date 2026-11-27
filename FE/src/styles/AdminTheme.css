@@ -17,11 +17,11 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  background: #fff;
-  padding: 24px;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  padding: 24px 28px;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+  border: 1.5px solid #111827;
 }
 
 .clan-account-title, .admin-account-title {
@@ -71,23 +71,23 @@
 }
 
 .family-card-item, .clan-card, .admin-card {
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+  border: 1.5px solid #111827;
   overflow: hidden;
   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
 }
 
 .family-card-item:hover, .clan-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08) !important;
-  border-color: rgba(37, 99, 235, 0.28) !important;
+  transform: translateY(-3px);
+  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.12) !important;
+  border-color: #000000 !important;
 }
 
 .family-card-header, .clan-card-header, .admin-card-header {
-  padding: 20px 24px;
-  border-bottom: 1px solid #e2e8f0;
+  padding: 18px 24px;
+  border-bottom: 1.5px solid #111827;
   background: #f8fafc;
   display: flex;
   justify-content: space-between;
@@ -107,9 +107,9 @@
 
 /* Tables */
 .clan-table-card, .admin-table-card {
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
   border: 1px solid #e2e8f0;
   overflow: hidden;
 }

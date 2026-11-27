@@ -143,50 +143,9 @@ export const MemberDashboard: React.FC<MemberDashboardProps> = ({
     userName,
   ]);
 
-  // Tự động tính toán ngày giỗ từ danh sách thành viên tiền nhân trong dòng họ
-  const upcomingEvents = useMemo(() => {
-    if (!membersList || membersList.length === 0) return [];
-
-    const deceasedWithDates = membersList.filter((m) => m.deathDate && (!m.isAlive || m.isAlive === false));
-    if (deceasedWithDates.length === 0) return [];
-
-    return deceasedWithDates.slice(0, 4).map((m, idx) => {
-      const dStr = m.deathDate;
-      const dObj = new Date(dStr);
-      const isDateValid = !isNaN(dObj.getTime());
-      const formattedDate = isDateValid
-        ? `Ngày ${dObj.getDate().toString().padStart(2, '0')}/${(dObj.getMonth() + 1).toString().padStart(2, '0')} (Âm lịch)`
-        : `Năm mất: ${dStr}`;
-
-      return {
-        id: m.id || idx,
-        title: `Lễ giỗ Cụ ${m.fullName}`,
-        date: formattedDate,
-        countdown: (m.generation && m.generation <= 2) ? 'Đời tiên tổ' : `Đời ${m.generation || 1}`,
-        location: `Từ đường ${effectiveClanName}`,
-        family: effectiveClanName,
-      };
-    });
-  }, [membersList, effectiveClanName]);
-
-  // Hoạt động phả hệ gần đây dựa trên dữ liệu dòng họ
-  const recentActivities = useMemo(() => {
-    if (!membersList || membersList.length === 0) return [];
-    return [
-      {
-        id: 1,
-        user: effectiveClanName,
-        action: `đã đồng bộ thành công ${totalMembers} thành viên và dữ liệu phả hệ vào cây.`,
-        time: 'Vừa xong',
-      },
-      {
-        id: 2,
-        user: 'Hệ thống phả hệ',
-        action: 'đã xác thực và liên kết các chi nhánh, trực hệ tự động.',
-        time: 'Hôm nay',
-      },
-    ];
-  }, [membersList, totalMembers, effectiveClanName]);
+  // Không tự sinh dữ liệu mẫu giả lập cho Lịch giỗ & Hoạt động gần đây
+  const upcomingEvents = useMemo(() => [], []);
+  const recentActivities = useMemo(() => [], []);
 
   return (
     <>

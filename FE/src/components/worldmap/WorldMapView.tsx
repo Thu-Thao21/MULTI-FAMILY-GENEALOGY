@@ -183,7 +183,7 @@ export const WorldMapView: React.FC<WorldMapViewProps> = ({
   const defaultViewportRef = useRef(defaultViewport);
   defaultViewportRef.current = defaultViewport;
 
-  const controlsReady = hasPoints && !mapError;
+  const controlsReady = !mapError;
 
   // Vệ tinh chỉ có khi nền thật là MapTiler — nếu đổi (hoặc bị chuyển sang OpenFreeMap giữa chừng) mà đang chọn
   // vệ tinh thì quay lại "Bản đồ" để không kẹt ở một lựa chọn không còn tác dụng.
@@ -229,10 +229,9 @@ export const WorldMapView: React.FC<WorldMapViewProps> = ({
     }
   }, []);
 
-  // Khởi tạo bản đồ (khi có điểm, hoặc khi đổi nền/kiểu nền, hoặc khi bấm "Thử lại"); dọn (map.remove) khi hết
-  // điểm, đổi nền hoặc unmount.
+  // Khởi tạo bản đồ (khi mount, khi đổi nền/kiểu nền, hoặc khi bấm "Thử lại"); dọn (map.remove) khi đổi nền hoặc unmount.
   useEffect(() => {
-    if (!hasPoints || !containerRef.current) return;
+    if (!containerRef.current) return;
     let cancelled = false;
     let map: MapLibreMap | null = null;
     let popup: MapLibrePopup | null = null;
@@ -518,7 +517,7 @@ export const WorldMapView: React.FC<WorldMapViewProps> = ({
       mapRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- hiddenRef/pointsRef/defaultViewportRef cố tình đọc qua ref
-  }, [hasPoints, styleUrl, basemapProvider, reportStyleFailure, retryNonce]);
+  }, [styleUrl, basemapProvider, reportStyleFailure, retryNonce]);
 
   // Đổi lớp đang bật (chip chú giải) hoặc dữ liệu điểm: chỉ cập nhật marker đang vẽ, KHÔNG động tới khung
   // nhìn — bật/tắt một chip không nên làm camera nhảy.
@@ -615,9 +614,9 @@ export const WorldMapView: React.FC<WorldMapViewProps> = ({
       <div ref={stageRef} className="wm-stage" style={height !== undefined ? { height } : undefined}>
         <div ref={containerRef} className="wm-canvas" />
 
-        {hasPoints && !mapError && <MapTilerLogo basemap={basemap} />}
+        {!mapError && <MapTilerLogo basemap={basemap} />}
 
-        {hasPoints && !mapError && satelliteAvailable && (
+        {!mapError && satelliteAvailable && (
           <div className="wm-kind-toggle" role="group" aria-label="Kiểu nền bản đồ">
             <button
               type="button"
@@ -641,21 +640,6 @@ export const WorldMapView: React.FC<WorldMapViewProps> = ({
         {loading && !hasPoints && (
           <div className="wm-overlay wm-overlay-skeleton" aria-hidden="true">
             <div className="wm-skeleton" />
-          </div>
-        )}
-        {!loading && !hasPoints && (
-          <div className="wm-overlay wm-overlay-empty" role="status">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="1.6" aria-hidden="true">
-              <path d="M1 6l7-3 8 3 7-3v15l-7 3-8-3-7 3V6z" />
-              <path d="M8 3v15M16 6v15" />
-            </svg>
-            <strong>Chưa có dữ liệu bản đồ</strong>
-            <span>{emptyMessage}</span>
-            {onRetry && (
-              <button type="button" className="wm-retry-btn" onClick={onRetry}>
-                Thử lại
-              </button>
-            )}
           </div>
         )}
         {mapError && (

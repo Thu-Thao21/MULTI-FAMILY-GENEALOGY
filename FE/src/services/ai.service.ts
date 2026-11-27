@@ -339,12 +339,13 @@ export async function parseAndPreviewSmartExcel(
 export async function commitSmartExcelImport(
   clanId: string,
   parsedData: any,
-  wipeExisting: boolean = true
+  wipeExisting: boolean = true,
+  createAccounts: boolean = false
 ): Promise<AISmartExcelCommitResponse> {
   try {
     const res = await apiClient.post<AISmartExcelCommitResponse>(
       `/clans/${clanId}/ai/excel/commit-import`,
-      { parsed_data: parsedData, wipe_existing: wipeExisting },
+      { parsed_data: parsedData, wipe_existing: wipeExisting, create_accounts: createAccounts },
       { timeout: 300000 }
     );
     return res.data;

@@ -334,6 +334,10 @@ export interface AISmartExcelCommitResponse {
   created_persons: number;
   created_relationships: number;
   created_branches: number;
+  created_accounts?: number;
+  skipped_accounts?: number;
+  accounts_excel_base64?: string | null;
+  accounts_excel_filename?: string | null;
   message: string;
 }
 

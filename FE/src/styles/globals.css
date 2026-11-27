@@ -9,10 +9,14 @@
   /* Standard Border Radii */
   --radius-xs: 4px;
   --radius-sm: 6px;
-  --radius-md: 8px;   /* Standard Button & Input Radius */
-  --radius-lg: 12px;  /* Standard Card & Table Container Radius */
-  --radius-xl: 16px;  /* Modal & Elevated Panel Radius */
-  --radius-full: 9999px; /* Badges & Circular Avatars */
+  --radius-md: 8px;
+  /* Standard Button & Input Radius */
+  --radius-lg: 12px;
+  /* Standard Card & Table Container Radius */
+  --radius-xl: 16px;
+  /* Modal & Elevated Panel Radius */
+  --radius-full: 9999px;
+  /* Badges & Circular Avatars */
 
   /* Brand Palette */
   --color-primary: #2563eb;
@@ -144,7 +148,12 @@ body::after {
   z-index: 1;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-heading);
 }
 
@@ -195,10 +204,13 @@ textarea {
 
 /* Pulse animation for active badges */
 @keyframes pulse-subtle {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: scale(1);
     opacity: 1;
   }
+
   50% {
     transform: scale(1.05);
     opacity: 0.85;
@@ -282,6 +294,7 @@ textarea {
   transform: translateY(0) !important;
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06) !important;
 }
+
 /* Universal Neutral Elevated Action Buttons for Tables & Lists */
 .fam-btn-view,
 .fam-btn-tree,
@@ -460,7 +473,8 @@ textarea {
   gap: 8px !important;
   height: 38px !important;
   padding: 8px 16px !important;
-  border-radius: var(--radius-md) !important; /* 8px universal */
+  border-radius: var(--radius-md) !important;
+  /* 8px universal */
   font-family: var(--font-body) !important;
   font-size: 13.5px !important;
   font-weight: 600 !important;
@@ -624,7 +638,8 @@ button:disabled,
 .form-input-admin {
   height: 38px !important;
   padding: 8px 14px !important;
-  border-radius: var(--radius-md) !important; /* 8px */
+  border-radius: var(--radius-md) !important;
+  /* 8px */
   border: 1px solid #cbd5e1 !important;
   background-color: #ffffff !important;
   color: #0f172a !important;
@@ -692,7 +707,8 @@ button:disabled,
 .modal-box,
 .mfn-modal-box {
   background: #ffffff !important;
-  border-radius: var(--radius-xl) !important; /* 16px */
+  border-radius: var(--radius-xl) !important;
+  /* 16px */
   border: 1px solid #e2e8f0 !important;
   box-shadow: var(--shadow-xl) !important;
   overflow: hidden !important;
@@ -702,13 +718,25 @@ button:disabled,
 }
 
 @keyframes mfgModalFadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes mfgModalSlideUp {
-  from { opacity: 0; transform: translateY(14px) scale(0.98); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 /* ==========================================================================
@@ -719,9 +747,9 @@ button:disabled,
 .data-table-container,
 .shared-table-container {
   background: #ffffff !important;
-  border-radius: var(--radius-lg) !important; /* 12px */
-  border: 1px solid #e2e8f0 !important;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04) !important;
+  border-radius: 16px !important;
+  border: 1.5px solid #111827 !important;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06) !important;
   overflow: hidden !important;
 }
 
@@ -729,23 +757,23 @@ button:disabled,
 .admin-table th,
 .custom-table th {
   background: #f8fafc !important;
-  padding: 13px 20px !important;
+  padding: 14px 20px !important;
   font-family: var(--font-body) !important;
   font-size: 12px !important;
   font-weight: 700 !important;
-  color: #475569 !important;
+  color: #111827 !important;
   text-transform: uppercase !important;
   letter-spacing: 0.05em !important;
-  border-bottom: 1px solid #e2e8f0 !important;
+  border-bottom: 1.5px solid #111827 !important;
 }
 
 .clan-table td,
 .admin-table td,
 .custom-table td {
-  padding: 14px 20px !important;
-  border-bottom: 1px solid #f1f5f9 !important;
+  padding: 15px 20px !important;
+  border-bottom: 1px solid #e2e8f0 !important;
   vertical-align: middle !important;
-  color: #334155 !important;
+  color: #1e293b !important;
   font-size: 13.5px !important;
   font-family: var(--font-body) !important;
 }
@@ -754,4 +782,153 @@ button:disabled,
 .admin-table tr:hover,
 .custom-table tr:hover {
   background-color: #f8fafc !important;
+}
+
+/* ==========================================================================
+   Viền đen toàn hệ thống + Icon / Hoa văn dân tộc Việt Nam (Trống Đồng & Hoa Sen)
+   ========================================================================== */
+.personalized-overview-card,
+.upcoming-events-card,
+.recent-activities-card,
+.upcoming-events-item,
+.wm-root,
+.wm-stage,
+.clan-leader-section-card,
+.clan-stat-card,
+.clan-profile-card,
+.profile-card,
+.profile-section-card,
+.profile-tab-panel,
+.cnm-header-card,
+.cnm-card,
+.cnm-section-card,
+.cnm-table-wrap,
+.fcc-card,
+.fa-card,
+.fa-panel,
+.fa-kpi-card,
+.fa-import-guide-banner,
+.fa-preview-tabs-container,
+.admin-kpi-card,
+.admin-chart-card,
+.admin-panel-card,
+.tree-toolbar-card,
+.tree-panel-card,
+.public-card,
+.auth-card,
+.feature-empty-state,
+.dashboard-empty-select-prompt,
+.ai-consent-panel,
+.detail-panel,
+.memorial-date-panel,
+.events-tabs-bar,
+.fund-tabs-nav,
+.notif-nav-tabs-bar,
+.rel-navigation-tabs,
+.audit-tabs-bar,
+.quality-tabs-bar,
+.review-tabs-bar,
+.wm-tabs,
+.event-kpis > *,
+.fund-kpis > *,
+.archive-kpis > *,
+.memorial-kpis > *,
+.quality-kpi-grid > *,
+.audit-kpi-grid > * {
+  border: 1.5px solid #111827 !important;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06) !important;
+}
+
+.clan-search-input,
+.admin-search-input,
+.clan-select-filter,
+.admin-select-filter,
+.form-input-admin,
+.topbar-search-input,
+.topbar-toggle-btn,
+.wm-toolbar button,
+.feature-field input,
+.feature-field select,
+.feature-field textarea,
+.feature-button.secondary {
+  border: 1.5px solid #111827 !important;
+}
+
+/* Hero Banners: viền đen + icon Trống Đồng Lạc Việt chìm tinh tế ở góc phải */
+.family-events-hero,
+.fund-hero,
+.archive-hero,
+.memorial-hero,
+.proposals-hero,
+.ai-hero-header,
+.notif-hero-card,
+.rel-finder-banner,
+.audit-banner-card,
+.quality-banner-card,
+.clan-hero-header,
+.sprint-feature-hero,
+.personalized-overview-banner,
+.clan-profile-hero,
+.fa-hero,
+.admin-hero-banner {
+  position: relative;
+  overflow: hidden;
+  border-radius: 20px;
+  border: 2px solid #111827 !important;
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.14) !important;
+}
+
+.family-events-hero::after,
+.fund-hero::after,
+.archive-hero::after,
+.memorial-hero::after,
+.proposals-hero::after,
+.ai-hero-header::after,
+.notif-hero-card::after,
+.rel-finder-banner::after,
+.audit-banner-card::after,
+.quality-banner-card::after,
+.clan-hero-header::after,
+.sprint-feature-hero::after,
+.personalized-overview-banner::after,
+.clan-profile-hero::after,
+.fa-hero::after,
+.admin-hero-banner::after {
+  content: '';
+  position: absolute;
+  right: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 150px;
+  height: 150px;
+  pointer-events: none;
+  opacity: 0.16;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120' fill='none' stroke='%23fde68a' stroke-width='2'%3E%3Ccircle cx='60' cy='60' r='54' stroke-dasharray='4 3'/%3E%3Ccircle cx='60' cy='60' r='44'/%3E%3Ccircle cx='60' cy='60' r='32' stroke-dasharray='3 3'/%3E%3Ccircle cx='60' cy='60' r='16'/%3E%3Cpath d='M60 8v12M60 100v12M8 60h12M100 60h12M23 23l8.5 8.5M88.5 88.5L97 97M97 23l-8.5 8.5M31.5 88.5L23 97'/%3E%3Cpolygon points='60,38 65,54 82,60 65,66 60,82 55,66 38,60 55,54' fill='%23fde68a' fill-opacity='0.35'/%3E%3C/svg%3E");
+}
+
+/* Icon Hoa Sen dân tộc nhỏ trước tiêu đề các khối chính */
+.upcoming-events-title::before,
+.recent-activities-title::before,
+.clan-account-title::before,
+.admin-account-title::before,
+.dashboard-section-title::before {
+  content: '';
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+  vertical-align: -3px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23b45309' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3c2.2 3.2 3.2 6.2 3.2 9 0 2.5-1.4 4.5-3.2 5.5-1.8-1-3.2-3-3.2-5.5 0-2.8 1-5.8 3.2-9z' fill='%23fde68a' fill-opacity='0.55'/%3E%3Cpath d='M12 17.5C8.5 16.8 5.5 14 4.5 9.5c3 .5 5.2 2.2 6.2 4.5'/%3E%3Cpath d='M12 17.5c3.5-.7 6.5-3.5 7.5-8-3 .5-5.2 2.2-6.2 4.5'/%3E%3Cpath d='M5 19.5h14'/%3E%3C/svg%3E");
+}
+
+.upcoming-events-header,
+.recent-activities-header {
+  padding-bottom: 12px;
+  border-bottom: 1.5px solid #111827;
 }

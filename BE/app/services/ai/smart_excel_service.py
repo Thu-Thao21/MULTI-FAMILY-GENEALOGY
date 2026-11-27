@@ -1054,6 +1054,7 @@ class SmartExcelService:
         parsed_data: Dict[str, Any],
         allowed_branch_ids: Optional[Set[uuid.UUID]] = None,
         wipe_existing: bool = True,
+        create_accounts: bool = False,
     ) -> Dict[str, Any]:
         """Thực hiện lưu dữ liệu phả hệ nguyên khối (atomic) vào CSDL Neon DB."""
         preview = parsed_data.get("preview") or {}
@@ -1326,12 +1327,37 @@ class SmartExcelService:
 
         await db.flush()
 
+        account_res: Dict[str, Any] = {
+            "created_accounts": 0,
+            "skipped_accounts": 0,
+            "accounts_excel_base64": None,
+            "accounts_excel_filename": None,
+        }
+        if create_accounts:
+            from app.services.ai.excel_account_provisioning import provision_accounts_for_imported_persons
+
+            account_res = await provision_accounts_for_imported_persons(
+                db=db,
+                clan_id=clan_id,
+                actor_user_id=user_id,
+                persons_data=persons_data,
+                person_id_map=person_id_map,
+            )
+
+        msg = f"Nhập thành công {created_persons} thành viên và {created_rels} mối quan hệ vào cơ sở dữ liệu phả hệ."
+        if create_accounts:
+            msg += f" Đã cấp mới {account_res['created_accounts']} tài khoản (bỏ qua {account_res['skipped_accounts']})."
+
         return {
             "success": True,
             "created_persons": created_persons,
             "created_relationships": created_rels,
             "created_branches": created_branches,
-            "message": f"Nhập thành công {created_persons} thành viên và {created_rels} mối quan hệ vào cơ sở dữ liệu phả hệ.",
+            "created_accounts": account_res["created_accounts"],
+            "skipped_accounts": account_res["skipped_accounts"],
+            "accounts_excel_base64": account_res["accounts_excel_base64"],
+            "accounts_excel_filename": account_res["accounts_excel_filename"],
+            "message": msg,
         }
 
 

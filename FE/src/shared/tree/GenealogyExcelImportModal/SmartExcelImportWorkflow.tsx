@@ -45,6 +45,7 @@ export const SmartExcelImportWorkflow: React.FC<SmartExcelImportWorkflowProps> =
   const [isCommitting, setIsCommitting] = useState<boolean>(false);
   const [commitResult, setCommitResult] = useState<AISmartExcelCommitResponse | null>(null);
   const [wipeExisting, setWipeExisting] = useState<boolean>(true);
+  const [createAccounts, setCreateAccounts] = useState<boolean>(true);
 
   // UI state
   const [activeTab, setActiveTab] = useState<'persons' | 'relations'>('persons');
@@ -138,6 +139,30 @@ export const SmartExcelImportWorkflow: React.FC<SmartExcelImportWorkflowProps> =
     }
   };
 
+  const downloadAccountsExcel = (b64?: string | null, filename?: string | null) => {
+    if (!b64) return;
+    try {
+      const byteChars = atob(b64);
+      const byteNums = new Array(byteChars.length);
+      for (let i = 0; i < byteChars.length; i += 1) {
+        byteNums[i] = byteChars.charCodeAt(i);
+      }
+      const blob = new Blob([new Uint8Array(byteNums)], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename || 'TaiKhoan_MatKhau_ThanhVien.xlsx';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      console.error('Lỗi tải file Excel tài khoản:', e);
+    }
+  };
+
   // ---------------------------------------------------------------------------
   // STEP 3: COMMIT TO DATABASE
   // ---------------------------------------------------------------------------
@@ -148,8 +173,11 @@ export const SmartExcelImportWorkflow: React.FC<SmartExcelImportWorkflowProps> =
     setErrorMessage(null);
 
     try {
-      const res = await commitSmartExcelImport(clanId, previewRes, wipeExisting);
+      const res = await commitSmartExcelImport(clanId, previewRes, wipeExisting, createAccounts);
       setCommitResult(res);
+      if (res.accounts_excel_base64) {
+        downloadAccountsExcel(res.accounts_excel_base64, res.accounts_excel_filename);
+      }
       onSuccess(res);
     } catch (err: any) {
       const msg = err?.response?.data?.detail || err?.message || 'Lỗi khi lưu dữ liệu phả hệ vào cơ sở dữ liệu.';
@@ -200,7 +228,19 @@ export const SmartExcelImportWorkflow: React.FC<SmartExcelImportWorkflowProps> =
           <p style={{ margin: '0 0 16px', fontSize: '13.5px', color: '#166534' }}>
             {commitResult.message || `Đã nhập thành công ${commitResult.created_persons} thành viên và ${commitResult.created_relationships} mối quan hệ vào cây phả hệ.`}
           </p>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '12px' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', flexWrap: 'wrap' }}>
+            {commitResult.accounts_excel_base64 && (
+              <button
+                type="button"
+                className="smart-btn-primary"
+                style={{ background: '#059669' }}
+                onClick={() =>
+                  downloadAccountsExcel(commitResult.accounts_excel_base64, commitResult.accounts_excel_filename)
+                }
+              >
+                Tải file TK/MK ({commitResult.created_accounts || 0} tài khoản)
+              </button>
+            )}
             <button
               type="button"
               className="smart-btn-secondary"
@@ -718,6 +758,20 @@ export const SmartExcelImportWorkflow: React.FC<SmartExcelImportWorkflowProps> =
             />
             <label htmlFor="smart-wipe-toggle" style={{ fontSize: '13px', fontWeight: 600, color: '#1e293b', cursor: 'pointer', margin: 0 }}>
               Làm mới dữ liệu phả hệ: Xóa sạch dữ liệu cũ của dòng họ trước khi nhập (Khuyên dùng để cây phả hệ chỉ có 1 đỉnh và không bị trùng lặp)
+            </label>
+          </div>
+
+          {/* Auto Create Member Accounts & Export Excel Option */}
+          <div style={{ marginTop: '10px', padding: '12px 16px', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <input
+              type="checkbox"
+              id="smart-create-accounts-toggle"
+              checked={createAccounts}
+              onChange={(e) => setCreateAccounts(e.target.checked)}
+              style={{ width: '18px', height: '18px', accentColor: '#16a34a', cursor: 'pointer' }}
+            />
+            <label htmlFor="smart-create-accounts-toggle" style={{ fontSize: '13px', fontWeight: 600, color: '#14532d', cursor: 'pointer', margin: 0 }}>
+              Tự động tạo tài khoản đăng nhập cho thành viên còn sống &amp; xuất file Excel (Tên đăng nhập / Email / Mật khẩu tạm)
             </label>
           </div>
 

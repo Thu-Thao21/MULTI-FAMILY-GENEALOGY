@@ -36,6 +36,7 @@ router = APIRouter()
 class SmartCommitRequestBody(BaseModel):
     parsed_data: Dict[str, Any]
     wipe_existing: bool = True
+    create_accounts: bool = False
 
 
 @router.post(
@@ -169,6 +170,7 @@ async def commit_smart_excel_import(
             parsed_data=payload.parsed_data,
             allowed_branch_ids=allowed_branch_ids,
             wipe_existing=payload.wipe_existing,
+            create_accounts=payload.create_accounts,
         )
 
         # Ghi nhật ký hệ thống
@@ -183,6 +185,7 @@ async def commit_smart_excel_import(
                     "created_persons": result["created_persons"],
                     "created_relationships": result["created_relationships"],
                     "created_branches": result["created_branches"],
+                    "created_accounts": result.get("created_accounts", 0),
                 },
                 reason="Nhập dữ liệu phả hệ tự động bằng AI Smart Excel",
                 occurred_at=now,
