@@ -4,4 +4,4 @@ export { ModerationManagement } from './ModerationManagement';
 export { RolePermissionManagement } from './RolePermissionManagement';
 export { AdminProfileView } from './AdminProfileView';
 
-export * from './mockData';
+export * from './platformAdminTypes';

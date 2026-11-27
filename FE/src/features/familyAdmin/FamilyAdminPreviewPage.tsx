@@ -1,12 +1,12 @@
 import React from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { FamilyAdminModule, type FamilyAdminView } from './FamilyAdminModule';
-import { AnniversariesModule } from '../../components/member/AnniversariesModule';
-import { ClanEventsModule } from '../../components/member/ClanEventsModule';
-import { ClanFundsModule } from '../../components/member/ClanFundsModule';
-import { ClanDocumentsModule } from '../../components/member/ClanDocumentsModule';
-import { ClanAIAssistantModule } from '../../components/member/ClanAIAssistantModule';
-import { DigitalAncestralHallModule } from '../../components/member/DigitalAncestralHallModule';
+import { AnniversariesModule } from '../../components/member/activities/AnniversariesModule';
+import { ClanEventsModule } from '../../components/member/activities/ClanEventsModule';
+import { ClanFundsModule } from '../../components/member/activities/ClanFundsModule';
+import { ClanDocumentsModule } from '../../components/member/workspace/ClanDocumentsModule';
+import { ClanAIAssistantModule } from '../../components/member/ai/ClanAIAssistantModule';
+import { DigitalAncestralHallModule } from '../../components/member/ancestralHall/DigitalAncestralHallModule';
 
 type PreviewView = FamilyAdminView | 'memorials' | 'events' | 'funds' | 'documents' | 'ai' | 'worship';
 const tabs: Array<[PreviewView, string]> = [

@@ -11,7 +11,7 @@ import {
   formatVnd,
   useAdminToast,
 } from './shared';
-import { ServicePackage, ServicePackageStatus } from './types';
+import { ServicePackage, ServicePackageStatus } from './platformAdminTypes';
 import './PlatformAdmin.css';
 
 const PAGE_SIZE = 4;

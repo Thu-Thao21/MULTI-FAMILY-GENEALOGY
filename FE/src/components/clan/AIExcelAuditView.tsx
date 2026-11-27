@@ -232,7 +232,7 @@ export const AIExcelAuditView: React.FC<AIExcelAuditViewProps> = ({
               <h4>Nguyên tắc vận hành và đối soát dữ liệu phả hệ số (Giai đoạn 6):</h4>
               <ul>
                 <li>
-                  <strong>Không tự động gộp hồ sơ:</strong> Khi phát hiện Person trùng họ tên hoặc năm sinh, hệ thống cảnh báo để người quản trị kiểm tra gia phả gốc; hệ thống tuyệt đối không tự ý gộp hay sửa hồ sơ.
+                  <strong>Không tự động gộp hồ sơ:</strong> Khi phát hiện hồ sơ thành viên trùng họ tên hoặc năm sinh, hệ thống cảnh báo để người quản trị kiểm tra gia phả gốc; hệ thống tuyệt đối không tự ý gộp hay sửa hồ sơ.
                 </li>
                 <li>
                   <strong>Cùng có con không đồng nghĩa đã kết hôn:</strong> Nếu hai người cùng được khai báo là phụ huynh của một người con, hệ thống chỉ gợi ý <em>&quot;Kiểm tra liên kết phối ngẫu&quot;</em>, không tự suy đoán hôn nhân.

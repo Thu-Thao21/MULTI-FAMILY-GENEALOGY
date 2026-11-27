@@ -27,8 +27,8 @@ import {
   type ClanAuditLogItem,
 } from '../../services/genealogy.service';
 import './FamilyAdminModule.css';
-import { SmartExcelImportWorkflow } from '../../shared/tree/SmartExcelImportWorkflow';
-import { RelationshipFinder } from '../../components/member/RelationshipFinder';
+import { SmartExcelImportWorkflow } from '../../shared/tree/GenealogyExcelImportModal/SmartExcelImportWorkflow';
+import { RelationshipFinder } from '../../components/member/workspace/RelationshipFinder';
 import {
   getClanJoinRequestsForReviewer,
   reviewClanJoinRequest,
@@ -36,62 +36,25 @@ import {
 } from '../../services/clanJoin.service';
 import { fetchMembers } from '../../services/member.service';
 import { readApiError } from '../../api/apiError';
-import { GenderAvatar } from '../../components/common/GenderAvatar';
+import { GenderAvatar } from '../../components/common/GenderAvatar/GenderAvatar';
 import { ClanLocationsModule } from '../../components/clan/ClanLocationsModule';
-import { ClanNetworkManagement } from '../../components/network/ClanNetworkManagement';
+import { ClanNetworkManagement } from '../../components/network/ClanNetworkManagement/ClanNetworkManagement';
+import {
+  relationLabels,
+  genderLabels,
+  emptyPerson,
+  emptyBranch,
+  clean,
+  downloadFile,
+  csvEscape,
+  parseCsv,
+} from './utils/familyAdminHelpers';
+import { FamilyAccountsView } from './views/FamilyAccountsView';
+import { FamilyAuditView } from './views/FamilyAuditView';
+import { FamilyOverviewView } from './views/FamilyOverviewView';
 
 export type FamilyAdminView = 'overview' | 'members' | 'relations' | 'branches' | 'tree' | 'search' | 'approvals' | 'accounts' | 'links' | 'exchange' | 'audit' | 'locations';
 type Props = { view: FamilyAdminView; onNavigate?: (view: FamilyAdminView) => void };
-
-const relationLabels: Record<RelationType, string> = {
-  father: 'Cha → con', mother: 'Mẹ → con', spouse: 'Vợ/chồng',
-  adoptive_parent: 'Cha/mẹ nuôi → con', step_parent: 'Cha/mẹ kế → con',
-};
-const genderLabels = { male: 'Nam', female: 'Nữ', other: 'Khác' };
-const emptyPerson = (branchId: string): Omit<FamilyPerson, 'id'> => ({
-  fullName: '', gender: 'male', birthDate: '', deathDate: '', branchId,
-  generation: 1, phone: '', email: '', bio: '', hidden: false, visibility: 'family',
-});
-const emptyBranch: Omit<FamilyBranch, 'id'> = { name: '', founderId: '', description: '' };
-const clean = (value: string) => value.trim().toLocaleLowerCase('vi');
-
-function downloadFile(name: string, content: string, type: string) {
-  const url = URL.createObjectURL(new Blob(['\ufeff', content], { type }));
-  const anchor = document.createElement('a');
-  anchor.href = url;
-  anchor.download = name;
-  anchor.click();
-  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
-}
-
-function csvEscape(value: string | number): string {
-  const text = String(value);
-  return /[",\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
-}
-
-function parseCsv(text: string): string[][] {
-  const rows: string[][] = [];
-  let row: string[] = [];
-  let cell = '';
-  let quoted = false;
-  const source = text.replace(/^\uFEFF/, '');
-  for (let i = 0; i < source.length; i += 1) {
-    const char = source[i];
-    if (char === '"') {
-      if (quoted && source[i + 1] === '"') { cell += '"'; i += 1; }
-      else quoted = !quoted;
-    } else if (char === ',' && !quoted) { row.push(cell); cell = ''; }
-    else if ((char === '\n' || char === '\r') && !quoted) {
-      if (char === '\r' && source[i + 1] === '\n') i += 1;
-      row.push(cell); if (row.some((part) => part.trim())) rows.push(row);
-      row = []; cell = '';
-    } else cell += char;
-  }
-  if (quoted) throw new Error('Tệp CSV có dấu ngoặc kép chưa đóng.');
-  row.push(cell);
-  if (row.some((part) => part.trim())) rows.push(row);
-  return rows;
-}
 
 export const FamilyAdminModule: React.FC<Props> = ({ view, onNavigate }) => {
   const { account } = useAuth();
@@ -287,7 +250,9 @@ export const FamilyAdminModule: React.FC<Props> = ({ view, onNavigate }) => {
     }
   };
 
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState(() => {
+    return new URLSearchParams(window.location.search).get('search') || '';
+  });
   const [selectedBranchFilter, setSelectedBranchFilter] = useState('all');
   const [editPersonId, setEditPersonId] = useState<string | undefined>();
   const [personForm, setPersonForm] = useState<Omit<FamilyPerson, 'id'> | null>(null);
@@ -323,6 +288,8 @@ export const FamilyAdminModule: React.FC<Props> = ({ view, onNavigate }) => {
   const [newPersonBirthDate, setNewPersonBirthDate] = useState('');
   const [newPersonBranchId, setNewPersonBranchId] = useState('');
   const [personSearchText, setPersonSearchText] = useState('');
+  const [isPersonDropdownOpen, setIsPersonDropdownOpen] = useState(false);
+  const personDropdownRef = React.useRef<HTMLDivElement>(null);
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
 
   const loadJoinRequests = useCallback(async () => {
@@ -350,11 +317,22 @@ export const FamilyAdminModule: React.FC<Props> = ({ view, onNavigate }) => {
     }
   }, [view, loadJoinRequests, loadLinksData]);
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (personDropdownRef.current && !personDropdownRef.current.contains(event.target as Node)) {
+        setIsPersonDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const handleOpenReviewModal = (req: ClanJoinRequestItem) => {
     setSelectedJoinReq(req);
     setReviewActionType('APPROVE');
     setReviewerNote('');
     setPersonSearchText('');
+    setIsPersonDropdownOpen(false);
 
     // 1. Tự động kiểm tra có Person nào trong cây trùng tên và chưa bị ai liên kết
     const reqNameClean = req.full_name.trim().toLowerCase();
@@ -399,7 +377,7 @@ export const FamilyAdminModule: React.FC<Props> = ({ view, onNavigate }) => {
 
     if (reviewActionType === 'APPROVE') {
       if (linkPersonMode === 'existing' && !selectedPersonId) {
-        alert('Vui lòng chọn một Person trong cây để liên kết hồ sơ.');
+        alert('Vui lòng chọn một hồ sơ thành viên trong cây để liên kết.');
         return;
       }
       if (linkPersonMode === 'new' && !newPersonName.trim()) {
@@ -418,11 +396,11 @@ export const FamilyAdminModule: React.FC<Props> = ({ view, onNavigate }) => {
       if (reviewActionType === 'APPROVE') {
         if (linkPersonMode === 'existing') {
           if (!selectedPersonId) {
-            alert('Vui lòng chọn một hồ sơ Person để liên kết với tài khoản này.');
+            alert('Vui lòng chọn một hồ sơ thành viên để liên kết với tài khoản này.');
             return;
           }
           if (linkedPersonIds.has(selectedPersonId)) {
-            alert('Hồ sơ Person này đã được liên kết với một tài khoản khác. Vui lòng chọn hồ sơ khác hoặc tạo hồ sơ mới.');
+            alert('Hồ sơ thành viên này đã được liên kết với một tài khoản khác. Vui lòng chọn hồ sơ khác hoặc tạo hồ sơ mới.');
             return;
           }
           payload.person_id = selectedPersonId;
@@ -510,6 +488,7 @@ export const FamilyAdminModule: React.FC<Props> = ({ view, onNavigate }) => {
     links: 'Yêu cầu liên kết dòng họ',
     exchange: 'Nhập xuất dữ liệu gia tộc',
     audit: 'Nhật ký hoạt động',
+    locations: 'Bản đồ lăng mộ & Địa điểm',
   } satisfies Record<FamilyAdminView, string>)[view];
 
   return (
@@ -550,112 +529,16 @@ export const FamilyAdminModule: React.FC<Props> = ({ view, onNavigate }) => {
           1. THỐNG KÊ DÂN SỐ & THẾ HỆ (VIEW: OVERVIEW)
       ======================================================== */}
       {view === 'overview' && (
-        <>
-          <div className="fa-stat-grid">
-            <div className="fa-stat-card">
-              <span>Tổng số nhân khẩu</span>
-              <strong>{totalPersons}</strong>
-              <small>{data.branches.length} Chi/Nhánh đã ghi nhận</small>
-            </div>
-            <div className="fa-stat-card">
-              <span>Nam giới</span>
-              <strong style={{ color: '#2563eb' }}>{maleCount}</strong>
-              <small>{totalPersons ? Math.round((maleCount / totalPersons) * 100) : 0}% tổng dòng họ</small>
-            </div>
-            <div className="fa-stat-card">
-              <span>Nữ giới</span>
-              <strong style={{ color: '#db2777' }}>{femaleCount}</strong>
-              <small>{totalPersons ? Math.round((femaleCount / totalPersons) * 100) : 0}% tổng dòng họ</small>
-            </div>
-            <div className="fa-stat-card">
-              <span>Còn sống / Hiện diện</span>
-              <strong style={{ color: '#059669' }}>{livingCount}</strong>
-              <small>{deceasedCount} tiền nhân đã khuất</small>
-            </div>
-            <div className="fa-stat-card">
-              <span>Thế hệ ghi nhận</span>
-              <strong style={{ color: '#d97706' }}>{generationDistribution.maxGen} Đời</strong>
-              <small>Từ Thủy tổ đến thế hệ con cháu</small>
-            </div>
-            <div className="fa-stat-card">
-              <span>Quan hệ phả hệ</span>
-              <strong style={{ color: '#7c3aed' }}>{data.relations.length}</strong>
-              <small>Liên kết cha mẹ - con & hôn phối</small>
-            </div>
-          </div>
-
-          <div className="fa-panel">
-            <div className="fa-panel-heading">
-              <div>
-                <h2>Phân bố thành viên theo thế hệ (Đời thứ)</h2>
-                <p>Thống kê số lượng con cháu qua từng thế hệ của dòng tộc trong cơ sở dữ liệu.</p>
-              </div>
-            </div>
-            {generationDistribution.list.length > 0 ? (
-              <div className="fa-gen-bars">
-                {generationDistribution.list.map(({ gen, count }) => {
-                  const pct = Math.round((count / totalPersons) * 100) || 0;
-                  const barWidth = Math.round((count / generationDistribution.maxCount) * 100);
-                  return (
-                    <div key={gen} className="fa-gen-bar-row">
-                      <span className="fa-gen-bar-label">Đời {gen}</span>
-                      <div className="fa-gen-bar-track">
-                        <div className="fa-gen-bar-fill" style={{ width: `${Math.max(barWidth, 4)}%` }} />
-                      </div>
-                      <span className="fa-gen-bar-value">{count} người ({pct}%)</span>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <EmptyState
-                variant="chart"
-                compact
-                title="Chưa đủ dữ liệu thành viên để phân tích thế hệ"
-                subMessage="Hệ thống cần ít nhất thông tin các đời để tính toán tỉ lệ phân bố phái hệ."
-              />
-            )}
-          </div>
-
-          <div className="fa-panel">
-            <div className="fa-panel-heading">
-              <div>
-                <h2>Cơ cấu nhân khẩu theo Chi & Nhánh</h2>
-                <p>Số lượng thành viên thuộc từng chi phái trực hệ.</p>
-              </div>
-            </div>
-            <div className="fa-card-grid">
-              {data.branches.map((b) => {
-                const count = data.persons.filter((p) => p.branchId === b.id).length;
-                const pct = totalPersons ? Math.round((count / totalPersons) * 100) : 0;
-                return (
-                  <div key={b.id} className="fa-card">
-                    <span className="fa-card-eyebrow">CHI NHÁNH</span>
-                    <h3>{b.name}</h3>
-                    <p>{b.description || 'Chưa cập nhật mô tả chi nhánh.'}</p>
-                    <dl>
-                      <div>
-                        <dt>Số thành viên</dt>
-                        <dd>{count} người ({pct}%)</dd>
-                      </div>
-                    </dl>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="fa-panel">
-            <h2>Lối tắt quản lý dòng họ</h2>
-            <div className="fa-actions" style={{ gap: '10px' }}>
-              <button type="button" className="fa-primary" onClick={() => go('members')}>Quản lý thành viên →</button>
-              <button type="button" onClick={() => go('relations')}>Thiết lập quan hệ →</button>
-              <button type="button" onClick={() => go('branches')}>Quản lý Chi/Nhánh →</button>
-              <button type="button" onClick={() => go('approvals')}>Phê duyệt hồ sơ →</button>
-              <button type="button" onClick={() => go('exchange')}>Nhập/Xuất Excel →</button>
-            </div>
-          </div>
-        </>
+        <FamilyOverviewView
+          data={data}
+          totalPersons={totalPersons}
+          maleCount={maleCount}
+          femaleCount={femaleCount}
+          livingCount={livingCount}
+          deceasedCount={deceasedCount}
+          generationDistribution={generationDistribution}
+          onNavigate={go}
+        />
       )}
 
       {/* ========================================================
@@ -1361,12 +1244,11 @@ export const FamilyAdminModule: React.FC<Props> = ({ view, onNavigate }) => {
       ======================================================== */}
       {view === 'approvals' && (
         <>
-          <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+          <div className="fa-actions" style={{ marginBottom: '16px' }}>
             <button
               type="button"
               className={approvalsTab === 'join-requests' ? 'fa-primary' : ''}
               onClick={() => setApprovalsTab('join-requests')}
-              style={{ padding: '8px 16px', borderRadius: '8px', fontWeight: 600, cursor: 'pointer' }}
             >
               Gia nhập dòng tộc ({joinRequests.filter((r) => r.status === 'PENDING' || r.status === 'NEED_INFO').length})
             </button>
@@ -1374,7 +1256,6 @@ export const FamilyAdminModule: React.FC<Props> = ({ view, onNavigate }) => {
               type="button"
               className={approvalsTab === 'proposals' ? 'fa-primary' : ''}
               onClick={() => setApprovalsTab('proposals')}
-              style={{ padding: '8px 16px', borderRadius: '8px', fontWeight: 600, cursor: 'pointer' }}
             >
               Đề xuất chỉnh sửa gia phả ({data.proposals.filter((p) => p.status === 'pending').length})
             </button>
@@ -1385,7 +1266,7 @@ export const FamilyAdminModule: React.FC<Props> = ({ view, onNavigate }) => {
               <div className="fa-panel-heading">
                 <div>
                   <h2>Xét duyệt hồ sơ xin gia nhập dòng tộc</h2>
-                  <p>Xác minh người xin gia nhập và liên kết với hồ sơ Person trong cây gia phả.</p>
+                  <p>Xác minh người xin gia nhập và liên kết với hồ sơ thành viên trong cây gia phả.</p>
                 </div>
                 <button type="button" onClick={loadJoinRequests} disabled={loadingJoinReqs}>
                   {loadingJoinReqs ? 'Đang tải...' : 'Làm mới'}
@@ -1667,14 +1548,14 @@ export const FamilyAdminModule: React.FC<Props> = ({ view, onNavigate }) => {
                                 className={`review-tab-pill ${linkPersonMode === 'new' ? 'active' : ''}`}
                                 onClick={() => setLinkPersonMode('new')}
                               >
-                                Tạo hồ sơ Person mới theo đơn
+                                Tạo hồ sơ thành viên mới theo đơn
                               </button>
                               <button
                                 type="button"
                                 className={`review-tab-pill ${linkPersonMode === 'existing' ? 'active' : ''}`}
                                 onClick={() => setLinkPersonMode('existing')}
                               >
-                                Chọn hồ sơ Person có sẵn trong cây
+                                Chọn hồ sơ thành viên có sẵn trong cây
                               </button>
                             </div>
 
@@ -1682,7 +1563,7 @@ export const FamilyAdminModule: React.FC<Props> = ({ view, onNavigate }) => {
                               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                                 <div>
                                   <label style={{ fontSize: '12px', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '4px' }}>
-                                    Họ và tên Person mới:
+                                    Họ và tên thành viên mới:
                                   </label>
                                   <input
                                     type="text"
@@ -1748,33 +1629,218 @@ export const FamilyAdminModule: React.FC<Props> = ({ view, onNavigate }) => {
                                 </div>
                               </div>
                             ) : (
-                              <div>
-                                <div style={{ marginBottom: '8px' }}>
+                              <div ref={personDropdownRef} style={{ position: 'relative', width: '100%' }}>
+                                {/* 1 thanh tìm kiếm và chọn Person tích hợp duy nhất */}
+                                <div
+                                  style={{
+                                    position: 'relative',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    background: '#ffffff',
+                                    border: isPersonDropdownOpen ? '1.5px solid #2563eb' : '1px solid #cbd5e1',
+                                    borderRadius: '8px',
+                                    padding: '3px 8px',
+                                    boxShadow: isPersonDropdownOpen ? '0 0 0 3px rgba(37, 99, 235, 0.12)' : 'none',
+                                    transition: 'all 0.2s ease',
+                                    minHeight: '42px',
+                                  }}
+                                >
+                                  <span style={{ fontSize: '14px', color: '#64748b', marginRight: '6px' }}>🔍</span>
                                   <input
                                     type="text"
-                                    className="review-input-field"
-                                    placeholder="Tìm kiếm theo họ tên Person trong dòng họ..."
+                                    style={{
+                                      flex: 1,
+                                      border: 'none',
+                                      outline: 'none',
+                                      fontSize: '13.5px',
+                                      padding: '6px 4px',
+                                      color: '#0f172a',
+                                      background: 'transparent',
+                                      width: '100%',
+                                    }}
+                                    placeholder={
+                                      selectedPersonId
+                                        ? `Đang chọn: ${data.persons.find((p) => p.id === selectedPersonId)?.fullName || ''} (Gõ hoặc bấm để đổi)`
+                                        : 'Gõ họ tên hoặc bấm để chọn hồ sơ thành viên có sẵn trong cây...'
+                                    }
                                     value={personSearchText}
-                                    onChange={(e) => setPersonSearchText(e.target.value)}
+                                    onChange={(e) => {
+                                      setPersonSearchText(e.target.value);
+                                      if (!isPersonDropdownOpen) setIsPersonDropdownOpen(true);
+                                    }}
+                                    onFocus={() => setIsPersonDropdownOpen(true)}
                                   />
+
+                                  {/* Badge người đang chọn nếu có */}
+                                  {selectedPersonId && !personSearchText && (() => {
+                                    const sp = data.persons.find((p) => p.id === selectedPersonId);
+                                    if (!sp) return null;
+                                    return (
+                                      <div
+                                        style={{
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          gap: '4px',
+                                          fontSize: '12px',
+                                          color: '#15803d',
+                                          background: '#dcfce7',
+                                          padding: '2px 8px',
+                                          borderRadius: '6px',
+                                          fontWeight: 600,
+                                          marginRight: '6px',
+                                          whiteSpace: 'nowrap',
+                                        }}
+                                      >
+                                        <span>✓ {sp.fullName}</span>
+                                        <span style={{ color: '#166534', fontSize: '11px' }}>
+                                          (Đời {sp.generation})
+                                        </span>
+                                      </div>
+                                    );
+                                  })()}
+
+                                  {/* Nút xóa chọn */}
+                                  {selectedPersonId && (
+                                    <button
+                                      type="button"
+                                      title="Bỏ chọn hồ sơ này"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setSelectedPersonId('');
+                                        setPersonSearchText('');
+                                        setIsPersonDropdownOpen(true);
+                                      }}
+                                      style={{
+                                        border: 'none',
+                                        background: 'transparent',
+                                        color: '#94a3b8',
+                                        cursor: 'pointer',
+                                        fontSize: '14px',
+                                        padding: '4px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                      }}
+                                    >
+                                      ✕
+                                    </button>
+                                  )}
+
+                                  {/* Mũi tên đóng mở dropdown */}
+                                  <button
+                                    type="button"
+                                    title="Mở danh sách"
+                                    onClick={() => setIsPersonDropdownOpen(!isPersonDropdownOpen)}
+                                    style={{
+                                      border: 'none',
+                                      background: 'transparent',
+                                      color: '#64748b',
+                                      cursor: 'pointer',
+                                      fontSize: '11px',
+                                      padding: '4px',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                    }}
+                                  >
+                                    {isPersonDropdownOpen ? '▲' : '▼'}
+                                  </button>
                                 </div>
-                                <select
-                                  className="review-input-field"
-                                  value={selectedPersonId}
-                                  onChange={(e) => setSelectedPersonId(e.target.value)}
-                                >
-                                  <option value="">-- Chọn một hồ sơ Person để gán cho tài khoản này --</option>
-                                  {data.persons
-                                    .filter((p) => !personSearchText.trim() || p.fullName.toLowerCase().includes(personSearchText.toLowerCase()))
-                                    .map((p) => {
-                                      const isLinked = linkedPersonIds.has(p.id);
-                                      return (
-                                        <option key={p.id} value={p.id} disabled={isLinked}>
-                                          {p.fullName} (Đời {p.generation} • {p.gender === 'female' ? 'Nữ' : 'Nam'} • {branchName(p.branchId)}) {isLinked ? ' [ĐÃ LIÊN KẾT VỚI TÀI KHOẢN KHÁC]' : ''}
-                                        </option>
-                                      );
-                                    })}
-                                </select>
+
+                                {/* Dropdown menu danh sách hồ sơ Person */}
+                                {isPersonDropdownOpen && (
+                                  <div
+                                    style={{
+                                      position: 'absolute',
+                                      top: 'calc(100% + 4px)',
+                                      left: 0,
+                                      right: 0,
+                                      maxHeight: '250px',
+                                      overflowY: 'auto',
+                                      background: '#ffffff',
+                                      borderRadius: '8px',
+                                      border: '1px solid #cbd5e1',
+                                      boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.12), 0 8px 10px -6px rgba(0, 0, 0, 0.08)',
+                                      zIndex: 999,
+                                    }}
+                                  >
+                                    {(() => {
+                                      const query = personSearchText.trim().toLowerCase();
+                                      const filtered = data.persons.filter((p) => {
+                                        if (!query) return true;
+                                        const name = p.fullName.toLowerCase();
+                                        const bName = branchName(p.branchId).toLowerCase();
+                                        const gen = `đời ${p.generation}`;
+                                        return name.includes(query) || bName.includes(query) || gen.includes(query);
+                                      });
+
+                                      if (filtered.length === 0) {
+                                        return (
+                                          <div style={{ padding: '14px', color: '#64748b', fontSize: '13px', textAlign: 'center' }}>
+                                            Không tìm thấy hồ sơ thành viên nào khớp với &quot;{personSearchText}&quot;
+                                          </div>
+                                        );
+                                      }
+
+                                      return filtered.map((p) => {
+                                        const isLinked = linkedPersonIds.has(p.id);
+                                        const isSelected = p.id === selectedPersonId;
+                                        return (
+                                          <div
+                                            key={p.id}
+                                            onClick={() => {
+                                              if (isLinked) return;
+                                              setSelectedPersonId(p.id);
+                                              setPersonSearchText('');
+                                              setIsPersonDropdownOpen(false);
+                                            }}
+                                            style={{
+                                              padding: '9px 12px',
+                                              display: 'flex',
+                                              alignItems: 'center',
+                                              justifyContent: 'space-between',
+                                              backgroundColor: isSelected ? '#eff6ff' : isLinked ? '#f8fafc' : '#ffffff',
+                                              cursor: isLinked ? 'not-allowed' : 'pointer',
+                                              opacity: isLinked ? 0.6 : 1,
+                                              borderBottom: '1px solid #f1f5f9',
+                                              transition: 'background-color 0.15s ease',
+                                            }}
+                                            onMouseEnter={(e) => {
+                                              if (!isLinked && !isSelected) e.currentTarget.style.backgroundColor = '#f1f5f9';
+                                            }}
+                                            onMouseLeave={(e) => {
+                                              if (!isLinked && !isSelected) e.currentTarget.style.backgroundColor = '#ffffff';
+                                            }}
+                                          >
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                              <span style={{ fontSize: '14px' }}>{p.gender === 'female' ? '👩' : '👨'}</span>
+                                              <div>
+                                                <strong style={{ fontSize: '13.5px', color: isLinked ? '#94a3b8' : '#0f172a' }}>
+                                                  {p.fullName}
+                                                </strong>
+                                                <span style={{ fontSize: '12px', color: '#64748b', marginLeft: '6px' }}>
+                                                  (Đời {p.generation} • {p.gender === 'female' ? 'Nữ' : 'Nam'} • {branchName(p.branchId)})
+                                                </span>
+                                              </div>
+                                            </div>
+                                            {isLinked ? (
+                                              <span style={{ fontSize: '11px', color: '#ef4444', background: '#fee2e2', padding: '2px 8px', borderRadius: '4px', fontWeight: 600 }}>
+                                                Đã có tài khoản
+                                              </span>
+                                            ) : isSelected ? (
+                                              <span style={{ fontSize: '11px', color: '#2563eb', background: '#dbeafe', padding: '2px 8px', borderRadius: '4px', fontWeight: 600 }}>
+                                                Đang chọn ✓
+                                              </span>
+                                            ) : (
+                                              <span style={{ fontSize: '11px', color: '#059669', background: '#ecfdf5', padding: '2px 6px', borderRadius: '4px' }}>
+                                                Khả dụng
+                                              </span>
+                                            )}
+                                          </div>
+                                        );
+                                      });
+                                    })()}
+                                  </div>
+                                )}
+
                                 <small style={{ color: '#64748b', display: 'block', marginTop: '6px', fontSize: '12px' }}>
                                   Lưu ý: Chỉ hồ sơ chưa liên kết mới có thể chọn. Các hồ sơ đã có tài khoản (như Tộc trưởng) sẽ bị vô hiệu hóa để bảo đảm tính duy nhất 1-1.
                                 </small>
@@ -1839,181 +1905,16 @@ export const FamilyAdminModule: React.FC<Props> = ({ view, onNavigate }) => {
           8. PHÂN QUYỀN & TÀI KHOẢN (VIEW: ACCOUNTS)
       ======================================================== */}
       {view === 'accounts' && (
-        <>
-          <div className="fa-panel">
-            <div className="fa-panel-heading">
-              <div>
-                <h2>Phân quyền Quản trị viên dòng họ (Family Admin)</h2>
-                <p>Trưởng tộc bổ nhiệm và phân quyền Family Admin từ các thành viên thuộc dòng họ.</p>
-              </div>
-              <button type="button" onClick={loadClanUsers} disabled={loadingUsers}>
-                {loadingUsers ? 'Đang tải...' : 'Làm mới'}
-              </button>
-            </div>
-
-            <div className="fa-table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Họ và tên</th>
-                    <th>Email</th>
-                    <th>Vai trò</th>
-                    <th>Trạng thái</th>
-                    <th>Thao tác</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {clanUsers.length === 0 ? (
-                    <tr>
-                      <td colSpan={5} style={{ padding: '16px' }}>
-                        {loadingUsers ? (
-                          <LoadingState compact message="Đang truy xuất danh sách tài khoản gia tộc..." />
-                        ) : (
-                          <EmptyState
-                            variant="members"
-                            compact
-                            title="Chưa có tài khoản thành viên nào"
-                            subMessage="Các tài khoản đã được liên kết với hồ sơ dòng họ sẽ xuất hiện tại đây."
-                          />
-                        )}
-                      </td>
-                    </tr>
-                  ) : (
-                    clanUsers.map((u) => {
-                      const isOwner = u.roles.includes('BUSINESS_OWNER') || u.roles.includes('owner');
-                      return (
-                        <tr key={u.user_id}>
-                          <td><strong>{u.display_name}</strong></td>
-                          <td>{u.email}</td>
-                          <td>
-                            {isOwner ? (
-                              <span className="fa-status approved">Trưởng tộc</span>
-                            ) : u.is_family_admin ? (
-                              <span className="fa-status approved" style={{ background: '#dcfce7', color: '#15803d' }}>
-                                Family Admin
-                              </span>
-                            ) : (
-                              <span className="fa-status pending">Thành viên</span>
-                            )}
-                          </td>
-                          <td>
-                            <span className={`fa-status ${u.user_status === 'ACTIVE' ? 'approved' : 'rejected'}`}>
-                              {u.user_status === 'ACTIVE' ? 'Hoạt động' : u.user_status}
-                            </span>
-                          </td>
-                          <td>
-                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                              {isOwner ? (
-                                <small style={{ color: '#64748b' }}>Chủ sở hữu</small>
-                              ) : (
-                                <>
-                                  {u.is_family_admin ? (
-                                    <button
-                                      type="button"
-                                      style={{ background: '#fee2e2', color: '#b91c1c', border: '1px solid #f87171' }}
-                                      disabled={!isLeader || actionUserId === u.user_id}
-                                      onClick={() => setConfirmAction({ type: 'revoke', userId: u.user_id, userName: u.display_name })}
-                                    >
-                                      {actionUserId === u.user_id ? 'Đang xử lý...' : 'Thu hồi FA'}
-                                    </button>
-                                  ) : (
-                                    <button
-                                      type="button"
-                                      className="fa-primary"
-                                      disabled={!isLeader || actionUserId === u.user_id}
-                                      onClick={() => setConfirmAction({ type: 'assign', userId: u.user_id, userName: u.display_name })}
-                                    >
-                                      {actionUserId === u.user_id ? 'Đang xử lý...' : 'Nâng quyền FA'}
-                                    </button>
-                                  )}
-                                  <button
-                                    type="button"
-                                    style={{
-                                      background: '#fff1f2',
-                                      color: '#be123c',
-                                      border: '1px solid #fda4af',
-                                      padding: '4px 10px',
-                                      borderRadius: '6px',
-                                      cursor: isLeader ? 'pointer' : 'not-allowed',
-                                      fontSize: '13px',
-                                      fontWeight: 500,
-                                    }}
-                                    disabled={!isLeader || actionUserId === u.user_id}
-                                    title="Khai trừ thành viên ra khỏi dòng họ"
-                                    onClick={() => setConfirmAction({ type: 'expel', userId: u.user_id, userName: u.display_name })}
-                                  >
-                                    Khai trừ khỏi tộc
-                                  </button>
-                                </>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          {/* Modal xác nhận bổ nhiệm / thu hồi / khai trừ */}
-          {confirmAction && (
-            <div className="fa-modal-backdrop" onClick={() => !actionUserId && setConfirmAction(null)}>
-              <div className="fa-modal" style={{ maxWidth: '500px' }} onClick={(e) => e.stopPropagation()}>
-                <div className="fa-modal-title">
-                  <h2>
-                    {confirmAction.type === 'assign'
-                      ? 'Bổ nhiệm Quản trị viên'
-                      : confirmAction.type === 'revoke'
-                      ? 'Thu hồi quyền Quản trị viên'
-                      : 'Khai trừ thành viên khỏi dòng họ'}
-                  </h2>
-                  <button type="button" onClick={() => !actionUserId && setConfirmAction(null)}>×</button>
-                </div>
-                <div style={{ padding: '8px 0' }}>
-                  {confirmAction.type === 'assign' && (
-                    <p style={{ margin: 0, fontSize: '14px', lineHeight: 1.6 }}>
-                      Bạn có chắc chắn muốn nâng quyền Quản trị viên dòng họ (Family Admin) cho thành viên <strong>{confirmAction.userName}</strong> không?
-                    </p>
-                  )}
-                  {confirmAction.type === 'revoke' && (
-                    <p style={{ margin: 0, fontSize: '14px', lineHeight: 1.6 }}>
-                      Bạn có chắc chắn muốn thu hồi quyền Family Admin của thành viên <strong>{confirmAction.userName}</strong> không?
-                    </p>
-                  )}
-                  {confirmAction.type === 'expel' && (
-                    <div>
-                      <p style={{ margin: '0 0 12px 0', fontSize: '14px', lineHeight: 1.6 }}>
-                        Bạn có chắc chắn muốn khai trừ tài khoản của thành viên <strong>{confirmAction.userName}</strong> ra khỏi dòng họ không?
-                      </p>
-                      <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '6px', padding: '12px', color: '#991b1b', fontSize: '13px' }}>
-                        <strong>Quy tắc hệ thống:</strong>
-                        <ul style={{ margin: '6px 0 0 0', paddingLeft: '18px', lineHeight: 1.5 }}>
-                          <li>Tài khoản sẽ bị hủy tư cách thành viên và không thể truy cập vào dữ liệu nội bộ dòng họ nữa.</li>
-                          <li>Nếu người này đã có hồ sơ trên Cây gia phả, hồ sơ nhân vật và các quan hệ phả hệ vẫn được giữ nguyên vẹn (chỉ hủy liên kết tài khoản).</li>
-                          <li>Giải phóng 1 vị trí tham gia dòng họ cho người dùng này.</li>
-                        </ul>
-                      </div>
-                    </div>
-                  )}
-                </div>
-                <div className="fa-modal-actions">
-                  <button type="button" disabled={!!actionUserId} onClick={() => setConfirmAction(null)}>Hủy bỏ</button>
-                  <button
-                    type="button"
-                    className="fa-primary"
-                    style={confirmAction.type === 'expel' ? { background: '#dc2626', borderColor: '#b91c1c' } : undefined}
-                    disabled={!!actionUserId}
-                    onClick={handleExecuteConfirmAction}
-                  >
-                    {actionUserId ? 'Đang xử lý...' : confirmAction.type === 'expel' ? 'Xác nhận khai trừ' : 'Xác nhận'}
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-        </>
+        <FamilyAccountsView
+          clanUsers={clanUsers}
+          loadingUsers={loadingUsers}
+          isLeader={isLeader}
+          actionUserId={actionUserId}
+          confirmAction={confirmAction}
+          setConfirmAction={setConfirmAction}
+          onRefresh={loadClanUsers}
+          onExecuteConfirmAction={handleExecuteConfirmAction}
+        />
       )}
 
       {/* ========================================================
@@ -2051,7 +1952,7 @@ export const FamilyAdminModule: React.FC<Props> = ({ view, onNavigate }) => {
           <div style={{ padding: '0 0 10px 0' }}>
             <SmartExcelImportWorkflow
               clanId={clanId}
-              clanName={data.clan?.name}
+              clanName={clanDisplayName}
               embedded={true}
               onSuccess={async (res) => {
                 setNotice({
@@ -2075,217 +1976,15 @@ export const FamilyAdminModule: React.FC<Props> = ({ view, onNavigate }) => {
 
 
       {view === 'audit' && (
-        <>
-          <div className="fa-stat-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>
-            <div className="fa-stat-card">
-              <span>Tổng số hoạt động</span>
-              <strong style={{ color: '#2563eb' }}>{clanAuditLogs.length}</strong>
-              <small>Ghi nhận từ cơ sở dữ liệu hệ thống</small>
-            </div>
-            <div className="fa-stat-card">
-              <span>Thao tác phả hệ</span>
-              <strong style={{ color: '#7c3aed' }}>
-                {clanAuditLogs.filter((l) => ['MEMBER', 'RELATION', 'BRANCH'].includes(l.actionType)).length}
-              </strong>
-              <small>Thêm/Sửa thành viên, quan hệ, chi nhánh</small>
-            </div>
-            <div className="fa-stat-card">
-              <span>Xét duyệt & Quyền hạn</span>
-              <strong style={{ color: '#059669' }}>
-                {clanAuditLogs.filter((l) => ['APPROVAL', 'PERMISSION', 'LINK'].includes(l.actionType)).length}
-              </strong>
-              <small>Duyệt hồ sơ, phân quyền, liên họ</small>
-            </div>
-          </div>
-
-          <div className="fa-panel">
-            <div className="fa-panel-heading">
-              <div>
-                <h2>Lịch sử hoạt động & Nhật ký kiểm toán</h2>
-                <p>Theo dõi minh bạch mọi thay đổi dữ liệu trong dòng họ theo thời gian thực.</p>
-              </div>
-              <button type="button" onClick={loadClanAuditLogs} disabled={loadingAuditLogs}>
-                {loadingAuditLogs ? 'Đang tải...' : 'Làm mới'}
-              </button>
-            </div>
-
-            {/* Filter Pills */}
-            <div className="fa-filter-pills">
-              <button
-                type="button"
-                className={`fa-filter-pill ${auditCategoryFilter === 'all' ? 'active' : ''}`}
-                onClick={() => setAuditCategoryFilter('all')}
-              >
-                Tất cả ({clanAuditLogs.length})
-              </button>
-              <button
-                type="button"
-                className={`fa-filter-pill ${auditCategoryFilter === 'MEMBER' ? 'active' : ''}`}
-                onClick={() => setAuditCategoryFilter('MEMBER')}
-              >
-                Thành viên ({clanAuditLogs.filter((l) => l.actionType === 'MEMBER').length})
-              </button>
-              <button
-                type="button"
-                className={`fa-filter-pill ${auditCategoryFilter === 'RELATION' ? 'active' : ''}`}
-                onClick={() => setAuditCategoryFilter('RELATION')}
-              >
-                Quan hệ ({clanAuditLogs.filter((l) => l.actionType === 'RELATION').length})
-              </button>
-              <button
-                type="button"
-                className={`fa-filter-pill ${auditCategoryFilter === 'BRANCH' ? 'active' : ''}`}
-                onClick={() => setAuditCategoryFilter('BRANCH')}
-              >
-                Chi/Nhánh ({clanAuditLogs.filter((l) => l.actionType === 'BRANCH').length})
-              </button>
-              <button
-                type="button"
-                className={`fa-filter-pill ${auditCategoryFilter === 'APPROVAL' ? 'active' : ''}`}
-                onClick={() => setAuditCategoryFilter('APPROVAL')}
-              >
-                Xét duyệt ({clanAuditLogs.filter((l) => l.actionType === 'APPROVAL').length})
-              </button>
-              <button
-                type="button"
-                className={`fa-filter-pill ${auditCategoryFilter === 'PERMISSION' ? 'active' : ''}`}
-                onClick={() => setAuditCategoryFilter('PERMISSION')}
-              >
-                Phân quyền ({clanAuditLogs.filter((l) => l.actionType === 'PERMISSION').length})
-              </button>
-              <button
-                type="button"
-                className={`fa-filter-pill ${auditCategoryFilter === 'LINK' ? 'active' : ''}`}
-                onClick={() => setAuditCategoryFilter('LINK')}
-              >
-                Liên họ ({clanAuditLogs.filter((l) => l.actionType === 'LINK').length})
-              </button>
-              <button
-                type="button"
-                className={`fa-filter-pill ${auditCategoryFilter === 'EXPORT' ? 'active' : ''}`}
-                onClick={() => setAuditCategoryFilter('EXPORT')}
-              >
-                Xuất tệp ({clanAuditLogs.filter((l) => l.actionType === 'EXPORT').length})
-              </button>
-            </div>
-
-            {/* Search toolbar */}
-            <div className="fa-toolbar" style={{ marginBottom: '24px' }}>
-              <input
-                type="search"
-                value={auditSearchTerm}
-                onChange={(e) => setAuditSearchTerm(e.target.value)}
-                placeholder="Tìm theo nội dung thao tác, tên người thực hiện, thành viên..."
-                aria-label="Tìm kiếm nhật ký"
-              />
-              <span>
-                Hiển thị{' '}
-                {
-                  clanAuditLogs.filter((l) => {
-                    const matchCat = auditCategoryFilter === 'all' || l.actionType === auditCategoryFilter;
-                    const matchSearch =
-                      !auditSearchTerm.trim() ||
-                      [l.action, l.details, l.actorName].join(' ').toLowerCase().includes(auditSearchTerm.trim().toLowerCase());
-                    return matchCat && matchSearch;
-                  }).length
-                }{' '}
-                hoạt động
-              </span>
-            </div>
-
-            {/* Timeline */}
-            <div className="fa-timeline">
-              {clanAuditLogs.filter((l) => {
-                const matchCat = auditCategoryFilter === 'all' || l.actionType === auditCategoryFilter;
-                const matchSearch =
-                  !auditSearchTerm.trim() ||
-                  [l.action, l.details, l.actorName].join(' ').toLowerCase().includes(auditSearchTerm.trim().toLowerCase());
-                return matchCat && matchSearch;
-              }).length === 0 ? (
-                loadingAuditLogs ? (
-                  <LoadingState
-                    message="Đang truy xuất nhật ký phả hệ dòng tộc..."
-                    subMessage="Hệ thống đang tải lịch sử các thao tác quản trị từ cơ sở dữ liệu."
-                  />
-                ) : (
-                  <EmptyState
-                    variant="history"
-                    title="Không tìm thấy nhật ký hoạt động phù hợp"
-                    subMessage="Hãy thử thay đổi danh mục hoạt động hoặc xóa từ khóa tìm kiếm để xem tất cả lịch sử."
-                  />
-                )
-              ) : (
-                clanAuditLogs
-                  .filter((l) => {
-                    const matchCat = auditCategoryFilter === 'all' || l.actionType === auditCategoryFilter;
-                    const matchSearch =
-                      !auditSearchTerm.trim() ||
-                      [l.action, l.details, l.actorName].join(' ').toLowerCase().includes(auditSearchTerm.trim().toLowerCase());
-                    return matchCat && matchSearch;
-                  })
-                  .map((log) => {
-                    const typeKey = (log.actionType || 'member').toLowerCase();
-                    const formattedDate = new Date(log.occurredAt).toLocaleString('vi-VN', {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                      day: '2-digit',
-                      month: '2-digit',
-                      year: 'numeric',
-                    });
-                    return (
-                      <div key={log.id} className="fa-timeline-item">
-                        <div
-                          className="fa-timeline-node"
-                          style={{
-                            background:
-                              log.actionType === 'RELATION'
-                                ? '#7c3aed'
-                                : log.actionType === 'APPROVAL'
-                                ? '#059669'
-                                : log.actionType === 'PERMISSION'
-                                ? '#d97706'
-                                : log.actionType === 'BRANCH'
-                                ? '#ea580c'
-                                : log.actionType === 'LINK'
-                                ? '#0284c7'
-                                : log.actionType === 'EXPORT'
-                                ? '#64748b'
-                                : '#2563eb',
-                          }}
-                        />
-                        <div className="fa-audit-card">
-                          <div className="fa-audit-header">
-                            <span className={`fa-audit-type-badge ${typeKey}`}>
-                              {log.actionType === 'MEMBER'
-                                ? 'Thành viên'
-                                : log.actionType === 'RELATION'
-                                ? 'Quan hệ'
-                                : log.actionType === 'BRANCH'
-                                ? 'Chi/Nhánh'
-                                : log.actionType === 'APPROVAL'
-                                ? 'Xét duyệt'
-                                : log.actionType === 'PERMISSION'
-                                ? 'Phân quyền'
-                                : log.actionType === 'LINK'
-                                ? 'Liên họ'
-                                : 'Xuất dữ liệu'}
-                            </span>
-                            <span className="fa-timeline-time">{formattedDate}</span>
-                          </div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                            <strong style={{ fontSize: '15px', color: '#0f172a' }}>{log.action}</strong>
-                            <span style={{ fontSize: '12px', color: '#94a3b8' }}>•</span>
-                            <span className="fa-audit-actor">{log.actorName}</span>
-                          </div>
-                          <div className="fa-audit-details">{log.details}</div>
-                        </div>
-                      </div>
-                    );
-                  })
-              )}
-            </div>
-          </div>
-        </>
+        <FamilyAuditView
+          clanAuditLogs={clanAuditLogs}
+          loadingAuditLogs={loadingAuditLogs}
+          auditCategoryFilter={auditCategoryFilter}
+          setAuditCategoryFilter={setAuditCategoryFilter}
+          auditSearchTerm={auditSearchTerm}
+          setAuditSearchTerm={setAuditSearchTerm}
+          onRefresh={loadClanAuditLogs}
+        />
       )}
     </section>
   );

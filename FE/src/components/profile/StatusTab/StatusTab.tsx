@@ -5,8 +5,8 @@ import type { PersonBurial } from '../../../types/location';
 import { useAuth } from '../../../hooks/useAuth';
 import { fetchPersonBurial, getGoogleMapsDirectionUrl } from '../../../services/location.service';
 import { LocationPreviewMap } from '../../worldmap/LocationPreviewMap';
-import { BurialEditModal } from '../../common/BurialEditModal';
-import { LocationProposalModal } from '../../common/LocationProposalModal';
+import { BurialEditModal } from '../../common/BurialModals/BurialEditModal';
+import { LocationProposalModal } from '../../common/LocationModals/LocationProposalModal';
 import '../Profile.css';
 import './StatusTab.css';
 

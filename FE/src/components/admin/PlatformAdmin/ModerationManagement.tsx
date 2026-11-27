@@ -5,7 +5,7 @@ import {
   type ModerationPriority,
   type ModerationReport,
   type ModerationStatus,
-} from './mockData';
+} from './platformAdminTypes';
 import {
   AdminConfirmDialog,
   AdminModal,

@@ -5,7 +5,7 @@ import { useAuth } from '../../../context/AuthContext';
 import { useClanContext } from '../../../context/ClanContext';
 import { fetchFamilies, fetchMembers } from '../../../services/member.service';
 import type { Family, Member } from '../../../types/member';
-import { GenderAvatar } from '../../common/GenderAvatar';
+import { GenderAvatar } from '../../common/GenderAvatar/GenderAvatar';
 import './MemberList.css';
 
 export interface MemberListProps {
@@ -22,7 +22,9 @@ export const MemberList: React.FC<MemberListProps> = ({ onSelectMember, initialF
   const [members, setMembers] = useState<Member[]>([]);
   const [families, setFamilies] = useState<Family[]>([]);
   const [selectedFamilyId, setSelectedFamilyId] = useState<string>(userClanId || '');
-  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [searchTerm, setSearchTerm] = useState<string>(() => {
+    return new URLSearchParams(window.location.search).get('search') || '';
+  });
   const [loading, setLoading] = useState<boolean>(true);
 
   // Đồng bộ selectedFamilyId khi activeClanId thay đổi từ TopBar
@@ -124,7 +126,7 @@ export const MemberList: React.FC<MemberListProps> = ({ onSelectMember, initialF
               {members.map((m) => (
                 <tr key={m.id} onClick={() => onSelectMember(m.id)} style={{ cursor: 'pointer' }}>
                   <td className="member-name-cell">
-                    <GenderAvatar gender={m.gender} fullName={m.fullName} avatarUrl={m.avatarUrl} size={36} />
+                    <GenderAvatar gender={m.gender} avatarUrl={m.avatarUrl} size={36} />
                     <div className="member-name-info">
                       <span className="member-primary-name">{m.fullName}</span>
                       {m.otherName && <span className="member-secondary-name">({m.otherName})</span>}

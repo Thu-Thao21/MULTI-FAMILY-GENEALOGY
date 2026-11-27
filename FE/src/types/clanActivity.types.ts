@@ -45,15 +45,18 @@ export interface EventParticipant {
 
 export interface FamilyEventRecord {
   id: string;
-  title: string;
-  type: 'anniversary' | 'gathering' | 'meeting' | 'tomb_cleaning';
+  title?: string;
+  name?: string;
+  type: 'anniversary' | 'gathering' | 'meeting' | 'tomb_cleaning' | 'scholarship' | 'trip' | 'ceremony';
   startDate: string;
   endDate?: string;
+  time?: string;
   location: string;
   organizer: string;
   description: string;
+  notes?: string;
   status: EventStatus;
-  participantsCount: number;
+  participantsCount?: number;
   participants: EventParticipant[];
 }
 

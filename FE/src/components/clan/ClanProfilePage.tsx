@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import apiClient from '../../api/axios';
 import { fetchClanProfile, updateClanProfile, fetchMembers } from '../../services/member.service';
+import { getCached, setCached } from '../../utils/memoryCache';
 import '../../shared/tree/TreeActionModals/TreeActionModals.css';
 import './ClanProfilePage.css';
 
@@ -29,18 +30,28 @@ export const ClanProfilePage: React.FC<ClanProfilePageProps> = ({ clanId }) => {
 
   const canEdit = isClanAdmin || isFamilyAdmin;
 
-  const [loading, setLoading] = useState(true);
-  const [profile, setProfile] = useState<any>(null);
-  const [branches, setBranches] = useState<any[]>([]);
-  const [memberStats, setMemberStats] = useState({
-    total: 0,
-    generations: 1,
-    males: 0,
-    females: 0,
-  });
+  const cacheKey = `clan-profile-view:${effectiveClanId || 'none'}`;
+  const cachedView = getCached<{
+    profile: any;
+    branches: any[];
+    memberStats: { total: number; generations: number; males: number; females: number };
+  }>(cacheKey);
+
+  const [loading, setLoading] = useState(!cachedView);
+  const [profile, setProfile] = useState<any>(cachedView?.data.profile ?? null);
+  const [branches, setBranches] = useState<any[]>(cachedView?.data.branches ?? []);
+  const [memberStats, setMemberStats] = useState(
+    cachedView?.data.memberStats ?? {
+      total: 0,
+      generations: 1,
+      males: 0,
+      females: 0,
+    }
+  );
 
   // Edit Modal State
   const [isEditing, setIsEditing] = useState(false);
+  const [editName, setEditName] = useState('');
   const [editOriginPlace, setEditOriginPlace] = useState('');
   const [editAncestralAddress, setEditAncestralAddress] = useState('');
   const [editHistory, setEditHistory] = useState('');
@@ -48,12 +59,14 @@ export const ClanProfilePage: React.FC<ClanProfilePageProps> = ({ clanId }) => {
   const [saveLoading, setSaveLoading] = useState(false);
   const [successToast, setSuccessToast] = useState<string | null>(null);
 
-  const loadData = async () => {
+  const loadData = async (silent = false) => {
     if (!effectiveClanId) {
       setLoading(false);
       return;
     }
-    setLoading(true);
+    if (!silent && !getCached(cacheKey)) {
+      setLoading(true);
+    }
     try {
       const [profData, branchRes, memRes] = await Promise.all([
         fetchClanProfile(effectiveClanId),
@@ -63,6 +76,7 @@ export const ClanProfilePage: React.FC<ClanProfilePageProps> = ({ clanId }) => {
 
       if (profData) {
         setProfile(profData);
+        setEditName(profData.name || account?.clan_name || '');
         setEditOriginPlace(profData.originPlace || '');
         setEditAncestralAddress(profData.ancestralHouseAddress || '');
         setEditHistory(profData.history || '');
@@ -77,7 +91,7 @@ export const ClanProfilePage: React.FC<ClanProfilePageProps> = ({ clanId }) => {
 
       const memList = memRes.items || [];
 
-      // Đồng bộ số lượng thành viên thực tế của từng chi từ danh sách Person trong DB
+      // Đồng bộ số lượng thành viên thực tế của từng chi từ danh sách thành viên trong DB
       const enrichedBranches = branchItems.map((b: any) => {
         const bId = b.branchId || b.id;
         const countFromMembers = memList.filter((m: any) => m.branchId === bId || m.branch_id === bId).length;
@@ -91,12 +105,22 @@ export const ClanProfilePage: React.FC<ClanProfilePageProps> = ({ clanId }) => {
       const females = memList.filter((m) => m.gender === 'female').length;
       const maxGen = memList.length > 0 ? Math.max(...memList.map((m) => m.generation || 1)) : 1;
 
-      setMemberStats({
+      const nextStats = {
         total: memList.length,
         generations: maxGen,
         males,
         females,
-      });
+      };
+      setMemberStats(nextStats);
+      setCached(
+        cacheKey,
+        {
+          profile: profData ?? profile,
+          branches: enrichedBranches,
+          memberStats: nextStats,
+        },
+        120_000
+      );
     } catch (err) {
       console.error('Lỗi khi tải hồ sơ gia tộc:', err);
     } finally {
@@ -105,16 +129,17 @@ export const ClanProfilePage: React.FC<ClanProfilePageProps> = ({ clanId }) => {
   };
 
   useEffect(() => {
-    loadData();
+    void loadData(Boolean(cachedView));
   }, [effectiveClanId]);
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!effectiveClanId) return;
+    const trimmedName = editName.trim() || profile?.name || account?.clan_name || '';
     setSaveLoading(true);
     try {
       await updateClanProfile(effectiveClanId, {
-        name: profile?.name,
+        name: trimmedName,
         originPlace: editOriginPlace.trim() || null,
         ancestralHouseAddress: editAncestralAddress.trim() || null,
         history: editHistory.trim() || null,
@@ -148,7 +173,7 @@ export const ClanProfilePage: React.FC<ClanProfilePageProps> = ({ clanId }) => {
       <div className="clan-profile-hero">
         <div className="clan-hero-header">
           <div className="clan-hero-title-group">
-            <h1>Hồ Sơ Gia Tộc: {clanName}</h1>
+            <h1>Hồ sơ gia tộc: {clanName}</h1>
             <div className="clan-hero-badges">
               <span className="clan-tag code">Mã tộc: {profile?.clanCode || '—'}</span>
               <span className="clan-tag active">Trạng thái: Đang hoạt động</span>
@@ -188,7 +213,7 @@ export const ClanProfilePage: React.FC<ClanProfilePageProps> = ({ clanId }) => {
         {/* Left Column: General Info & Branches */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           <div className="clan-card">
-            <h2 className="clan-card-title">Thông Tin Hành Chính & Từ Đường</h2>
+            <h2 className="clan-card-title">Thông tin hành chính & Từ đường</h2>
             
             <div className="clan-info-row">
               <span className="clan-info-label">Tên chính thức dòng họ</span>
@@ -212,7 +237,7 @@ export const ClanProfilePage: React.FC<ClanProfilePageProps> = ({ clanId }) => {
           </div>
 
           <div className="clan-card">
-            <h2 className="clan-card-title">Các Chi Nhánh Trực Thuộc ({branches.length})</h2>
+            <h2 className="clan-card-title">Các chi nhánh trực thuộc ({branches.length})</h2>
             {branches.length > 0 ? (
               <div className="clan-branch-list">
                 {branches.map((b) => (
@@ -233,14 +258,14 @@ export const ClanProfilePage: React.FC<ClanProfilePageProps> = ({ clanId }) => {
         {/* Right Column: History & Clan Rules */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           <div className="clan-card">
-            <h2 className="clan-card-title">Lịch Sử & Nguồn Gốc Dòng Họ</h2>
+            <h2 className="clan-card-title">Lịch sử & Nguồn gốc dòng họ</h2>
             <div className="clan-prose" style={!profile?.history ? { fontStyle: 'italic', color: '#64748b' } : undefined}>
               {profile?.history || 'Dòng họ chưa cập nhật thông tin lịch sử & nguồn gốc.'}
             </div>
           </div>
 
           <div className="clan-card">
-            <h2 className="clan-card-title">Tộc Ước & Gia Huấn Dòng Tộc</h2>
+            <h2 className="clan-card-title">Tộc ước & Gia huấn dòng tộc</h2>
             <div className="clan-prose" style={!profile?.publicDescription ? { fontStyle: 'italic', color: '#64748b' } : undefined}>
               {profile?.publicDescription || 'Dòng họ chưa cập nhật tộc ước & gia huấn dòng tộc.'}
             </div>
@@ -259,6 +284,18 @@ export const ClanProfilePage: React.FC<ClanProfilePageProps> = ({ clanId }) => {
               </div>
 
               <div className="tree-action-modal-body">
+                <div className="tree-action-form-group">
+                  <label className="tree-action-form-label">Tên chính thức dòng họ *</label>
+                  <input
+                    type="text"
+                    className="tree-action-form-input"
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    placeholder="Ví dụ: Dòng họ Nguyễn Chi 1"
+                    required
+                  />
+                </div>
+
                 <div className="tree-action-form-group">
                   <label className="tree-action-form-label">Quê quán phát tích</label>
                   <input

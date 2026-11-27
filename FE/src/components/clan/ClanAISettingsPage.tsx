@@ -1,4 +1,4 @@
-﻿import { LoadingState } from '../../shared/Feedback/LoadingState';
+import { LoadingState } from '../../shared/Feedback/LoadingState';
 import React, { useEffect, useState } from 'react';
 import {
   fetchClanAISettings,
@@ -361,10 +361,10 @@ export const ClanAISettingsPage: React.FC<Props> = ({ clanId }) => {
           <div>
             <h3>4. Kiểm tra kết nối Gemini AI (Mô phỏng an toàn)</h3>
             <p>
-              Giai đoạn 2: Kiểm tra tính sẵn sàng, độ trễ và khả năng xử lý tiếng Việt của model mà không gửi dữ liệu Person thật từ cơ sở dữ liệu.
+              Giai đoạn 2: Kiểm tra tính sẵn sàng, độ trễ và khả năng xử lý tiếng Việt của mô hình AI mà không gửi dữ liệu thành viên thật từ cơ sở dữ liệu.
             </p>
           </div>
-          <span className="badge-pill">Giai đoạn 2 Foundation</span>
+          <span className="badge-pill">Giai đoạn 2 - Nền tảng</span>
         </div>
 
         <div className="test-input-group">

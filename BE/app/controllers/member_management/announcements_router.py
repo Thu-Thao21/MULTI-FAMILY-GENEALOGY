@@ -302,3 +302,41 @@ async def mark_all_notifications_read(
     await db.execute(stmt)
     await db.commit()
     return {"success": True}
+
+
+@router.delete("/notifications/read")
+async def delete_read_notifications(
+    db: AsyncSession = Depends(get_db),
+    account: Account = Depends(get_current_account),
+):
+    """Delete all read notifications from the current user's inbox."""
+    from sqlalchemy import delete
+    stmt = delete(UserNotification).where(
+        UserNotification.user_id == account.id,
+        UserNotification.read_at.is_not(None),
+    )
+    res = await db.execute(stmt)
+    await db.commit()
+    return {"success": True, "deleted": res.rowcount or 0}
+
+
+@router.delete("/notifications/{notification_id}")
+async def delete_single_notification(
+    notification_id: str,
+    db: AsyncSession = Depends(get_db),
+    account: Account = Depends(get_current_account),
+):
+    """Delete a single notification from the current user's inbox."""
+    from sqlalchemy import delete
+    try:
+        n_uuid = uuid.UUID(notification_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid notification_id")
+
+    stmt = delete(UserNotification).where(
+        UserNotification.notification_id == n_uuid,
+        UserNotification.user_id == account.id,
+    )
+    await db.execute(stmt)
+    await db.commit()
+    return {"success": True}

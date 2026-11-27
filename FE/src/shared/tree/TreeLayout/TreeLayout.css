@@ -72,21 +72,21 @@
   gap: 6px;
   padding: 6px 14px;
   border-radius: 8px;
-  border: 1.5px solid #d97706;
-  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
-  color: #b45309;
+  border: 1px solid #bfdbfe;
+  background: #eff6ff;
+  color: #1d4ed8;
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 2px 6px rgba(180, 83, 9, 0.12);
 }
 
 .tree-btn-studio-toggle:hover {
-  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-  color: #78350f;
+  background: #dbeafe;
+  border-color: #93c5fd;
+  color: #1e40af;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(180, 83, 9, 0.2);
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.14);
 }
 
 .tree-btn-studio-toggle .btn-icon {
@@ -518,20 +518,13 @@
   margin: 0;
 }
 
-.tree-btn-green-sm {
-  font-size: 11px !important;
-  padding: 0 8px !important;
-  min-width: auto !important;
-  font-weight: 700 !important;
-  color: #16a34a !important;
-}
-
+.tree-btn-green-sm,
 .tree-btn-gray-sm {
-  font-size: 11px !important;
-  padding: 0 8px !important;
+  font-size: 12px !important;
+  padding: 0 10px !important;
   min-width: auto !important;
-  font-weight: 700 !important;
-  color: #64748b !important;
+  font-weight: 600 !important;
+  color: #334155 !important;
 }
 
 .tree-zoom-btn-fixed {

@@ -287,11 +287,12 @@ async def create_clan_join_request(
     # Gửi thông báo đến toàn bộ Ban Quản trị / Trưởng tộc của dòng họ
     try:
         from app.services.activity_fund.notification_service import notification_service
+        lineage_vn = "Bên nội" if (body.lineage_type or "").upper() == "PATERNAL" else "Bên ngoại"
         await notification_service.notify_clan_admins(
             db=db,
             clan_id=body.clan_id,
             title="Yêu cầu gia nhập dòng họ mới",
-            body=f"Thành viên {body.full_name} vừa gửi yêu cầu gia nhập dòng họ (Tuyến quan hệ: {body.lineage_type}). Vui lòng xem xét và duyệt hồ sơ.",
+            body=f"Thành viên {body.full_name} vừa gửi yêu cầu gia nhập dòng họ (Tuyến quan hệ: {lineage_vn}). Vui lòng xem xét và duyệt hồ sơ.",
             notif_type="JOIN_REQUEST",
             entity_type="CLAN_JOIN_REQUEST",
             entity_id=new_req.request_id,
@@ -840,11 +841,12 @@ async def review_clan_join_request(
     try:
         from app.services.activity_fund.notification_service import notification_service
         clan_name_val = (await db.execute(select(Clan.name).where(Clan.clan_id == clan_id))).scalar_one_or_none() or "dòng họ"
+        lineage_vn = "Bên nội" if (req.lineage_type or "").upper() == "PATERNAL" else "Bên ngoại"
         await notification_service.notify_single_user(
             db=db,
             user_id=req.user_id,
             title="Yêu cầu gia nhập dòng họ đã được phê duyệt",
-            body=f"Chúc mừng bạn! Yêu cầu gia nhập dòng họ {clan_name_val} (Tuyến quan hệ: {req.lineage_type}) đã được Ban Quản trị phê duyệt thành công. Bạn hiện có thể truy cập cây gia phả đầy đủ.",
+            body=f"Chúc mừng bạn! Yêu cầu gia nhập dòng họ {clan_name_val} (Tuyến quan hệ: {lineage_vn}) đã được Ban Quản trị phê duyệt thành công. Bạn hiện có thể truy cập cây gia phả đầy đủ.",
             clan_id=clan_id,
             notif_type="JOIN_REQUEST_RESULT",
             entity_type="CLAN_JOIN_REQUEST",

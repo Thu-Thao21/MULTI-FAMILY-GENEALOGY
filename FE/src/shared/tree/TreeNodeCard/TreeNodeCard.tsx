@@ -1,7 +1,7 @@
 import React from 'react';
 import type { ErgoTreeNode } from '../../../types/tree';
 import type { GenealogyChartConfig } from '../GenealogyChartStudio/chartConfigTypes';
-import { GenderAvatar } from '../../../components/common/GenderAvatar';
+import { GenderAvatar } from '../../../components/common/GenderAvatar/GenderAvatar';
 import './TreeNodeCard.css';
 
 export interface TreeNodeCardProps {

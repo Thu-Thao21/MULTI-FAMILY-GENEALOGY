@@ -783,7 +783,7 @@ export const NetworkTopologyDiagram: React.FC<NetworkTopologyDiagramProps> = ({
               </div>
 
               <div className="ntd-info-row">
-                <span className="ntd-info-label">Cặp Person xác minh:</span>
+                <span className="ntd-info-label">Cặp thành viên xác minh:</span>
                 <span className="ntd-info-val">{selectedEdge.verifiedCount} cặp</span>
               </div>
 

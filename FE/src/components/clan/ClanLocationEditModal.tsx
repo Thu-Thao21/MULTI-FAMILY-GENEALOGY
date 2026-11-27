@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import type { ClanLocation, LocationType, LocationPrivacyLevel } from '../../types/location';
 import { createClanLocation, updateClanLocation } from '../../services/location.service';
-import { LocationPickerModal } from '../common/LocationPickerModal';
-import { formatFormCoords, initialFormCoords, requireFormCoords } from '../common/locationFormCoords';
-import '../common/BurialEditModal.css';
+import { LocationPickerModal } from '../common/LocationModals/LocationPickerModal';
+import { formatFormCoords, initialFormCoords, requireFormCoords } from '../common/LocationModals/locationFormCoords';
+import '../common/BurialModals/BurialEditModal.css';
 
 export interface ClanLocationEditModalProps {
   isOpen: boolean;

@@ -3,7 +3,7 @@ import apiClient from '../../../api/axios';
 import { useAuth } from '../../../context/AuthContext';
 import { useClanContext } from '../../../context/ClanContext';
 import { fetchFamilyPersons, createFamilyPerson, updateFamilyPerson } from '../../../services/genealogy.service';
-import { GenderAvatar } from '../../common/GenderAvatar';
+import { GenderAvatar } from '../../common/GenderAvatar/GenderAvatar';
 import './AdminMembersMgmt.css';
 
 type MemberGender = 'male' | 'female' | 'other';

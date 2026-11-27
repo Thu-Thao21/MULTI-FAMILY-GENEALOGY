@@ -6,7 +6,7 @@ import {
   type PermissionAction,
   type PermissionSet,
   type RoleDefinition,
-} from './mockData';
+} from './platformAdminTypes';
 import {
   AdminConfirmDialog,
   AdminPageHeader,

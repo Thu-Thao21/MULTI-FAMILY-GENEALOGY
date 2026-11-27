@@ -11,12 +11,12 @@ import { TreeNodeSummarySheet } from '../TreeNodeSummarySheet';
 import { useIsMobile } from '../../../hooks/useIsMobile';
 import TreeActionModals, { type ModalType } from '../TreeActionModals/TreeActionModals';
 import { NotificationModal } from '../../common/NotificationModal';
-import { BurialQuickViewModal } from '../../../components/common/BurialQuickViewModal';
+import { BurialQuickViewModal } from '../../../components/common/BurialModals/BurialQuickViewModal';
 import { DualLineageModal } from '../../../components/network/DualLineageModal';
 import { fetchMyFamilyNetwork, fetchFamilyNetwork } from '../../../services/network.service';
 import type { MyFamilyNetworkResponse } from '../../../types/network';
 import { MyFamilyNetworkView } from '../../../components/network/MyFamilyNetwork';
-import { LineageAccessRequestModal } from '../../../components/network/LineageAccessRequestModal';
+import { LineageAccessRequestModal } from '../../../components/network/LineageAccessRequestModal/LineageAccessRequestModal';
 import {
   GenealogyChartModal,
   type GenealogyChartConfig,
@@ -740,7 +740,6 @@ export const TreeLayout: React.FC<TreeLayoutProps> = ({
             title="Mở không gian Tùy chỉnh Phả đồ truyền thống, Đổi màu sắc, Khung nền và Xuất bản in chất lượng cao"
           >
             <span>Tùy chỉnh Phả đồ & Xuất in</span>
-            <span className="studio-new-badge">Mới</span>
           </button>
 
           {/* Family Dropdown */}
@@ -796,24 +795,6 @@ export const TreeLayout: React.FC<TreeLayoutProps> = ({
             })}
           </select>
 
-          {/* Tree Direction Toggle */}
-          <div className="tree-dir-toggle-group">
-            <button
-              className={`tree-dir-btn ${treeDirection === 'vertical' ? 'active' : ''}`}
-              onClick={() => setTreeDirection('vertical')}
-              title="Chuyển sơ đồ dọc (Từ trên xuống)"
-            >
-               Dọc
-            </button>
-            <button
-              className={`tree-dir-btn ${treeDirection === 'horizontal' ? 'active' : ''}`}
-              onClick={() => setTreeDirection('horizontal')}
-              title="Chuyển sơ đồ ngang (Từ trái sang phải)"
-            >
-              Ngang
-            </button>
-          </div>
-
           {branches.length > 0 && (
             <select
               className="tree-control-select"
@@ -852,14 +833,22 @@ export const TreeLayout: React.FC<TreeLayoutProps> = ({
               onClick={() => setExpandTrigger({ action: 'expand_all', timestamp: Date.now() })}
               title="Mở rộng tất cả các đời và nhánh trong gia phả"
             >
-              🔽 Mở rộng hết
+              Mở rộng hết
             </button>
             <button
               className="tree-control-btn collapse-all-btn tree-btn-gray-sm"
               onClick={() => setExpandTrigger({ action: 'collapse_all', timestamp: Date.now() })}
               title="Thu gọn các nhánh về các đời trên"
             >
-              🔼 Thu gọn
+              Thu gọn
+            </button>
+            <button
+              className="tree-control-btn"
+              onClick={() => setZoomScale((z) => Math.max(0.1, Math.round((z - 0.15) * 100) / 100))}
+              title="Thu nhỏ (-15%)"
+              style={{ minWidth: '30px', padding: '0 8px', fontWeight: 700 }}
+            >
+              −
             </button>
             <button
               className="tree-control-btn reset tree-zoom-btn-fixed"
@@ -887,9 +876,6 @@ export const TreeLayout: React.FC<TreeLayoutProps> = ({
                   }, 60);
                 } else {
                   setZoomScale(1.0);
-                  setFocusMemberId(undefined);
-                  setSelectedBranch(undefined);
-                  setSelectedGeneration(undefined);
                   if (viewport) {
                     setTimeout(() => {
                       const maxScroll = viewport.scrollWidth - viewport.clientWidth;
@@ -901,6 +887,14 @@ export const TreeLayout: React.FC<TreeLayoutProps> = ({
               title={zoomScale >= 0.90 ? 'Bấm để thu vừa toàn bộ khung màn hình' : 'Bấm để phóng to 100% xem chi tiết'}
             >
               {Math.round(zoomScale * 100)}%
+            </button>
+            <button
+              className="tree-control-btn"
+              onClick={() => setZoomScale((z) => Math.min(2.0, Math.round((z + 0.15) * 100) / 100))}
+              title="Phóng to (+15%)"
+              style={{ minWidth: '30px', padding: '0 8px', fontWeight: 700 }}
+            >
+              +
             </button>
             <button
               className={`tree-control-btn ${isFullscreen ? 'active' : ''}`}

@@ -4,7 +4,7 @@ import {
   type PaymentMethod,
   type PaymentStatus,
   type PaymentTransaction,
-} from './mockData';
+} from './platformAdminTypes';
 import {
   AdminConfirmDialog,
   AdminModal,

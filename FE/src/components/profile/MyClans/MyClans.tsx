@@ -798,7 +798,7 @@ export const MyClans: React.FC = () => {
                   </div>
 
                   <div className="review-info-alert">
-                    <strong>Lưu ý:</strong> Sau khi gửi, yêu cầu sẽ chuyển sang trạng thái <em>Chờ xác minh</em>. Người duyệt của dòng họ đích sẽ kiểm tra thông tin và liên kết hồ sơ Person trước khi chính thức chấp thuận.
+                    <strong>Lưu ý:</strong> Sau khi gửi, yêu cầu sẽ chuyển sang trạng thái <em>Chờ xác minh</em>. Người duyệt của dòng họ đích sẽ kiểm tra thông tin và liên kết hồ sơ thành viên trước khi chính thức chấp thuận.
                   </div>
                 </div>
               )}
@@ -888,7 +888,7 @@ export const MyClans: React.FC = () => {
 
                   {viewingRequest.linked_person_name && (
                     <>
-                      <dt className="review-linked-person-dt">Hồ sơ Person được liên kết:</dt>
+                      <dt className="review-linked-person-dt">Hồ sơ thành viên được liên kết:</dt>
                       <dd className="review-linked-person-dd">{viewingRequest.linked_person_name}</dd>
                     </>
                   )}

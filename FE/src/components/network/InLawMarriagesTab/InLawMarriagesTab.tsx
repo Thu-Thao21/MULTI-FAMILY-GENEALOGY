@@ -3,8 +3,13 @@ import {
   fetchInLawMarriages,
   fetchMyMarriageInvitations,
   respondMarriageInvitation,
+  sendMarriageInvitation,
+  fetchFamilyNetwork,
+  fetchClanCandidateMembers,
 } from '../../../services/network.service';
-import type { InLawMarriage, MarriageInvitationItem } from '../../../types/network';
+import type { InLawMarriage, MarriageInvitationItem, FamilyNetwork } from '../../../types/network';
+import type { MemberItem } from '../../../types/member';
+import { useClanContext } from '../../../context/ClanContext';
 import { EmptyState } from '../../../shared/Feedback/EmptyState';
 import { LoadingState } from '../../../shared/Feedback/LoadingState';
 import '../Network.css';
@@ -12,12 +17,26 @@ import { DualLineageModal } from '../DualLineageModal';
 import './InLawMarriagesTab.css';
 
 export const InLawMarriagesTab: React.FC = () => {
+  const { activeClanId, activeClanName } = useClanContext();
   const [marriages, setMarriages] = useState<InLawMarriage[]>([]);
   const [invitations, setInvitations] = useState<MarriageInvitationItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionId, setActionId] = useState<string | null>(null);
   const [feedbackMsg, setFeedbackMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [selectedLineagePersonId, setSelectedLineagePersonId] = useState<string | null>(null);
+
+  // Modal Kết nối Hôn phối (Member)
+  const [isConnectModalOpen, setIsConnectModalOpen] = useState(false);
+  const [availableClans, setAvailableClans] = useState<FamilyNetwork[]>([]);
+  const [loadingClans, setLoadingClans] = useState(false);
+  const [targetClanId, setTargetClanId] = useState('');
+  const [targetCandidateMembers, setTargetCandidateMembers] = useState<MemberItem[]>([]);
+  const [loadingMembers, setLoadingMembers] = useState(false);
+  const [selectedTargetPersonId, setSelectedTargetPersonId] = useState('');
+  const [spouseSearchText, setSpouseSearchText] = useState('');
+  const [connectNotes, setConnectNotes] = useState('');
+  const [submittingConnect, setSubmittingConnect] = useState(false);
+  const [connectError, setConnectError] = useState<string | null>(null);
 
   const loadData = async () => {
     try {
@@ -37,6 +56,76 @@ export const InLawMarriagesTab: React.FC = () => {
   useEffect(() => {
     loadData();
   }, []);
+
+  const handleOpenConnectModal = async () => {
+    setIsConnectModalOpen(true);
+    setConnectError(null);
+    setTargetClanId('');
+    setSelectedTargetPersonId('');
+    setSpouseSearchText('');
+    setConnectNotes('');
+    setLoadingClans(true);
+    try {
+      const clans = await fetchFamilyNetwork('all');
+      const filtered = clans.filter((c) => !activeClanId || c.id.toLowerCase() !== activeClanId.toLowerCase());
+      setAvailableClans(filtered);
+    } catch (err) {
+      console.error('Lỗi nạp danh sách dòng họ đối tác:', err);
+      setConnectError('Không thể nạp danh sách dòng họ đối tác.');
+    } finally {
+      setLoadingClans(false);
+    }
+  };
+
+  const handleSelectTargetClan = async (clanId: string) => {
+    setTargetClanId(clanId);
+    setSelectedTargetPersonId('');
+    setSpouseSearchText('');
+    setTargetCandidateMembers([]);
+    if (!clanId) return;
+
+    setLoadingMembers(true);
+    setConnectError(null);
+    try {
+      const members = await fetchClanCandidateMembers(clanId);
+      setTargetCandidateMembers(members);
+    } catch (err) {
+      console.error('Lỗi nạp thành viên dòng họ đối tác:', err);
+      setConnectError('Không thể nạp danh sách thành viên của dòng họ đối tác.');
+    } finally {
+      setLoadingMembers(false);
+    }
+  };
+
+  const handleSubmitConnect = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedTargetPersonId) {
+      setConnectError('Vui lòng chọn người phối ngẫu bên dòng họ đối tác.');
+      return;
+    }
+    setSubmittingConnect(true);
+    setConnectError(null);
+    try {
+      await sendMarriageInvitation(selectedTargetPersonId, connectNotes.trim() || undefined);
+      setIsConnectModalOpen(false);
+      setFeedbackMsg({
+        type: 'success',
+        text: 'Đã gửi lời mời kết nối hôn phối thành công! Lời mời đang chờ người phối ngẫu xác nhận.',
+      });
+      await loadData();
+    } catch (err: any) {
+      console.error('Lỗi gửi lời mời kết hôn:', err);
+      const detail = err?.response?.data?.detail || 'Không thể gửi lời mời kết nối. Vui lòng kiểm tra lại.';
+      setConnectError(detail);
+    } finally {
+      setSubmittingConnect(false);
+    }
+  };
+
+  const filteredCandidates = targetCandidateMembers.filter((m) => {
+    if (!spouseSearchText.trim()) return true;
+    return m.fullName.toLowerCase().includes(spouseSearchText.trim().toLowerCase());
+  });
 
   const handleRespond = async (mappingId: string, action: 'ACCEPT' | 'REJECT') => {
     setActionId(mappingId);
@@ -165,10 +254,26 @@ export const InLawMarriagesTab: React.FC = () => {
       )}
 
       <div className="network-card">
-        <h3 className="network-card-title">Dâu & Rể Liên Họ</h3>
-        <p className="network-card-subtitle">
-          Danh sách các cuộc hôn nhân kết nối giữa hai dòng họ khác nhau, tạo nên mạng lưới thông gia.
-        </p>
+        <div className="inlaw-header-flex">
+          <div>
+            <h3 className="network-card-title">Dâu & Rể Liên Họ</h3>
+            <p className="network-card-subtitle">
+              Danh sách các cuộc hôn nhân kết nối giữa hai dòng họ khác nhau, tạo nên mạng lưới thông gia.
+            </p>
+          </div>
+          <button
+            type="button"
+            className="inlaw-btn-connect-primary"
+            onClick={handleOpenConnectModal}
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            <span>+ Kết nối Vợ / Chồng (Hôn phối)</span>
+          </button>
+        </div>
+
         {marriages.length > 0 ? (
           <div className="network-marriage-list">
             {marriages.map((m) => (
@@ -216,9 +321,167 @@ export const InLawMarriagesTab: React.FC = () => {
             variant="tree"
             title="Chưa ghi nhận mối liên kết Dâu & Rể liên họ"
             subMessage="Khi có các cuộc hôn nhân được thiết lập giữa thành viên dòng họ của bạn và các dòng họ khác, danh sách sẽ hiển thị trang trọng tại đây."
+            action={
+              <button
+                type="button"
+                className="inlaw-btn-connect-primary"
+                style={{ marginTop: '12px' }}
+                onClick={handleOpenConnectModal}
+              >
+                + Kết nối Vợ / Chồng (Hôn phối liên họ)
+              </button>
+            }
           />
         )}
       </div>
+
+      {/* MODAL KẾT NỐI HÔN PHỐI LIÊN HỌ (DÀNH CHO MEMBER) */}
+      {isConnectModalOpen && (
+        <div className="inlaw-modal-backdrop" onClick={() => setIsConnectModalOpen(false)}>
+          <div className="inlaw-modal-card" onClick={(e) => e.stopPropagation()}>
+            <div className="inlaw-modal-header">
+              <div className="inlaw-modal-header-text">
+                <span className="inlaw-modal-eyebrow">HÔN PHỐI SONG TỘC & LIÊN HỌ</span>
+                <h3 className="inlaw-modal-title">Gửi Lời Mời Kết Nối Vợ / Chồng</h3>
+                <p className="inlaw-modal-desc">
+                  Thiết lập quan hệ hôn nhân chính danh giữa bạn và người phối ngẫu bên dòng họ đối tác.
+                </p>
+              </div>
+              <button
+                type="button"
+                className="inlaw-modal-close-btn"
+                onClick={() => setIsConnectModalOpen(false)}
+                title="Đóng (Esc)"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmitConnect} className="inlaw-modal-body">
+              <div className="inlaw-privacy-notice">
+                <div className="inlaw-privacy-notice-icon">🛡️</div>
+                <div className="inlaw-privacy-notice-content">
+                  <strong>Quy trình & Quyền riêng tư 2 lớp:</strong>
+                  <ul>
+                    <li>1. Bạn gửi lời mời &rarr; Người phối ngẫu nhận thông báo và bấm <strong>Chấp thuận</strong>.</li>
+                    <li>2. Trưởng tộc hai bên dòng họ thẩm tra và phê duyệt chính danh.</li>
+                    <li>3. <strong>Bảo mật:</strong> Chỉ vợ chồng bạn và con cái mới xem được mạng lưới 4 đời hai bên gia đình. Dòng tộc không xem được thông tin chi tiết nhà thông gia.</li>
+                  </ul>
+                </div>
+              </div>
+
+              {connectError && (
+                <div className="inlaw-modal-error">
+                  {connectError}
+                </div>
+              )}
+
+              {/* 1. Chọn dòng họ đối tác */}
+              <div className="inlaw-form-group">
+                <label className="inlaw-form-label">
+                  1. Chọn Dòng họ của Người phối ngẫu (Vợ / Chồng) <span className="req">*</span>
+                </label>
+                {loadingClans ? (
+                  <div className="inlaw-field-hint">Đang nạp danh sách dòng họ trong hệ thống...</div>
+                ) : (
+                  <select
+                    className="inlaw-form-select"
+                    value={targetClanId}
+                    onChange={(e) => handleSelectTargetClan(e.target.value)}
+                    required
+                  >
+                    <option value="">-- Chọn dòng họ của vợ/chồng --</option>
+                    {availableClans.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name} {c.originPlace ? `(${c.originPlace})` : ''}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+
+              {/* 2. Chọn người phối ngẫu */}
+              {targetClanId && (
+                <div className="inlaw-form-group">
+                  <label className="inlaw-form-label">
+                    2. Chọn Hồ sơ Người phối ngẫu trên Cây dòng họ đối tác <span className="req">*</span>
+                  </label>
+
+                  {loadingMembers ? (
+                    <div className="inlaw-field-hint">Đang nạp danh sách thành viên dòng họ đối tác...</div>
+                  ) : (
+                    <>
+                      {targetCandidateMembers.length > 8 && (
+                        <input
+                          type="text"
+                          className="inlaw-form-input search-input"
+                          placeholder="🔍 Gõ nhanh để tìm theo tên người phối ngẫu..."
+                          value={spouseSearchText}
+                          onChange={(e) => setSpouseSearchText(e.target.value)}
+                        />
+                      )}
+
+                      <select
+                        className="inlaw-form-select"
+                        value={selectedTargetPersonId}
+                        onChange={(e) => setSelectedTargetPersonId(e.target.value)}
+                        required
+                      >
+                        <option value="">-- Chọn người phối ngẫu --</option>
+                        {filteredCandidates.map((m) => (
+                          <option key={m.id} value={m.id}>
+                            {m.fullName} ({m.gender === 'male' || m.gender === 'Nam' ? 'Nam' : 'Nữ'}
+                            {m.generation ? `, Đời ${m.generation}` : ''}
+                            {m.birthDate ? `, Sinh năm ${m.birthDate}` : ''})
+                          </option>
+                        ))}
+                      </select>
+
+                      {filteredCandidates.length === 0 && (
+                        <div className="inlaw-field-hint warning">
+                          Không tìm thấy thành viên phù hợp trong dòng họ này.
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              )}
+
+              {/* 3. Lời nhắn gửi kèm */}
+              <div className="inlaw-form-group">
+                <label className="inlaw-form-label">
+                  3. Lời nhắn gửi kèm theo lời mời (Tùy chọn)
+                </label>
+                <textarea
+                  className="inlaw-form-textarea"
+                  rows={2}
+                  placeholder="Ví dụ: Chào anh/em, em gửi lời mời kết nối thông tin vợ chồng gia đình mình lên hệ thống..."
+                  value={connectNotes}
+                  onChange={(e) => setConnectNotes(e.target.value)}
+                />
+              </div>
+
+              <div className="inlaw-modal-footer">
+                <button
+                  type="button"
+                  className="inlaw-btn-cancel"
+                  onClick={() => setIsConnectModalOpen(false)}
+                >
+                  Hủy bỏ
+                </button>
+                <button
+                  type="submit"
+                  className="inlaw-btn-submit"
+                  disabled={submittingConnect || !targetClanId || !selectedTargetPersonId}
+                >
+                  {submittingConnect ? 'Đang gửi...' : 'Gửi lời mời kết nối →'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {selectedLineagePersonId && (
         <DualLineageModal
           personId={selectedLineagePersonId}

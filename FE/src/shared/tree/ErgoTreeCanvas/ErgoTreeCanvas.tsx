@@ -784,13 +784,6 @@ export const ErgoTreeCanvas: React.FC<ErgoTreeCanvasProps> = ({
 
   const handleNodeClick = (e: React.MouseEvent, node: ErgoTreeNode) => {
     onCardClick(e, node);
-    // Đưa thẻ người vừa click vào ngay chính giữa màn hình
-    setTimeout(() => {
-      const card = viewportRef.current?.querySelector(`[data-person-card-id="${node.id}"]`) as HTMLElement;
-      if (card) {
-        card.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
-      }
-    }, 80);
   };
 
   // Drag to pan viewport handlers (Pointer Events with Pointer Capture for buttery 120 FPS panning)
@@ -958,29 +951,31 @@ export const ErgoTreeCanvas: React.FC<ErgoTreeCanvasProps> = ({
                     </div>
                   </div>
 
-                  <div
-                    className="tree-bilateral-column-header spouse"
-                    style={{
-                      position: 'absolute',
-                      left: `${bilateralLayout.SPOUSE_X - 180}px`,
-                      top: '24px',
-                      width: '360px',
-                      textAlign: 'center',
-                      padding: '10px 18px',
-                      background: '#f5f3ff',
-                      border: '1.5px solid #c4b5fd',
-                      borderRadius: '16px',
-                      boxShadow: '0 4px 14px rgba(124, 58, 237, 0.08)',
-                      zIndex: 3,
-                    }}
-                  >
-                    <div style={{ fontSize: '11px', fontWeight: 700, color: '#7c3aed', letterSpacing: '0.6px', textTransform: 'uppercase' }}>
-                      Dòng họ bên phối ngẫu (Thông gia)
+                  {bilateralLayout.spouseClan && bilateralLayout.spouseNode && (
+                    <div
+                      className="tree-bilateral-column-header spouse"
+                      style={{
+                        position: 'absolute',
+                        left: `${bilateralLayout.SPOUSE_X - 180}px`,
+                        top: '24px',
+                        width: '360px',
+                        textAlign: 'center',
+                        padding: '10px 18px',
+                        background: '#f5f3ff',
+                        border: '1.5px solid #c4b5fd',
+                        borderRadius: '16px',
+                        boxShadow: '0 4px 14px rgba(124, 58, 237, 0.08)',
+                        zIndex: 3,
+                      }}
+                    >
+                      <div style={{ fontSize: '11px', fontWeight: 700, color: '#7c3aed', letterSpacing: '0.6px', textTransform: 'uppercase' }}>
+                        Dòng họ bên phối ngẫu (Thông gia)
+                      </div>
+                      <div style={{ fontSize: '16px', fontWeight: 800, color: '#5b21b6', marginTop: '2px' }}>
+                        {bilateralLayout.spouseClan?.name?.toUpperCase()} [4 ĐỜI CHIA SẺ]
+                      </div>
                     </div>
-                    <div style={{ fontSize: '16px', fontWeight: 800, color: '#5b21b6', marginTop: '2px' }}>
-                      {bilateralLayout.spouseClan?.name?.toUpperCase() || 'MAI THẾ TỘC'} [4 ĐỜI CHIA SẺ]
-                    </div>
-                  </div>
+                  )}
 
                   {/* 2. SVG Connectors Layer */}
                   <svg

@@ -8,20 +8,20 @@ import { ProfileLayout } from '../../components/profile/ProfileLayout';
 import { ClanProfilePage } from '../../components/clan/ClanProfilePage';
 import { MyClans } from '../../components/profile/MyClans/MyClans';
 import { fetchMembers } from '../../services/member.service';
-import { PrivacySettingsTab } from '../../components/profile/PrivacySettingsTab';
-import { RelationshipFinder } from '../../components/member/RelationshipFinder';
-import { MyProposalsModule } from '../../components/member/MyProposalsModule';
-import { AnniversariesModule } from '../../components/member/AnniversariesModule';
-import { ClanEventsModule } from '../../components/member/ClanEventsModule';
-import { ClanFundsModule } from '../../components/member/ClanFundsModule';
-import { ClanDocumentsModule } from '../../components/member/ClanDocumentsModule';
-import { ClanAIAssistantModule } from '../../components/member/ClanAIAssistantModule';
-import { FloatingAIAssistant } from '../../components/member/FloatingAIAssistant';
-import { DigitalAncestralHallModule } from '../../components/member/DigitalAncestralHallModule';
+import { PrivacySettingsTab } from '../../components/profile/PrivacySettingsTab/PrivacySettingsTab';
+import { RelationshipFinder } from '../../components/member/workspace/RelationshipFinder';
+import { MyProposalsModule } from '../../components/member/workspace/MyProposalsModule';
+import { AnniversariesModule } from '../../components/member/activities/AnniversariesModule';
+import { ClanEventsModule } from '../../components/member/activities/ClanEventsModule';
+import { ClanFundsModule } from '../../components/member/activities/ClanFundsModule';
+import { ClanDocumentsModule } from '../../components/member/workspace/ClanDocumentsModule';
+import { ClanAIAssistantModule } from '../../components/member/ai/ClanAIAssistantModule';
+import { FloatingAIAssistant } from '../../components/member/ai/FloatingAIAssistant';
+import { DigitalAncestralHallModule } from '../../components/member/ancestralHall/DigitalAncestralHallModule';
 import { ClanLocationsModule } from '../../components/clan/ClanLocationsModule';
-import { NotificationCenterModule } from '../../components/member/NotificationCenterModule';
-import { AIConsentModule } from '../../components/member/AIConsentModule';
-import { DataExchangeModule } from '../../components/member/DataExchangeModule';
+import { NotificationCenterModule } from '../../components/member/workspace/NotificationCenterModule';
+import { AIConsentModule } from '../../components/member/ai/AIConsentModule';
+import { DataExchangeModule } from '../../components/member/workspace/DataExchangeModule';
 import { NotificationModal } from '../../components/common/NotificationModal';
 import { FamilyPaternalTab } from '../../components/network/FamilyPaternalTab';
 import { FamilyMaternalTab } from '../../components/network/FamilyMaternalTab';
@@ -396,6 +396,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ userName, onLogout }) => {
           canManage={canManageFamily}
           clanName={activeClanName || account?.clan_name || 'Dòng họ'}
           userRole={userRole}
+          onNavigateTab={handleSelectTab}
         />
       );
     }
@@ -611,7 +612,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ userName, onLogout }) => {
       );
     }
     if (activeTab === 'net-noi') return <FamilyPaternalTab />;
-    if (activeTab === 'net-ngoai') return <FamilyMaternalTab onNavigateToLinks={() => handleSelectTab('family-links')} />;
+    if (activeTab === 'net-ngoai') return <FamilyMaternalTab onNavigateToLinks={() => handleSelectTab('net-dau-re')} />;
     if (activeTab === 'net-dau-re') return <InLawMarriagesTab />;
     if (activeTab === 'net-thong-gia') return <AffiliatedFamiliesTab />;
 
@@ -654,7 +655,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ userName, onLogout }) => {
             <span>HỒ SƠ CÁ NHÂN GIA TỘC</span>
             <h1>Chưa liên kết hồ sơ thành viên</h1>
             <p>
-              Tài khoản của bạn chưa được liên kết với hồ sơ Person cụ thể nào trong cây gia phả{' '}
+              Tài khoản của bạn chưa được liên kết với hồ sơ thành viên cụ thể nào trong cây gia phả{' '}
               <strong>{activeClanName || 'đang chọn'}</strong>.
             </p>
             <p style={{ fontSize: '13.5px', color: '#64748b', marginTop: '6px' }}>
@@ -737,6 +738,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ userName, onLogout }) => {
         isSidebarCollapsed={isSidebarCollapsed}
         onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
         onNavigateTab={handleSelectTab}
+        onSelectMember={handleSelectMember}
       />
 
       <div className="dashboard-body-row">

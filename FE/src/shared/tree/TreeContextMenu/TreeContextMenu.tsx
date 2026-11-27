@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { ErgoTreeNode } from '../../../types/tree';
 import { useIsMobile } from '../../../hooks/useIsMobile';
 import './TreeContextMenu.css';
@@ -54,6 +54,33 @@ export const TreeContextMenu: React.FC<TreeContextMenuProps> = ({
 }) => {
   // Mobile: hiện dạng bottom sheet có nền mờ thay vì menu nổi tại toạ độ chạm
   const isMobile = useIsMobile();
+  const menuRef = useRef<HTMLDivElement>(null);
+  const [pos, setPos] = useState<{ left: number; top: number }>({ left: x, top: y });
+
+  useLayoutEffect(() => {
+    if (!isOpen || isMobile) return;
+    const el = menuRef.current;
+    if (!el) {
+      setPos({ left: x, top: y });
+      return;
+    }
+    const rect = el.getBoundingClientRect();
+    const pad = 12;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+
+    let nextLeft = x;
+    let nextTop = y;
+
+    if (nextLeft + rect.width > vw - pad) {
+      nextLeft = Math.max(pad, vw - rect.width - pad);
+    }
+    if (nextTop + rect.height > vh - pad) {
+      const flippedTop = y - rect.height;
+      nextTop = flippedTop >= pad ? flippedTop : Math.max(pad, vh - rect.height - pad);
+    }
+    setPos({ left: Math.max(pad, nextLeft), top: Math.max(pad, nextTop) });
+  }, [isOpen, isMobile, x, y, node?.id]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -81,8 +108,9 @@ export const TreeContextMenu: React.FC<TreeContextMenuProps> = ({
 
   const menu = (
     <div
+      ref={menuRef}
       className={`tree-context-menu ${isMobile ? 'is-sheet' : ''}`}
-      style={isMobile ? undefined : { left: `${x}px`, top: `${y}px` }}
+      style={isMobile ? undefined : { left: `${pos.left}px`, top: `${pos.top}px`, maxHeight: 'calc(100vh - 24px)', overflowY: 'auto' }}
       onClick={(e) => e.stopPropagation()}
       role={isMobile ? 'dialog' : undefined}
       aria-modal={isMobile ? true : undefined}
@@ -259,6 +287,28 @@ export const TreeContextMenu: React.FC<TreeContextMenuProps> = ({
                   Xác nhận quan hệ (Nối phả hệ)
                 </button>
               )}
+
+              <button
+                className="tree-context-menu-item"
+                onClick={() => {
+                  onClose();
+                  if (onAddChild) onAddChild(node);
+                  else if (onActionToast) onActionToast('Thêm con');
+                }}
+              >
+                Thêm con
+              </button>
+
+              <button
+                className="tree-context-menu-item"
+                onClick={() => {
+                  onClose();
+                  if (onAddSpouse) onAddSpouse(node);
+                  else if (onActionToast) onActionToast('Thêm Vợ/Chồng');
+                }}
+              >
+                Thêm Vợ/Chồng
+              </button>
 
               <button
                 className="tree-context-menu-item"

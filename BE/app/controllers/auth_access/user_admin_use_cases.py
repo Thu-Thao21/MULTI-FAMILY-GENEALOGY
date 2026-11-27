@@ -215,6 +215,32 @@ async def list_clan_users(
     )
     total = await family.count_clan_members(clan_id, membership_status=query.membership_status)
     ids = [user.user_id for _membership, user in rows]
+
+    # Bổ sung những tài khoản đã kích hoạt & liên kết vào Person thuộc dòng họ
+    # nhưng chưa có bản ghi trực tiếp trong clan_memberships (nếu trang 1 & không lọc status)
+    extra_users = []
+    if query.page == 1 and query.membership_status is None:
+        from sqlalchemy import select
+        from app.models.genealogy.entities import Person, PersonAccountLink
+        from app.models.user_access.entities import Account
+
+        extra_stmt = (
+            select(Account)
+            .join(PersonAccountLink, PersonAccountLink.user_id == Account.id)
+            .join(Person, Person.id == PersonAccountLink.person_id)
+            .where(
+                Person.family_id == clan_id,
+                PersonAccountLink.status == "ACTIVE",
+                Account.id.notin_(ids) if ids else True,
+            )
+            .distinct()
+        )
+        extra_res = await family._session.execute(extra_stmt)
+        extra_users = list(extra_res.scalars().all())
+        for eu in extra_users:
+            if eu.id not in ids:
+                ids.append(eu.id)
+
     roles = await users.list_clan_role_codes(clan_id, ids)
     fa_ids = await family.list_active_fa_user_ids(clan_id, ids)
     items = [
@@ -230,6 +256,20 @@ async def list_clan_users(
         )
         for membership, user in rows
     ]
+    for eu in extra_users:
+        items.append(
+            ClanUserItem(
+                user_id=eu.id,
+                display_name=eu.display_name or eu.username or eu.email,
+                email=eu.email,
+                user_status=eu.status or "ACTIVE",
+                membership_status="ACTIVE",
+                roles=roles.get(eu.id, []),
+                is_family_admin=eu.id in fa_ids,
+                joined_at=eu.created_at,
+            )
+        )
+    total = max(total, len(items))
     return Page[ClanUserItem](
         items=items, total=total, page=query.page, page_size=query.page_size
     )

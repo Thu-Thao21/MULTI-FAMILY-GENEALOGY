@@ -1,5 +1,5 @@
 import apiClient from '../api/axios';
-import type { ClanBroadcastItem, NotificationItem } from '../components/member/NotificationCenterModule';
+import type { ClanBroadcastItem, NotificationItem } from '../components/member/workspace/NotificationCenterModule';
 
 export interface PublishAnnouncementPayload {
   title: string;
@@ -81,6 +81,32 @@ export async function markAllNotificationsRead(): Promise<boolean> {
     return true;
   } catch (err) {
     console.error('Lỗi đánh dấu tất cả đã đọc:', err);
+    return false;
+  }
+}
+
+/**
+ * Xóa một thông báo trong hộp thư cá nhân
+ */
+export async function deleteUserNotification(notificationId: string): Promise<boolean> {
+  try {
+    await apiClient.delete(`/notifications/${notificationId}`);
+    return true;
+  } catch (err) {
+    console.error('Lỗi xóa thông báo:', err);
+    return false;
+  }
+}
+
+/**
+ * Xóa tất cả thông báo đã đọc trong hộp thư cá nhân
+ */
+export async function deleteReadNotifications(): Promise<boolean> {
+  try {
+    await apiClient.delete('/notifications/read');
+    return true;
+  } catch (err) {
+    console.error('Lỗi xóa các thông báo đã đọc:', err);
     return false;
   }
 }

@@ -1,9 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '../../../config/routes';
 import circularEmblemLogo from '../../../assets/logo/logo_circular_emblem.png';
 import { ClanSelector } from './ClanSelector';
+import { useClanContext } from '../../../context/ClanContext';
+import { fetchMembers } from '../../../services/member.service';
+import type { Member } from '../../../types/member';
 import {
   fetchUserNotifications,
   markNotificationRead,
@@ -18,10 +21,11 @@ export interface TopBarProps {
   isSidebarCollapsed: boolean;
   onToggleSidebar: () => void;
   onNavigateTab?: (tabId: string) => void;
+  onSelectMember?: (memberId: string) => void;
 }
 
 export interface NotificationItem {
-  id: number;
+  id: number | string;
   title: string;
   desc: string;
   time: string;
@@ -31,11 +35,34 @@ export interface NotificationItem {
   targetTab?: string;
 }
 
+const NOTIFICATION_TYPE_LABELS: Record<string, string> = {
+  join_request: 'Yêu cầu gia nhập',
+  clan_join_request: 'Yêu cầu gia nhập',
+  join_request_result: 'Kết quả gia nhập',
+  join_approved: 'Đã duyệt gia nhập',
+  join_rejected: 'Từ chối gia nhập',
+  proposal: 'Đề xuất chỉnh sửa',
+  edit_proposal: 'Đề xuất chỉnh sửa',
+  change_proposal: 'Đề xuất chỉnh sửa',
+  approval: 'Phê duyệt hồ sơ',
+  link_request: 'Liên kết dòng họ',
+  inter_clan_link: 'Liên kết dòng họ',
+  memorial: 'Lễ giỗ & Tưởng niệm',
+  event: 'Sự kiện dòng họ',
+  fund: 'Quỹ & Đóng góp',
+  security: 'Bảo mật tài khoản',
+  ai: 'Trợ lý AI & Gợi ý',
+  system: 'Thông báo hệ thống',
+};
+
 export const getNotificationTypeConfig = (type?: string) => {
-  const t = (type || '').toLowerCase();
-  if (t.includes('giỗ') || t.includes('tưởng niệm')) {
+  const raw = (type || '').trim();
+  const t = raw.toLowerCase();
+  const mappedLabel = NOTIFICATION_TYPE_LABELS[t] || raw;
+
+  if (t.includes('giỗ') || t.includes('tưởng niệm') || t === 'memorial') {
     return {
-      label: type || 'Lễ giỗ & Tưởng niệm',
+      label: mappedLabel || 'Lễ giỗ & Tưởng niệm',
       color: '#d97706',
       badgeBg: '#fef3c7',
       badgeBorder: '#fde68a',
@@ -50,9 +77,16 @@ export const getNotificationTypeConfig = (type?: string) => {
       ),
     };
   }
-  if (t.includes('duyệt') || t.includes('thay đổi') || t.includes('hồ sơ')) {
+  if (
+    t.includes('duyệt') ||
+    t.includes('thay đổi') ||
+    t.includes('hồ sơ') ||
+    t.includes('join_request') ||
+    t.includes('proposal') ||
+    t === 'approval'
+  ) {
     return {
-      label: type || 'Phê duyệt hồ sơ',
+      label: mappedLabel || 'Phê duyệt hồ sơ',
       color: '#2563eb',
       badgeBg: '#eff6ff',
       badgeBorder: '#bfdbfe',
@@ -69,7 +103,7 @@ export const getNotificationTypeConfig = (type?: string) => {
     };
   }
   return {
-    label: type || 'Sự kiện & Hoạt động',
+    label: mappedLabel || 'Sự kiện & Hoạt động',
     color: '#7c3aed',
     badgeBg: '#f5f3ff',
     badgeBorder: '#ddd6fe',
@@ -82,7 +116,8 @@ export const getNotificationTypeConfig = (type?: string) => {
   };
 };
 
-export const renderNotificationContent = (content: string) => {
+export const renderNotificationContent = (content?: string) => {
+  if (!content) return null;
   const paragraphs = content.split('\n\n');
   return (
     <div className="topbar-notif-content-flow">
@@ -144,6 +179,90 @@ export const renderNotificationContent = (content: string) => {
   );
 };
 
+export const formatNotifText = (text?: string): string => {
+  if (!text) return '';
+  return text.replace(/PATERNAL/gi, 'Bên nội').replace(/MATERNAL/gi, 'Bên ngoại');
+};
+
+export const resolveNotificationTargetTab = (it: any, role?: string): string => {
+  const cat = (it.category || it.type || '').toLowerCase();
+  const title = (it.title || '').toLowerCase();
+  const content = (it.content || '').toLowerCase();
+  const isAdmin = (role || '').toLowerCase() === 'admin';
+
+  // 1. Phê duyệt kết quả gia nhập trả về cho thành viên
+  const isJoinResult =
+    cat === 'join_request_result' ||
+    title.includes('kết quả gia nhập') ||
+    title.includes('chấp thuận') ||
+    title.includes('được phê duyệt') ||
+    content.includes('đã được ban quản trị phê duyệt') ||
+    content.includes('bị từ chối') ||
+    content.includes('yêu cầu bạn bổ sung thông tin');
+
+  if (isJoinResult) {
+    return 'my-clans';
+  }
+
+  // 2. Yêu cầu xin gia nhập dòng họ mới -> Đi thẳng đến trang duyệt thành viên
+  const isJoinRequest =
+    cat === 'join_request' ||
+    cat === 'clan_join_request' ||
+    cat.includes('join') ||
+    title.includes('gia nhập') ||
+    content.includes('yêu cầu gia nhập') ||
+    content.includes('hồ sơ gia nhập');
+
+  if (isJoinRequest) {
+    return isAdmin ? 'admin-approval' : 'family-approvals';
+  }
+
+  // 3. Đề xuất quan hệ hoặc thông tin gia tộc
+  const isProposal =
+    cat === 'proposal' ||
+    cat === 'location_proposal' ||
+    cat.includes('proposal') ||
+    title.includes('đề xuất') ||
+    content.includes('đề xuất');
+
+  if (isProposal) {
+    const isRegularMember = !isAdmin && (role === 'Thành viên' || role === 'Member');
+    return isRegularMember ? 'my-proposals' : (isAdmin ? 'admin-approval' : 'family-approvals');
+  }
+
+  // 4. Sự kiện & hoạt động
+  if (cat === 'event' || title.includes('sự kiện')) {
+    return 'events';
+  }
+
+  // 5. Ngày giỗ & tưởng niệm
+  if (cat === 'memorial' || title.includes('giỗ') || title.includes('tưởng niệm')) {
+    return 'anniversaries';
+  }
+
+  // 6. Quỹ & tài chính
+  if (cat === 'fund' || title.includes('quỹ') || title.includes('đóng góp')) {
+    return 'funds';
+  }
+
+  // 7. Cây gia phả
+  if (cat === 'tree' || title.includes('cây gia phả') || title.includes('phả hệ')) {
+    return 'tree';
+  }
+
+  // 8. Thành viên
+  if (cat === 'member' || title.includes('thành viên mới')) {
+    return 'member-list';
+  }
+
+  // 9. Bất kỳ thông báo nào liên quan đến xét duyệt
+  if (title.includes('xét duyệt') || content.includes('xét duyệt') || title.includes('phê duyệt')) {
+    return isAdmin ? 'admin-approval' : 'family-approvals';
+  }
+
+  return 'notifications';
+};
+
 export const TopBar: React.FC<TopBarProps> = ({
   userName,
   userRole = 'Thành viên',
@@ -151,16 +270,22 @@ export const TopBar: React.FC<TopBarProps> = ({
   isSidebarCollapsed,
   onToggleSidebar,
   onNavigateTab,
+  onSelectMember,
 }) => {
   const navigate = useNavigate();
+  const { activeClanId } = useClanContext();
   const isAdmin = (userRole || '').toLowerCase() === 'admin';
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [selectedNotification, setSelectedNotification] = useState<NotificationItem | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<Member[]>([]);
+  const [showSearchDropdown, setShowSearchDropdown] = useState(false);
+  const [isSearchingMembers, setIsSearchingMembers] = useState(false);
 
   const profileMenuRef = useRef<HTMLDivElement>(null);
   const notifMenuRef = useRef<HTMLDivElement>(null);
+  const searchBoxRef = useRef<HTMLFormElement>(null);
 
   // Lắng nghe sự kiện Escape và Click Outside để tự động đóng dropdown menu & modal
   useEffect(() => {
@@ -169,6 +294,7 @@ export const TopBar: React.FC<TopBarProps> = ({
         setShowProfileMenu(false);
         setShowNotifications(false);
         setSelectedNotification(null);
+        setShowSearchDropdown(false);
       }
     };
 
@@ -179,9 +305,12 @@ export const TopBar: React.FC<TopBarProps> = ({
       if (notifMenuRef.current && !notifMenuRef.current.contains(e.target as Node)) {
         setShowNotifications(false);
       }
+      if (searchBoxRef.current && !searchBoxRef.current.contains(e.target as Node)) {
+        setShowSearchDropdown(false);
+      }
     };
 
-    if (showProfileMenu || showNotifications || selectedNotification) {
+    if (showProfileMenu || showNotifications || selectedNotification || showSearchDropdown) {
       document.addEventListener('keydown', handleKeyDown);
       document.addEventListener('mousedown', handleClickOutside);
     }
@@ -190,41 +319,83 @@ export const TopBar: React.FC<TopBarProps> = ({
       document.removeEventListener('keydown', handleKeyDown);
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [showProfileMenu, showNotifications, selectedNotification]);
+  }, [showProfileMenu, showNotifications, selectedNotification, showSearchDropdown]);
+
+  // Tìm kiếm thành viên trực tiếp khi gõ trên TopBar
+  useEffect(() => {
+    const q = searchQuery.trim();
+    if (!q) {
+      setSearchResults([]);
+      setShowSearchDropdown(false);
+      return;
+    }
+
+    const normalizeText = (s: string) =>
+      s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').toLowerCase();
+
+    let cancelled = false;
+    const timer = setTimeout(async () => {
+      setIsSearchingMembers(true);
+      try {
+        const res = await fetchMembers({ familyId: activeClanId || undefined, limit: 1000 });
+        if (cancelled) return;
+        const normQ = normalizeText(q);
+        const matches = (res.items || [])
+          .filter((m) => {
+            const hay = normalizeText(`${m.fullName || ''} ${m.otherName || ''} ${m.branch || ''} đời ${m.generation || ''}`);
+            return hay.includes(normQ);
+          })
+          .slice(0, 8);
+        setSearchResults(matches);
+        setShowSearchDropdown(true);
+      } catch {
+        if (!cancelled) setSearchResults([]);
+      } finally {
+        if (!cancelled) setIsSearchingMembers(false);
+      }
+    }, 180);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [searchQuery, activeClanId]);
 
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
 
   // Tải thông báo thực tế từ máy chủ
-  const loadNotifications = () => {
+  const loadNotifications = useCallback(() => {
     fetchUserNotifications().then((items) => {
       if (items && items.length > 0) {
         setNotifications(
           items.map((it: any, index: number) => ({
             id: it.id || index + 1,
-            title: it.title,
-            desc: it.content,
+            title: formatNotifText(it.title),
+            desc: formatNotifText(it.content),
             time: it.createdAt,
             unread: !it.read,
             type: it.category || 'Thông báo dòng họ',
-            fullContent: it.content,
-            targetTab: 'notifications',
+            fullContent: formatNotifText(it.content),
+            targetTab: resolveNotificationTargetTab(it, userRole),
           }))
         );
+      } else {
+        setNotifications([]);
       }
     }).catch((err) => console.error('Lỗi nạp thông báo TopBar:', err));
-  };
+  }, [userRole]);
 
   useEffect(() => {
     loadNotifications();
     const interval = setInterval(loadNotifications, 15000);
     return () => clearInterval(interval);
-  }, []);
+  }, [loadNotifications]);
 
   useEffect(() => {
     if (showNotifications) {
       loadNotifications();
     }
-  }, [showNotifications]);
+  }, [showNotifications, loadNotifications]);
 
   const unreadCount = notifications.filter((n) => n.unread).length;
   const roleClass = userRole === 'Admin' ? 'admin' : 'member';
@@ -248,14 +419,30 @@ export const TopBar: React.FC<TopBarProps> = ({
     setShowNotifications(false);
   };
 
+  const handleSelectSearchMember = (member: Member) => {
+    setShowSearchDropdown(false);
+    setSearchQuery('');
+    if (onSelectMember) {
+      onSelectMember(member.id);
+    } else {
+      navigate(ROUTES.USER.MEMBER_PROFILE);
+    }
+  };
+
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchQuery.trim()) {
-      if (onNavigateTab) {
-        onNavigateTab('member-list');
-      } else {
-        navigate(`${ROUTES.USER.MEMBERS}?search=${encodeURIComponent(searchQuery)}`);
-      }
+    const q = searchQuery.trim();
+    if (!q) return;
+    if (searchResults.length === 1 && onSelectMember) {
+      handleSelectSearchMember(searchResults[0]);
+      return;
+    }
+    setShowSearchDropdown(false);
+    if (onNavigateTab) {
+      onNavigateTab('member-list');
+      navigate(`${ROUTES.USER.MEMBERS}?search=${encodeURIComponent(q)}`, { replace: false });
+    } else {
+      navigate(`${ROUTES.USER.MEMBERS}?search=${encodeURIComponent(q)}`);
     }
   };
 
@@ -317,11 +504,14 @@ export const TopBar: React.FC<TopBarProps> = ({
 
       <ClanSelector isAdmin={userRole === 'Admin'} />
 
-      <form className="topbar-search-container" onSubmit={handleSearchSubmit}>
+      <form className="topbar-search-container" ref={searchBoxRef} onSubmit={handleSearchSubmit} style={{ position: 'relative' }}>
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
+          onFocus={() => {
+            if (searchQuery.trim()) setShowSearchDropdown(true);
+          }}
           placeholder="Tìm kiếm nhanh tên thành viên, biệt hiệu, dòng họ hoặc ngày giỗ..."
           className="topbar-search-input"
         />
@@ -331,6 +521,75 @@ export const TopBar: React.FC<TopBarProps> = ({
             <line x1="21" y1="21" x2="16.65" y2="16.65" />
           </svg>
         </button>
+
+        {showSearchDropdown && searchQuery.trim() && (
+          <div
+            style={{
+              position: 'absolute',
+              top: 'calc(100% + 6px)',
+              left: 0,
+              right: 0,
+              background: '#ffffff',
+              borderRadius: '12px',
+              border: '1px solid #e2e8f0',
+              boxShadow: '0 14px 32px rgba(15, 23, 42, 0.14)',
+              maxHeight: '340px',
+              overflowY: 'auto',
+              zIndex: 1000,
+              padding: '6px',
+            }}
+          >
+            {isSearchingMembers && searchResults.length === 0 ? (
+              <div style={{ padding: '12px', fontSize: '13px', color: '#64748b', textAlign: 'center' }}>
+                Đang tìm thành viên...
+              </div>
+            ) : searchResults.length === 0 ? (
+              <div style={{ padding: '12px', fontSize: '13px', color: '#64748b', textAlign: 'center' }}>
+                Không tìm thấy thành viên khớp với &quot;{searchQuery}&quot;
+              </div>
+            ) : (
+              searchResults.map((m) => (
+                <button
+                  key={m.id}
+                  type="button"
+                  onClick={() => handleSelectSearchMember(m)}
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '10px',
+                    padding: '9px 12px',
+                    border: 'none',
+                    borderRadius: '8px',
+                    background: 'transparent',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = '#eff6ff';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'transparent';
+                  }}
+                >
+                  <div>
+                    <div style={{ fontSize: '13.5px', fontWeight: 700, color: '#0f172a' }}>
+                      {m.fullName}
+                    </div>
+                    <div style={{ fontSize: '12px', color: '#64748b' }}>
+                      Đời {m.generation || 1} • {m.gender === 'female' ? 'Nữ' : 'Nam'}
+                      {m.branch ? ` • ${m.branch}` : ''}
+                    </div>
+                  </div>
+                  <span style={{ fontSize: '12px', color: '#2563eb', fontWeight: 600 }}>
+                    Xem hồ sơ →
+                  </span>
+                </button>
+              ))
+            )}
+          </div>
+        )}
       </form>
 
       <div className="topbar-right-group">
@@ -575,6 +834,7 @@ export const TopBar: React.FC<TopBarProps> = ({
                       onClick={() => {
                         const tab = selectedNotification.targetTab!;
                         setSelectedNotification(null);
+                        setShowNotifications(false);
                         onNavigateTab(tab);
                       }}
                     >

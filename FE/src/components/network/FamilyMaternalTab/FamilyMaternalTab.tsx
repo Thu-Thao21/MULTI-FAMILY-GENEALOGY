@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { fetchFamilyNetwork } from '../../../services/network.service';
 import type { FamilyNetwork } from '../../../types/network';
-import { FamilyClanCard } from '../FamilyClanCard';
+import { FamilyClanCard } from '../FamilyClanCard/FamilyClanCard';
 import { EmptyState } from '../../../shared/Feedback/EmptyState';
 import { LoadingState } from '../../../shared/Feedback/LoadingState';
 import '../Network.css';
@@ -72,7 +72,7 @@ export const FamilyMaternalTab: React.FC<FamilyMaternalTabProps> = ({ onNavigate
                 boxShadow: '0 1px 3px rgba(37, 99, 235, 0.2)',
               }}
             >
-              Quản lý liên họ & Gửi yêu cầu
+              + Kết nối Hôn phối (Dâu - Rể)
             </button>
           )}
         </div>
@@ -105,7 +105,7 @@ export const FamilyMaternalTab: React.FC<FamilyMaternalTabProps> = ({ onNavigate
                     cursor: 'pointer',
                   }}
                 >
-                  Gửi yêu cầu liên kết dòng họ
+                  + Kết nối Hôn phối (Dâu - Rể)
                 </button>
               )
             }

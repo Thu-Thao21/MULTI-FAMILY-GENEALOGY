@@ -2,7 +2,8 @@ import { LoadingState } from '../../../shared/Feedback/LoadingState';
 import { EmptyState } from '../../../shared/Feedback/EmptyState';
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../../hooks/useAuth';
-import { fetchMemberDetail } from '../../../services/member.service';
+import { fetchMemberDetail, updateMemberProfile } from '../../../services/member.service';
+import { getCached } from '../../../utils/memoryCache';
 import type { MemberDetail } from '../../../types/member';
 import { AccountTab } from '../AccountTab';
 import { BiographyTab } from '../BiographyTab';
@@ -24,10 +25,50 @@ export type ProfileTabKey = 'personal' | 'biography' | 'contact' | 'photos' | 'c
 
 export const ProfileLayout: React.FC<ProfileLayoutProps> = ({ memberId, onBack, onNavigateTab }) => {
   const { account } = useAuth();
-  const [member, setMember] = useState<MemberDetail | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const cachedMember = getCached<MemberDetail>(`member-detail:${memberId}`)?.data ?? null;
+  const [member, setMember] = useState<MemberDetail | null>(cachedMember);
+  const [loading, setLoading] = useState<boolean>(!cachedMember);
   const [activeTab, setActiveTab] = useState<ProfileTabKey>('personal');
   const [successToast, setSuccessToast] = useState<string | null>(null);
+  const [errorToast, setErrorToast] = useState<string | null>(null);
+
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [editSaving, setEditSaving] = useState(false);
+  const [editForm, setEditForm] = useState({
+    fullName: '',
+    otherName: '',
+    gender: 'male',
+    birthDate: '',
+    occupation: '',
+    education: '',
+    phone: '',
+    email: '',
+    address: '',
+    bio: '',
+  });
+
+  const applyExtraProfileFields = (data: MemberDetail | null): MemberDetail | null => {
+    if (!data) return null;
+    try {
+      const raw = localStorage.getItem(`profile_extra_${data.id}`);
+      if (!raw) return data;
+      const extra = JSON.parse(raw);
+      return {
+        ...data,
+        otherName: extra.otherName ?? data.otherName,
+        occupation: extra.occupation || data.occupation,
+        education: extra.education || data.education,
+        bio: extra.bio !== undefined ? extra.bio : (data as any).bio,
+        contact: {
+          phone: extra.phone ?? data.contact?.phone,
+          email: extra.email ?? data.contact?.email,
+          address: extra.address ?? data.contact?.address,
+        },
+      };
+    } catch {
+      return data;
+    }
+  };
 
   const [isPrivate, setIsPrivate] = useState<boolean>(() => {
     const saved = localStorage.getItem(`privacy_setting_${memberId}`);
@@ -35,9 +76,15 @@ export const ProfileLayout: React.FC<ProfileLayoutProps> = ({ memberId, onBack, 
   });
 
   useEffect(() => {
-    setLoading(true);
+    const cached = applyExtraProfileFields(getCached<MemberDetail>(`member-detail:${memberId}`)?.data ?? null);
+    if (cached) {
+      setMember(cached);
+      setLoading(false);
+    } else {
+      setLoading(true);
+    }
     fetchMemberDetail(memberId).then((data) => {
-      setMember(data);
+      setMember(applyExtraProfileFields(data));
       if (data) {
         const saved = localStorage.getItem(`privacy_setting_${memberId}`);
         const priv = saved ? saved === 'private' : Boolean((data as any).isPrivate || (data as any).is_private);
@@ -46,6 +93,84 @@ export const ProfileLayout: React.FC<ProfileLayoutProps> = ({ memberId, onBack, 
       setLoading(false);
     });
   }, [memberId]);
+
+  const roleLower = (account?.primary_role || '').toLowerCase();
+  const canManage = ['trưởng tộc', 'chủ dòng họ', 'clan admin', 'clan_admin', 'family_head', 'family admin', 'family_admin', 'manager'].includes(roleLower);
+
+  const openEditModal = () => {
+    if (!member) return;
+    setEditForm({
+      fullName: member.fullName || '',
+      otherName: member.otherName || '',
+      gender: (member.gender || 'male').toLowerCase(),
+      birthDate: member.birthDate ? String(member.birthDate).slice(0, 10) : '',
+      occupation: member.occupation || '',
+      education: member.education || '',
+      phone: member.contact?.phone || '',
+      email: member.contact?.email || (isSelf ? account?.email || '' : ''),
+      address: member.contact?.address || '',
+      bio: (member as any).bio || '',
+    });
+    setIsEditOpen(true);
+  };
+
+  const handleSaveProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!member) return;
+    if (!editForm.fullName.trim()) {
+      setErrorToast('Họ và tên không được để trống.');
+      setTimeout(() => setErrorToast(null), 3500);
+      return;
+    }
+    setEditSaving(true);
+    try {
+      await updateMemberProfile(member.id, {
+        fullName: editForm.fullName.trim(),
+        gender: editForm.gender,
+        birthDate: editForm.birthDate || '',
+        bio: editForm.bio,
+      });
+
+      try {
+        localStorage.setItem(
+          `profile_extra_${member.id}`,
+          JSON.stringify({
+            otherName: editForm.otherName.trim() || undefined,
+            occupation: editForm.occupation.trim() || undefined,
+            education: editForm.education.trim() || undefined,
+            phone: editForm.phone.trim() || undefined,
+            email: editForm.email.trim() || undefined,
+            address: editForm.address.trim() || undefined,
+            bio: editForm.bio,
+          })
+        );
+      } catch {
+        // Ignore storage errors
+      }
+
+      const fresh = await fetchMemberDetail(member.id);
+      setMember(
+        applyExtraProfileFields(
+          fresh || {
+            ...member,
+            fullName: editForm.fullName.trim(),
+            gender: editForm.gender as any,
+            birthDate: editForm.birthDate || undefined,
+            bio: editForm.bio,
+          }
+        )
+      );
+      setIsEditOpen(false);
+      setSuccessToast('Đã cập nhật thông tin cá nhân & liên hệ thành công!');
+      setTimeout(() => setSuccessToast(null), 4000);
+    } catch (err: any) {
+      const msg = err?.response?.data?.detail || 'Không thể cập nhật thông tin hồ sơ.';
+      setErrorToast(msg);
+      setTimeout(() => setErrorToast(null), 4000);
+    } finally {
+      setEditSaving(false);
+    }
+  };
 
   const isSelf = Boolean(
     account && member && (
@@ -135,9 +260,8 @@ export const ProfileLayout: React.FC<ProfileLayoutProps> = ({ memberId, onBack, 
   }
 
   const tabs: Array<{ key: ProfileTabKey; label: string; icon?: string }> = [
-    { key: 'personal', label: 'Thông tin cá nhân' },
+    { key: 'personal', label: 'Thông tin cá nhân & Liên hệ' },
     { key: 'biography', label: 'Tiểu sử & Dòng thời gian' },
-    { key: 'contact', label: 'Thông tin liên hệ' },
     { key: 'photos', label: 'Thư viện hình ảnh' },
     { key: 'contributions', label: 'Đóng góp & Năng lực' },
     { key: 'status', label: 'Trạng thái & An táng' },
@@ -198,15 +322,27 @@ export const ProfileLayout: React.FC<ProfileLayoutProps> = ({ memberId, onBack, 
                 </span>
               </div>
 
-              {isSelf && (
-                <button
-                  type="button"
-                  className="profile-privacy-toggle-btn"
-                  onClick={handleTogglePrivacy}
-                >
-                  {isPrivate ? 'Chuyển sang Công khai' : 'Thiết lập Riêng tư (Ẩn liên hệ)'}
-                </button>
-              )}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                {(isSelf || canManage) && (
+                  <button
+                    type="button"
+                    className="profile-privacy-toggle-btn"
+                    style={{ background: '#eff6ff', color: '#1d4ed8', borderColor: '#bfdbfe', fontWeight: 700 }}
+                    onClick={openEditModal}
+                  >
+                    Chỉnh sửa thông tin
+                  </button>
+                )}
+                {isSelf && (
+                  <button
+                    type="button"
+                    className="profile-privacy-toggle-btn"
+                    onClick={handleTogglePrivacy}
+                  >
+                    {isPrivate ? 'Chuyển sang Công khai' : 'Thiết lập Riêng tư (Ẩn liên hệ)'}
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -228,14 +364,230 @@ export const ProfileLayout: React.FC<ProfileLayoutProps> = ({ memberId, onBack, 
 
       {/* Tab Contents */}
       <div>
-        {activeTab === 'personal' && <PersonalInfoTab member={member} />}
+        {activeTab === 'personal' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <PersonalInfoTab member={member} />
+            <ContactTab member={member} isPrivate={isPrivate} isSelf={isSelf} />
+          </div>
+        )}
         {activeTab === 'biography' && <BiographyTab member={member} />}
-        {activeTab === 'contact' && <ContactTab member={member} isPrivate={isPrivate} isSelf={isSelf} />}
         {activeTab === 'photos' && <PhotosTab member={member} />}
         {activeTab === 'contributions' && <ContributionsTab member={member} />}
         {activeTab === 'status' && <StatusTab member={member} />}
         {activeTab === 'account' && <AccountTab member={member} />}
       </div>
+
+      {/* Edit Profile Modal */}
+      {isEditOpen && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(15, 23, 42, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999,
+            padding: '16px',
+          }}
+          onClick={() => !editSaving && setIsEditOpen(false)}
+        >
+          <div
+            style={{
+              background: '#ffffff',
+              borderRadius: '16px',
+              maxWidth: '520px',
+              width: '100%',
+              padding: '24px',
+              boxShadow: '0 20px 50px rgba(15, 23, 42, 0.25)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 700, color: '#0f172a' }}>
+                Cập nhật thông tin hồ sơ
+              </h3>
+              <button
+                type="button"
+                disabled={editSaving}
+                onClick={() => setIsEditOpen(false)}
+                style={{ border: 'none', background: 'transparent', fontSize: '20px', color: '#64748b', cursor: 'pointer' }}
+              >
+                ×
+              </button>
+            </div>
+            <form onSubmit={handleSaveProfile} style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxHeight: '72vh', overflowY: 'auto', paddingRight: '4px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#334155', marginBottom: '4px' }}>
+                    Họ và tên *
+                  </label>
+                  <input
+                    type="text"
+                    value={editForm.fullName}
+                    onChange={(e) => setEditForm((f) => ({ ...f, fullName: e.target.value }))}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', boxSizing: 'border-box' }}
+                    required
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#334155', marginBottom: '4px' }}>
+                    Tên gọi khác / Tự
+                  </label>
+                  <input
+                    type="text"
+                    value={editForm.otherName}
+                    onChange={(e) => setEditForm((f) => ({ ...f, otherName: e.target.value }))}
+                    placeholder="Ví dụ: Tự Minh Quân"
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', boxSizing: 'border-box' }}
+                  />
+                </div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#334155', marginBottom: '4px' }}>
+                    Giới tính
+                  </label>
+                  <select
+                    value={editForm.gender}
+                    onChange={(e) => setEditForm((f) => ({ ...f, gender: e.target.value }))}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }}
+                  >
+                    <option value="male">Nam</option>
+                    <option value="female">Nữ</option>
+                    <option value="other">Khác</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#334155', marginBottom: '4px' }}>
+                    Ngày sinh
+                  </label>
+                  <input
+                    type="date"
+                    value={editForm.birthDate}
+                    onChange={(e) => setEditForm((f) => ({ ...f, birthDate: e.target.value }))}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', boxSizing: 'border-box' }}
+                  />
+                </div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#334155', marginBottom: '4px' }}>
+                    Nghề nghiệp
+                  </label>
+                  <input
+                    type="text"
+                    value={editForm.occupation}
+                    onChange={(e) => setEditForm((f) => ({ ...f, occupation: e.target.value }))}
+                    placeholder="Ví dụ: Kỹ sư phần mềm"
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', boxSizing: 'border-box' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#334155', marginBottom: '4px' }}>
+                    Học vấn / Bằng cấp
+                  </label>
+                  <input
+                    type="text"
+                    value={editForm.education}
+                    onChange={(e) => setEditForm((f) => ({ ...f, education: e.target.value }))}
+                    placeholder="Ví dụ: Đại học"
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', boxSizing: 'border-box' }}
+                  />
+                </div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#334155', marginBottom: '4px' }}>
+                    Số điện thoại
+                  </label>
+                  <input
+                    type="tel"
+                    value={editForm.phone}
+                    onChange={(e) => setEditForm((f) => ({ ...f, phone: e.target.value }))}
+                    placeholder="Nhập số điện thoại liên hệ"
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', boxSizing: 'border-box' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#334155', marginBottom: '4px' }}>
+                    Email liên hệ
+                  </label>
+                  <input
+                    type="email"
+                    value={editForm.email}
+                    onChange={(e) => setEditForm((f) => ({ ...f, email: e.target.value }))}
+                    placeholder="Nhập địa chỉ email"
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', boxSizing: 'border-box' }}
+                  />
+                </div>
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#334155', marginBottom: '4px' }}>
+                  Địa chỉ hiện tại
+                </label>
+                <input
+                  type="text"
+                  value={editForm.address}
+                  onChange={(e) => setEditForm((f) => ({ ...f, address: e.target.value }))}
+                  placeholder="Nhập nơi ở hiện tại"
+                  style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', boxSizing: 'border-box' }}
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#334155', marginBottom: '4px' }}>
+                  Tiểu sử / Giới thiệu
+                </label>
+                <textarea
+                  rows={3}
+                  value={editForm.bio}
+                  onChange={(e) => setEditForm((f) => ({ ...f, bio: e.target.value }))}
+                  placeholder="Nhập thông tin tiểu sử, quá trình học tập hoặc ghi chú cá nhân..."
+                  style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', boxSizing: 'border-box' }}
+                />
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '8px' }}>
+                <button
+                  type="button"
+                  disabled={editSaving}
+                  onClick={() => setIsEditOpen(false)}
+                  style={{ padding: '9px 16px', borderRadius: '8px', border: '1px solid #cbd5e1', background: '#ffffff', color: '#334155', fontWeight: 600, cursor: 'pointer' }}
+                >
+                  Hủy
+                </button>
+                <button
+                  type="submit"
+                  disabled={editSaving}
+                  style={{ padding: '9px 18px', borderRadius: '8px', border: 'none', background: '#2563eb', color: '#ffffff', fontWeight: 600, cursor: 'pointer' }}
+                >
+                  {editSaving ? 'Đang lưu...' : 'Lưu thay đổi'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Error Notification */}
+      {errorToast && (
+        <div
+          style={{
+            position: 'fixed',
+            top: '24px',
+            right: '24px',
+            background: '#dc2626',
+            color: '#ffffff',
+            padding: '14px 22px',
+            borderRadius: '12px',
+            fontSize: '14px',
+            fontWeight: 600,
+            boxShadow: '0 10px 25px rgba(220, 38, 38, 0.25)',
+            zIndex: 10000,
+          }}
+        >
+          {errorToast}
+        </div>
+      )}
 
       {/* Success Notification */}
       {successToast && (

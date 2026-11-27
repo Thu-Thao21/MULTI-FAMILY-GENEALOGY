@@ -162,14 +162,14 @@ def shared_tree_node(person, allowed_fields: Any, privacy: Optional[PersonPrivac
     indiv_avatar_vis = (privacy.avatar_visibility if privacy else "CLAN").upper()
     indiv_birth_vis = (privacy.birth_date_visibility if privacy else "CLAN").upper()
 
-    # Living person privacy:
+    # Living person privacy within verified 4-generation inter-clan sharing:
     # 1. Clan sharing policy must allow living_persons
-    # 2. Individual privacy must not be CLAN, PRIVATE, or HIDDEN (since viewer is from external clan)
+    # 2. Only mask if individual explicitly set PRIVATE or HIDDEN (default CLAN is visible within verified 4-gen link)
     is_living_masked = False
     if living:
         if not allowed("living_persons"):
             is_living_masked = True
-        elif indiv_name_vis in ("CLAN", "PRIVATE", "HIDDEN"):
+        elif indiv_name_vis in ("PRIVATE", "HIDDEN"):
             is_living_masked = True
 
     can_show_identity = not is_living_masked and allowed("full_name")

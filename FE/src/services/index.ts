@@ -49,7 +49,12 @@ export * from './admin.service';
 export * from './business.service';
 export * from './clanJoin.service';
 export * from './member.service';
-export * from './genealogy.service';
+export {
+  fetchClanAuditLogs,
+  recordClanAuditLog,
+  createFamilyPerson,
+  type ClanAuditLogItem,
+} from './genealogy.service';
 export * from './tree.service';
 export * from './location.service';
 export * from './network.service';

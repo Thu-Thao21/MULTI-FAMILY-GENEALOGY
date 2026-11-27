@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { fetchFamilyNetwork } from '../../../services/network.service';
 import type { FamilyNetwork } from '../../../types/network';
-import { FamilyClanCard } from '../FamilyClanCard';
+import { FamilyClanCard } from '../FamilyClanCard/FamilyClanCard';
 import { EmptyState } from '../../../shared/Feedback/EmptyState';
 import { LoadingState } from '../../../shared/Feedback/LoadingState';
 import '../Network.css';

@@ -5,7 +5,7 @@ import type {
   MyFamilyNetworkEdge,
 } from '../../../types/network';
 import { fetchMyFamilyNetwork } from '../../../services/network.service';
-import { GenderAvatar } from '../../common/GenderAvatar';
+import { GenderAvatar } from '../../common/GenderAvatar/GenderAvatar';
 import './MyFamilyNetworkView.css';
 
 export interface MyFamilyNetworkViewProps {
@@ -482,7 +482,7 @@ export const MyFamilyNetworkView: React.FC<MyFamilyNetworkViewProps> = ({
         <div className="mfn-empty-state">
           <h3>Chưa có liên kết thông gia đa dòng họ</h3>
           <p>
-            Tài khoản của bạn ({data.ego.fullName}) hiện chưa có liên kết thông gia với dòng họ đối tác
+            Tài khoản của bạn ({data.ego?.fullName || 'Thành viên'}) hiện chưa có liên kết thông gia với dòng họ đối tác
             hoặc liên kết đang chờ Trưởng tộc phê duyệt.
           </p>
           {onNavigateToLinks && (
@@ -516,7 +516,7 @@ export const MyFamilyNetworkView: React.FC<MyFamilyNetworkViewProps> = ({
           </div>
           <p className="mfn-subtitle">
             Sơ đồ thống nhất hiển thị đồng thời hai nhánh gia tộc qua quan hệ hôn nhân của{' '}
-            <strong>{data.ego.fullName}</strong> và{' '}
+            <strong>{data.ego?.fullName || 'Bạn'}</strong> và{' '}
             <strong>{spouseClan ? data.bridges[0]?.spouseName || 'Phối ngẫu' : 'Phối ngẫu'}</strong>.
           </p>
         </div>
@@ -630,21 +630,23 @@ export const MyFamilyNetworkView: React.FC<MyFamilyNetworkViewProps> = ({
             <div className="mfn-lineage-name">{natalClan?.name?.toUpperCase() || 'DÒNG HỌ DƯƠNG'}</div>
           </div>
 
-          <div
-            className="mfn-lineage-header spouse"
-            style={{
-              position: 'absolute',
-              left: `${layout.SPOUSE_X - 170}px`,
-              top: '40px',
-              width: '340px',
-              textAlign: 'center',
-            }}
-          >
-            <div className="mfn-lineage-title">DÒNG HỌ BÊN PHỐI NGẪU</div>
-            <div className="mfn-lineage-name">
-              {spouseClan?.name?.toUpperCase() || 'MAI THẾ TỘC'} [4 ĐỜI CHIA SẺ]
+          {spouseClan && layout.nodes?.some((n) => n.isSpouse) && (
+            <div
+              className="mfn-lineage-header spouse"
+              style={{
+                position: 'absolute',
+                left: `${layout.SPOUSE_X - 170}px`,
+                top: '40px',
+                width: '340px',
+                textAlign: 'center',
+              }}
+            >
+              <div className="mfn-lineage-title">DÒNG HỌ BÊN PHỐI NGẪU</div>
+              <div className="mfn-lineage-name">
+                {spouseClan?.name?.toUpperCase()} [4 ĐỜI CHIA SẺ]
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Background SVG Connectors Layer */}
           <svg
@@ -730,7 +732,7 @@ export const MyFamilyNetworkView: React.FC<MyFamilyNetworkViewProps> = ({
 
             {/* Render Precision Inter-Family Bloodlines from Family Units */}
             {/* Quy tắc: Bố mẹ có vợ chồng thì nối ở giữa 2 vợ chồng rồi chỉa xuống; chưa có vợ thì nối 1 */}
-            {layout.familyUnits.map((unit) => {
+            {(layout.familyUnits || []).map((unit) => {
               const chCount = unit.children.length;
               if (chCount === 0) return null;
 

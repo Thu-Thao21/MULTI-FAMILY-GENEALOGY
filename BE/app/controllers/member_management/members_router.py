@@ -366,8 +366,22 @@ async def create_member(
         if not fam_id:
             raise HTTPException(status_code=400, detail="Không tìm thấy dòng họ để thêm thành viên")
 
-    # Member không được tự thêm Person; chỉ Clan Admin / Family Admin có quyền
-    await _require(db, account, fam_id, "person.create")
+    # Cho phép thành viên tự thêm con hoặc vợ/chồng cho chính hồ sơ của mình (liên kết PersonAccountLink active),
+    # nếu không phải thêm cho chính mình thì yêu cầu quyền person.create của Clan Admin / Family Admin
+    anchor_id = parent_obj.id if parent_obj else (spouse_obj.id if spouse_obj else None)
+    is_adding_for_self = False
+    if anchor_id is not None:
+        self_link_res = await db.execute(
+            select(PersonAccountLink).where(
+                PersonAccountLink.person_id == anchor_id,
+                PersonAccountLink.user_id == account.id,
+                PersonAccountLink.status == "ACTIVE",
+            )
+        )
+        is_adding_for_self = self_link_res.scalar_one_or_none() is not None
+
+    if not is_adding_for_self:
+        await _require(db, account, fam_id, "person.create")
 
     # Chặn không cho phép nhập người trùng tên trong cùng một dòng họ
     dup_res = await db.execute(
@@ -507,8 +521,18 @@ async def update_member(
     if not p:
         raise HTTPException(status_code=404, detail="Không tìm thấy thành viên")
 
-    # Member không được tự sửa Person; chỉ Clan Admin / Family Admin có quyền
-    await _require_branch_scope(db, account, p.family_id, p.branch_id, "person.update")
+    # Cho phép chủ sở hữu hồ sơ (liên kết tài khoản) tự cập nhật thông tin cá nhân,
+    # hoặc Clan Admin / Family Admin có quyền person.update
+    link_res = await db.execute(
+        select(PersonAccountLink).where(
+            PersonAccountLink.person_id == p.id,
+            PersonAccountLink.user_id == account.id,
+            PersonAccountLink.status == "ACTIVE",
+        )
+    )
+    is_self_owner = link_res.scalar_one_or_none() is not None
+    if not is_self_owner:
+        await _require_branch_scope(db, account, p.family_id, p.branch_id, "person.update")
 
     from app.services.worship.hall_service import auto_add_tablet_for_person, is_deceased_person
     was_deceased = is_deceased_person(p)  # chi lap bai vi khi CHUYEN sang "da mat"
